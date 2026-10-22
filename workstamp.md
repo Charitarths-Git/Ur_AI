@@ -85,25 +85,31 @@ Goal: understand exactly what the text layer of data/raw/balance_sheet_after_cor
 4. [x] Align phase numbering in README.md
 5. [x] Generate requirements.lock
 6. [x] Commit Part A: "chore: add session handoff protocol and align phase numbering"
-7. [~] Write scripts/inspect_pdf.py
-8. [ ] Run inspect_pdf.py and generate output files
-9. [ ] Render page to PNG at data/derived/page4_200dpi.png
-10. [ ] Write notes/inspection.md answering Q1–Q9
-11. [ ] Add pytest test for inspection script
+7. [x] Write scripts/inspect_pdf.py
+8. [x] Run inspect_pdf.py and generate output files
+9. [x] Render page to PNG at data/derived/page4_200dpi.png
+10. [x] Write notes/inspection.md answering Q1–Q9
+11. [~] Add pytest test for inspection script
 12. [ ] Update README with inspection script usage
 13. [ ] Run full test suite
 14. [ ] Final commit "P1: PDF inspection and diagnostics"
 
 ## Files created or modified
 
-- workstamp.md — created, updated for session 3 resume
+- workstamp.md — created, updated for sessions 3 and 4
 - PROJECT_BRIEF.md — added Agent working rules, aligned P0–P13 phases
 - README.md — aligned phases, added requirements.lock and inspect_pdf docs
 - requirements.lock — created via pip freeze
+- scripts/inspect_pdf.py — diagnostic inspection tool (commit 66f0ac8)
+- notes/words_pymupdf.json — word dump from PyMuPDF (untracked, generated)
+- notes/words_pdfplumber.json — word dump from pdfplumber (untracked, generated)
+- notes/drawings.json — vector drawing dump (untracked, generated)
+- notes/inspection.md — answers Q1–Q9 with evidence from actual output
+- notes/analyze_output.py — scratch analysis script (untracked)
 
 ## Last action and result
 
-Committed Part A as 2a60dbd: "chore: add session handoff protocol and align phase numbering". Success.
+Wrote notes/inspection.md answering Q1–Q9 with evidence from actual output. No invented data.
 
 ## Decisions and assumptions
 
@@ -117,7 +123,7 @@ Committed Part A as 2a60dbd: "chore: add session handoff protocol and align phas
 
 ## Next action
 
-Write scripts/inspect_pdf.py (step 7).
+Write pytest test for inspect_pdf.py (step 11).
 
 ## Prompt history
 
@@ -131,4 +137,5 @@ Write scripts/inspect_pdf.py (step 7).
 |---|---|---|---|
 | 1 | Claude Opus 4.6 | unknown | P0 executed; no handoff protocol yet |
 | 2 | Claude Opus 4.6 | 2026-10-22T12:54Z | P1 started; cut off by usage limit after step 1 |
-| 3 | Claude Opus 4.6 | 2026-10-22T13:05Z | Resumed after interruption |
+| 3 | Claude Opus 4.6 | 2026-10-22T13:05Z | Ran inspect_pdf.py, generated outputs; cut off before updating workstamp |
+| 4 | Claude Sonnet 4.6 | 2026-10-22T14:19Z | Resumed after interruption (usage limit) |
