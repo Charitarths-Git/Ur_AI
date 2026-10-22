@@ -84,8 +84,8 @@ Orientation (repo state, test count before this prompt); the public API and the 
 4. [x] Implement label-free accounting, replaceable tolerance and truncation diagnostics; commit section 4.
 5. [x] Generate JSON/Markdown reports and evaluator CLI; commit section 5.
 6. [x] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
-7. [~] Document observed failure analysis, separated from untested expectations; commit section 7.
-8. [ ] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
+7. [x] Document observed failure analysis, separated from untested expectations; commit section 7.
+8. [~] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
 9. [ ] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
 10. [ ] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
 
@@ -94,6 +94,11 @@ Orientation (repo state, test count before this prompt); the public API and the 
 - workstamp.md — verbatim P7-P8 request, numbered plan and boundaries.
 
 ## Last action and result
+
+Failure analysis written from measured seed/ablation/fault outputs, separating
+observed failures from untested expectations. No parser code fixed. Documents
+check disappearance/undefined rates, flat-parent errors and tolerance blind spots.
+Section 6 commit 6c3694b.
 
 Section 6 full experiment ran: 360 sweeps, all 20 seeds retained, no crashes.
 First tested degradation y=0.2H, x=0.3H. All six ablations completed. Numeric
@@ -136,7 +141,7 @@ No new known issue yet. Pytest CLI fixtures previously needed unsandboxed temp a
 
 ## Next action
 
-Write failure analysis from actual sweep records, ablations and hidden faults.
+Test evaluator/accounting/fault semantics, edge cases, real files and CLI.
 
 ## Prompt history
 
