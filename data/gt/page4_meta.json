@@ -15,8 +15,8 @@
     "current": "(2026年３月31日)"
   },
   "footer": "- 4 -",
-  "verified_by_human": false,
-  "status": "DRAFT — pending human verification",
+  "verified_by_human": true,
+  "status": "VERIFIED",
   "transcription_source": "data/derived/page4_200dpi.png and data/derived/crops/*_300dpi.png",
   "uncertain_cells": []
 }

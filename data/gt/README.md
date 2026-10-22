@@ -1,6 +1,9 @@
-# Page 4 ground truth — DRAFT
+# Page 4 ground truth — VERIFIED
 
-Pending human verification; `verified_by_human` is false.
+Human verification confirmed on 2026-10-23 (Asia/Calcutta); `verified_by_human` is true.
+The user checked all 43 rows against the page image, including labels, raw values,
+nil cells, △0 and hierarchy columns, and reported an independent second review
+with no discrepancies. No corrections were needed; the CSV bytes are unchanged.
 
 - File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
 - Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
@@ -21,4 +24,4 @@ Pending human verification; `verified_by_human` is false.
 Transcribed visually from `data/derived/page4_200dpi.png` and overlapping
 300 DPI crops rendered by `scripts/render_gt_crops.py`. No text extraction
 was used for transcription. The later text-layer cross-check is read-only
-and cannot adjudicate the draft. Nil values are empty CSV fields, never zero.
+and does not replace human adjudication. Nil values are empty CSV fields, never zero.
