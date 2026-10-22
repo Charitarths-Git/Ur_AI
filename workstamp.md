@@ -5,8 +5,8 @@
 | Field | Value |
 |---|---|
 | Prompt | P2 |
-| State | IN PROGRESS |
-| Updated | 2026-10-22T18:09:18Z |
+| State | DONE |
+| Updated | 2026-10-22T18:09:36Z |
 
 ## Current prompt (verbatim)
 
@@ -64,7 +64,7 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 4. [x] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
 5. [x] Add human checklist, informational self-check, one schema-only pytest test.
 6. [x] After CSV commit, implement read-only text-layer cross-check and report disagreements.
-7. [~] Update README, run full suite, record output and finalize draft handoff/commit.
+7. [x] Update README, run full suite, record output and finalize draft handoff/commit.
 
 ## Files created or modified
 
@@ -97,7 +97,9 @@ Orientation: clean tree at a46ee03; P1 DONE at 0597652; baseline 11 passed in
 
 Commits so far: 4d98884 orientation; 9a0e517 separate fix(P1); ff2d8e1 conventions;
 7ca2ef8 independent image-derived CSV; 43d8298 verification aids;
-8695260 read-only cross-check and documentation. Final commit next.
+8695260 read-only cross-check and documentation. Final P2 commit succeeded:
+0be2cf6cb6d9fba788d1395adf2b0ceebcd5b14f — P2: draft ground truth (pending human verification).
+This metadata-only follow-up records the final hash and DONE status, as in P1.
 
 ## Decisions and assumptions
 
@@ -122,7 +124,7 @@ Commits so far: 4d98884 orientation; 9a0e517 separate fix(P1); ff2d8e1 conventio
 
 ## Next action
 
-Create the final P2 draft commit, then record its hash and set the handoff to DONE.
+human verification of GT, then P3
 
 ## Prompt history
 
@@ -130,6 +132,7 @@ Create the final P2 draft commit, then record its hash and set the handoff to DO
 |---|---|---|
 | P0 | Scaffolding, dependencies, smoke tests done (pre-protocol) | 8c34c1d |
 | P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
+| P2 | DRAFT image-derived GT, 43 rows, pending human verification; 12 tests pass | 0be2cf6 |
 
 ## Sessions
 
