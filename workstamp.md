@@ -60,8 +60,8 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 2. [x] Define frozen layout structures/config and PDF backend interface; implement extraction adapter.
 3. [x] Implement pure relative-geometry reconstruction; inspect actual layout and resolve issues.
 4. [x] Add dump_rows CLI and UTF-8 startup to existing scripts.
-5. [~] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
-6. [ ] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
+5. [x] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
+6. [~] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
 7. [ ] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
 
 ## Files created or modified
@@ -69,6 +69,11 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 - workstamp.md — P4 prompt and numbered plan.
 
 ## Last action and result
+
+P4 targeted suite: 25 passed in 6.19s. Includes 12 synthetic/real invariance
+cases (shuffle, translation, two scales, combined transform, bounded jitter),
+GT integration, no-body/empty/three-column/invalid/sign/font/rule cases and
+both no-encoding subprocesses. No failed GT comparison. CLI commit: 265e765.
 
 CLI smoke checks pass for dump_rows.py and inspect_pdf.py with encoding env
 removed and -X utf8=0. Shared console startup applied to all existing CLIs.
@@ -102,7 +107,7 @@ Configured upstream origin/main is gone; no remote work requested.
 
 ## Next action
 
-Implement synthetic/invariance/GT/backend/subprocess tests, then investigate failures.
+Write algorithm/threshold/observation/cross-tab/limitation report and README updates.
 
 ## Prompt history
 
