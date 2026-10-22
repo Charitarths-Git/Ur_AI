@@ -56,16 +56,22 @@ Orientation (repo state, test count before P3); the public function signatures; 
 
 1. [x] Orient: inspect package/config/docs, run baseline suite, fingerprint protected data.
 2. [x] Implement pure amount, label and period normalization utilities; document decisions.
-3. [~] Add table-driven unit tests and read-only GT round-trip coverage; verify targeted tests.
-4. [ ] Update README, run complete suite then ruff on new files; verify protected data unchanged.
+3. [x] Add table-driven unit tests and read-only GT round-trip coverage; verify targeted tests.
+4. [~] Update README, run complete suite then ruff on new files; verify protected data unchanged.
 5. [ ] Final P3 commit, record hash and DONE handoff; next action P4 row reconstruction.
 
 ## Files created or modified
 
 - workstamp.md — verbatim P3 prompt, plan, authorization and orientation state.
 - src/parser/normalize.py — frozen AmountResult and four pure public helpers; decisions in module docstring.
+- tests/test_normalize.py — 129 table-driven tests, including read-only verified GT round trip.
 
 ## Last action and result
+
+Targeted normalization suite: 129 passed in 0.29s, including read-only GT round
+trip, 10,000-digit positive/negative integers, each dash variant, malformed
+inputs, label idempotence and period dates. No GT failures or corrections.
+Implementation commit: d9319f9.
 
 Implemented src/parser/normalize.py; initial smoke checks passed for full-width
 amounts, negative zero, nil, unit rejection, label idempotence with combining
@@ -103,7 +109,7 @@ None at orientation; record implementation choices as they are resolved.
 
 ## Next action
 
-Add comprehensive table-driven unit tests and read-only GT round trip.
+Update README; run full suite then ruff on both new Python files; recheck protected hashes.
 
 ## Prompt history
 
