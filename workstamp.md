@@ -7,7 +7,7 @@
 | Prompt | P4 |
 | State | IN PROGRESS |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T22:10:13Z |
+| Updated | 2026-10-22T22:23:24Z |
 
 ## Current prompt (verbatim)
 
@@ -80,53 +80,57 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 
 ## Last action and result
 
-Formatting/import cleanup completed for new/modified Python files; removed two
-preexisting unused export_chat locals and split one long string without altering
-its output. P3 normalize.py remains unchanged. Full suite then ruff next.
+Orientation: clean tree at 6374dbf; baseline 141 passed in 9.91s.
+P4 targeted suite: 25 passed in 6.19s. Final full suite: 166 passed in 6.86s.
+Then ruff on all new package modules, all scripts and test_rows.py: All checks passed!
+Twelve invariance cases pass on both synthetic and real pages: shuffle, translation,
+scales 0.45/2.75, combined transform and bounded jitter. Both no-encoding CLI
+subprocesses pass with -X utf8=0. Full evidence is in notes/row_reconstruction.md.
 
-Documentation complete: algorithm/defaults/actual thresholds, 43/43 exact labels,
-0 labels with internal spaces, full informational cross-tabs and limitations.
-README documents API/CLI/backend and relative configuration. Test commit bd9022b.
-Preparing style cleanup before final full-suite/lint validation.
+Observed H=8.963989, row tolerance=3.137396; value x1 centres=397.513123/522.553162.
+Indent centres=62.280000/75.239998/88.199997/101.279999/114.239998.
+Zones=6 header,43 body,1 footer. GT: all 43 rows and 74 printed cells match;
+43/43 labels match exactly, 0 labels with internal spaces. No GT failure/correction.
+Rule and indent cross-tabs are informational only and recorded in the report.
 
-P4 targeted suite: 25 passed in 6.19s. Includes 12 synthetic/real invariance
-cases (shuffle, translation, two scales, combined transform, bounded jitter),
-GT integration, no-body/empty/three-column/invalid/sign/font/rule cases and
-both no-encoding subprocesses. No failed GT comparison. CLI commit: 265e765.
+Every GT/raw file SHA-256 equals its pre-P4 value. CSV remains UTF-8 BOM, hash
+c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
+P3 normalize.py and dependency manifests unchanged. Verbatim P4 prompt exact.
 
-CLI smoke checks pass for dump_rows.py and inspect_pdf.py with encoding env
-removed and -X utf8=0. Shared console startup applied to all existing CLIs.
-Rule overlap refined to observed value spans (not just their right-edge anchors).
-Pure-reconstruction commit: 85698fe.
-
-Pure reconstruction smoke run: 6 header / 43 body / 1 footer rows, 2 columns,
-5 visual indent centres, dates (2025,3,31)/(2026,3,31). No GT used in algorithm.
-Median word height 8.964; row tolerance 3.1374. Backend commit d34449f.
-
-Backend/types smoke check succeeded: page 595.20 x 841.80, 132 words and 58
-retained thin horizontal rule primitives. No semantic processing or GT access.
-Orientation commit: 5785b3f.
-
-Read brief/handoff. Clean tree at 6374dbf; previous P3 completed at b41840c,
-last suite 141 passed. Existing Session 5 continues; no interrupted phase found.
-No repository AGENTS.md found. Baseline: 141 passed in 9.91s. Fingerprinted every GT/raw file; inspected P3
-normalization and all existing CLI scripts. No P3 bug identified.
+Progress commits: 5785b3f plan/baseline; d34449f backend/types; 85698fe pure logic;
+265e765 CLI/encoding/rule span overlap; bd9022b tests; 1d24b2a docs/report/style.
+Final P4 commit next.
 
 ## Decisions and assumptions
 
-- Only package pdf_backend.py may import pymupdf; reconstruction is pure on RawPage.
-- GT/raw files are read-only. No hierarchy, row_type inference, exports or evaluation modules.
-- All geometry thresholds will be relative and recorded in LayoutConfig/PageLayout.
-- P3 normalization changes require a demonstrated bug; none known.
-- Existing session continues; no Sessions row added. Use PYTHONIOENCODING=utf-8 for commands.
+- Existing Session 5 continues; no session row added. PYTHONIOENCODING=utf-8 used.
+- Frozen layout records use tuples; raw input is never mutated. Only the package
+  pdf_backend imports pymupdf; legacy P1/P2 diagnostic scripts retain their imports.
+- Geometry uses H-relative configurable distances and a relative empty-input fallback.
+  Column support counts distinct rows. All actual thresholds are exposed in PageLayout.
+- P3 parsing/key/date helpers are reused; P3 normalization needed no changes.
+- Date rows end header; no-date fallback starts at first supported valid value row.
+  Last aligned cell ends body; invalid aligned values are retained, not dropped.
+- Headings are collected by geometric bands without previous/current assumptions;
+  units may be included. Labels retain original text with gap-based spacing.
+- Visual indent steps and thin-rule overlap are evidence only: no hierarchy,
+  semantic row types, accounting rules, exports or evaluation module implemented.
+- GT is used only in integration tests and the informational report, never algorithm code.
+- Shared UTF-8 CLI startup fixes Windows output. Lint formatting and removal of two
+  unused legacy exporter locals do not alter existing diagnostic/export behavior.
 
 ## Known issues / open questions
 
-Configured upstream origin/main is gone; no remote work requested.
+No unresolved P4 failures or open design questions. Known limitations are documented:
+wrapped labels; split/multi-line and sub-column headings; page-spanning/multiple
+tables; label-only boundary rows; repeated aligned label digits; very short/all-invalid
+columns; noise crossing decision boundaries. Rotated pages are rejected; scanned
+pages require a future backend. Rule flags are visual evidence, not financial roles.
+Configured upstream origin/main is gone; no remote operations requested.
 
 ## Next action
 
-Format/lint changed Python files, run full suite then ruff, verify protected hashes.
+Create final P4 commit, then record its hash and DONE handoff for P5 hierarchy and parent paths.
 
 ## Prompt history
 

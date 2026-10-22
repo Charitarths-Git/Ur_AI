@@ -202,3 +202,24 @@ Final full-suite and ruff results are recorded in workstamp.md and appended belo
 - Rules must fit between consecutive word bboxes; crossing/touching tall text
   beyond the configured slack may be missed. Dashed/curved borders and color
   semantics are not interpreted. Thin decorative bars may still be evidence.
+
+## Final validation output
+
+```text
+python -m pytest
+collected 166 items
+tests/test_gt_schema.py: 1 passed
+tests/test_inspection.py: 8 passed
+tests/test_normalize.py: 129 passed
+tests/test_rows.py: 25 passed
+tests/test_smoke.py: 3 passed
+166 passed in 6.86s
+
+python -m ruff check src/parser/layout_types.py src/parser/pdf_backend.py src/parser/rows.py scripts tests/test_rows.py
+All checks passed!
+```
+
+Post-test SHA-256 verification confirms every file under data/gt/ and data/raw/
+is byte-for-byte unchanged. P3 normalize.py, pyproject.toml and requirements.lock
+are unchanged relative to the P4 baseline 6374dbf. The verbatim prompt is preserved
+in workstamp.md. No P5 work was started.
