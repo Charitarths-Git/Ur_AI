@@ -80,8 +80,8 @@ Orientation (repo state, test count before this prompt); the public API and the 
 
 1. [x] Orient, baseline tests/fingerprints; define independent file schema and evaluator contracts; commit section 1.
 2. [x] Implement deterministic ordered alignment with duplicate/gap cases; commit section 2.
-3. [~] Implement metrics, mismatch records and aggregation with denominators; commit section 3.
-4. [ ] Implement label-free accounting, replaceable tolerance and truncation diagnostics; commit section 4.
+3. [x] Implement metrics, mismatch records and aggregation with denominators; commit section 3.
+4. [~] Implement label-free accounting, replaceable tolerance and truncation diagnostics; commit section 4.
 5. [ ] Generate JSON/Markdown reports and evaluator CLI; commit section 5.
 6. [ ] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
 7. [ ] Document observed failure analysis, separated from untested expectations; commit section 7.
@@ -94,6 +94,9 @@ Orientation (repo state, test count before this prompt); the public API and the 
 - workstamp.md — verbatim P7-P8 request, numbered plan and boundaries.
 
 ## Last action and result
+
+Section 3 real-file metric smoke check: every GT metric scores 1; mismatches
+empty; duplicate-page micro aggregation passes. Counts/denominators are explicit.
 
 Section 2 alignment smoke checks pass: full real-page alignment; dropped
 duplicate-label row correctly left unmatched. Similarity uses labels/values only.
@@ -119,7 +122,7 @@ No new known issue yet. Pytest CLI fixtures previously needed unsandboxed temp a
 
 ## Next action
 
-Implement GT metrics, parent mapping, ancestor Jaccard, mismatches and aggregation.
+Implement label-free accounting and replaceable tolerance/truncation diagnostic.
 
 ## Prompt history
 
