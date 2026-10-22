@@ -2,7 +2,7 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P1 — PDF inspection complete. See [PROJECT_BRIEF.md](PROJECT_BRIEF.md) for the full phase plan.
+> **Status**: P1 — PDF inspection complete. See [notes/inspection.md](notes/inspection.md) for findings.
 
 ## Quick start
 
@@ -86,12 +86,19 @@ Diagnostic tool that extracts and dumps all text, coordinates, and drawings from
 
 ```bash
 # Run with the venv activated:
+# On Windows, set encoding first to avoid console errors:
+set PYTHONIOENCODING=utf-8   # cmd
+$env:PYTHONIOENCODING="utf-8" # PowerShell
+
 python scripts/inspect_pdf.py data/raw/balance_sheet_after_correction.pdf
 
-# Outputs are written to notes/:
-#   words_pymupdf.json, words_pdfplumber.json, drawings.json
-# And renders page 1 to:
-#   data/derived/page4_200dpi.png
+# Output files written to notes/:
+#   words_pymupdf.json    — every word with bbox, font, size (PyMuPDF)
+#   words_pdfplumber.json — every word with bbox (pdfplumber)
+#   drawings.json         — vector elements (lines, rects)
+#
+# Also renders page 1 to:
+#   data/derived/page4_200dpi.png  (200 DPI PNG; used for ground-truth in P2)
 ```
 
 ## License
