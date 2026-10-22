@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from parser.classify import ParseWarning
 from parser.layout_types import PageLayout
-from parser.normalize import label_key
+from parser.normalize import label_key, parse_period_end
 from parser.rules import JA_FINANCIAL_STATEMENT, RuleSet
 
 
@@ -99,6 +99,8 @@ def extract_metadata(
                                    if label_key(text) == found_unit), None)
             elif unit != found_unit:
                 warnings.append(ParseWarning("conflicting_units", "multiple unit strings found"))
+            continue
+        if parse_period_end(row.label) is not None:
             continue
         remainder = key
         for heading_key in heading_keys:

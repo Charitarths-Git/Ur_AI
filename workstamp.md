@@ -82,8 +82,8 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 4. [x] Implement indent-stack tree and partial flat fallback; commit section 4.
 5. [x] Extract metadata and date-based column roles, with clean headings; commit section 5.
 6. [x] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
-7. [~] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
-8. [ ] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
+7. [x] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
+8. [~] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
 9. [ ] Full suite then ruff; integrity checks; final commit and DONE handoff.
 
 ## Files created or modified
@@ -91,6 +91,14 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 - workstamp.md — P5-P6 verbatim prompt, plan and orientation.
 
 ## Last action and result
+
+Targeted 56 tests passed in 3.41s outside sandbox after pytest temporary-directory
+setup was blocked there (55 passed before setup error). No assertions weakened.
+Added one metadata edge-case regression: date-only headers are not titles.
+GT all 10 row fields match 43/43. Real warnings empty. Six CSV/JSON transform
+cases pass byte-for-byte. Flat ablation reports 39/43 correct parent IDs, with
+three subsection headers and fixed-assets subtotal wrong; types/values unchanged.
+Section 6 commit d466446.
 
 Section 6 pipeline/serializers/CLI smoke run succeeded: generated both required
 examples, 43 rows with expected types, indentation source, zero warnings.
@@ -133,7 +141,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Add synthetic/GT/invariance/ablation/export/CLI and committed-example tests.
+Document RuleSet validation limits, evidence counts, ablation, schemas and decisions.
 
 ## Prompt history
 
