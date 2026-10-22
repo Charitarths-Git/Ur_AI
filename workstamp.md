@@ -77,8 +77,8 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 ## Plan for this prompt
 
 1. [x] Orient, baseline tests and fingerprints; separately fix Q5 and unit-heading metadata cleanup.
-2. [~] Implement immutable replaceable RuleSet; commit section 2.
-3. [ ] Implement pure row classification, evidence and typed warnings; commit section 3.
+2. [x] Implement immutable replaceable RuleSet; commit section 2.
+3. [~] Implement pure row classification, evidence and typed warnings; commit section 3.
 4. [ ] Implement indent-stack tree and partial flat fallback; commit section 4.
 5. [ ] Extract metadata and date-based column roles, with clean headings; commit section 5.
 6. [ ] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
@@ -91,6 +91,9 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 - workstamp.md — P5-P6 verbatim prompt, plan and orientation.
 
 ## Last action and result
+
+Section 2 RuleSet smoke checks passed: normalized matching and immutable unit map.
+Separate fixes: d28504f Q5; e00ca2f unit-line cleanup helper/regression.
 
 Unit-heading cleanup helper added in metadata.py; regression test passes (1).
 It takes a caller-supplied pattern; RuleSet will supply the production pattern.
@@ -115,7 +118,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Commit standalone unit-line cleanup, then implement replaceable RuleSet.
+Implement row classification, evidence and typed warnings.
 
 ## Prompt history
 
