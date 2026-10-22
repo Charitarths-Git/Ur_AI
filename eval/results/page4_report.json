@@ -88,13 +88,13 @@
       "numerator": 2,
       "denominator": 2,
       "score": 1.0,
-      "meaning": "unique correct expected roles / max(expected,predicted columns); optional JSON/meta"
+      "meaning": "correct role at each unique expected column index / max(expected,predicted columns); optional JSON/meta"
     },
     "column_periods": {
       "numerator": 2,
       "denominator": 2,
       "score": 1.0,
-      "meaning": "correct dates for unique roles / max(expected,predicted columns); optional JSON/meta"
+      "meaning": "correct date at each unique expected column index / max(expected,predicted columns); optional JSON/meta"
     }
   },
   "alignment": {
@@ -1213,6 +1213,18 @@
         "denominator": 43,
         "score": 1.0,
         "meaning": "pooled counts across pages"
+      },
+      "accounting_pass_rate": {
+        "numerator": 20,
+        "denominator": 20,
+        "score": 1.0,
+        "meaning": "pooled accounting counts across pages"
+      },
+      "truncation_fraction": {
+        "numerator": 20,
+        "denominator": 20,
+        "score": 1.0,
+        "meaning": "pooled accounting counts across pages"
       }
     },
     "macro": {
@@ -1292,6 +1304,16 @@
         "total_pages": 1
       },
       "row_type": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "accounting_pass_rate": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "truncation_fraction": {
         "score": 1.0,
         "defined_pages": 1,
         "total_pages": 1

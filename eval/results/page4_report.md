@@ -18,8 +18,8 @@
 | row_precision | 43 / 43 | 1.000000 | aligned rows / predicted rows |
 | row_recall | 43 / 43 | 1.000000 | aligned rows / GT rows |
 | row_f1 | 86 / 86 | 1.000000 | 2 * aligned rows / (prediction rows + GT rows) |
-| column_roles | 2 / 2 | 1.000000 | unique correct expected roles / max(expected,predicted columns); optional JSON/meta |
-| column_periods | 2 / 2 | 1.000000 | correct dates for unique roles / max(expected,predicted columns); optional JSON/meta |
+| column_roles | 2 / 2 | 1.000000 | correct role at each unique expected column index / max(expected,predicted columns); optional JSON/meta |
+| column_periods | 2 / 2 | 1.000000 | correct date at each unique expected column index / max(expected,predicted columns); optional JSON/meta |
 
 Undefined denominators are N/A, not perfect scores. Missing GT rows count as wrong.
 

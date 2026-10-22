@@ -29,9 +29,14 @@ def evaluate_files(pred_csv, gt_csv, pred_json=None, gt_meta=None, *, threshold=
     report = score_tables(prediction, truth, threshold=threshold,
                           predicted_json=load(pred_json), gt_meta=load(gt_meta))
     checks = accounting_checks(account_rows(prediction), prediction.columns)
+    serialized_checks = []
+    for check in checks:
+        item = asdict(check)
+        item["dependencies"] = [list(cell) for cell in check.dependencies]
+        serialized_checks.append(item)
     report.update({"schema_version": "1.0", "inputs": {"prediction": Path(pred_csv).name,
                    "gt": Path(gt_csv).name}, "accounting": accounting_summary(checks),
-                   "accounting_checks": [asdict(c) for c in checks], "limitations": list(LIMITATIONS)})
+                   "accounting_checks": serialized_checks, "limitations": list(LIMITATIONS)})
     report["aggregation"] = aggregate_reports([report])
     return report
 
@@ -61,10 +66,11 @@ def markdown_report(report: dict) -> str:
     if not report["mismatches"]:
         lines.append("None.")
     else:
-        lines += ["| GT row | Prediction row | Label | Field | Expected | Predicted |", "|---|---|---|---|---|---|"]
+        lines += ["| GT row | Prediction row | Label | Field | Expected | Predicted | Reason |", "|---|---|---|---|---|---|---|"]
         for item in report["mismatches"]:
             lines.append("| " + " | ".join(_display(item[k]) for k in
-                         ["gt_row_id", "pred_row_id", "label", "field", "expected", "predicted"]) + " |")
+                         ["gt_row_id", "pred_row_id", "label", "field", "expected", "predicted"])
+                         + " | " + _display(item.get("reason", "")) + " |")
     if report["input_issues"]:
         lines += ["", "Input issues:", "", *(f"- {s}" for s in report["input_issues"])]
     lines += ["", "## Label-free accounting", "",

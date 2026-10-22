@@ -85,8 +85,8 @@ Orientation (repo state, test count before this prompt); the public API and the 
 5. [x] Generate JSON/Markdown reports and evaluator CLI; commit section 5.
 6. [x] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
 7. [x] Document observed failure analysis, separated from untested expectations; commit section 7.
-8. [~] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
-9. [ ] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
+8. [x] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
+9. [~] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
 10. [ ] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
 
 ## Files created or modified
@@ -94,6 +94,12 @@ Orientation (repo state, test count before this prompt); the public API and the 
 - workstamp.md — verbatim P7-P8 request, numbered plan and boundaries.
 
 ## Last action and result
+
+52 new evaluator/accounting/perturbation tests pass in 2.76s. Tests exposed two
+new-evaluator issues: role presence was insufficient to score column assignment;
+JSON report dependencies needed list normalization. Both fixed in evaluation code,
+not parser code; tests preserved. Reports and all 360 sweeps regenerated. Added
+missing-role reasons, pooled accounting aggregation and explicit fault participation.
 
 Failure analysis written from measured seed/ablation/fault outputs, separating
 observed failures from untested expectations. No parser code fixed. Documents
@@ -141,7 +147,7 @@ No new known issue yet. Pytest CLI fixtures previously needed unsandboxed temp a
 
 ## Next action
 
-Test evaluator/accounting/fault semantics, edge cases, real files and CLI.
+Document every metric/denominator, alignment, tolerance derivation, experiments and limitations.
 
 ## Prompt history
 

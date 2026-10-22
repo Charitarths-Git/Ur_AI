@@ -60,8 +60,12 @@ def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
             if not correct:
                 values_correct = False
                 mismatch(role + "_value", gv, pv)
+                if pred is not None and (not pvalid or role not in prediction.columns):
+                    mismatches[-1]["reason"] = "missing role or invalid prediction value"
             if pred is None or pr != gr or role not in prediction.columns:
                 mismatch(role + "_raw", gr, pr)
+                if role not in prediction.columns:
+                    mismatches[-1]["reason"] = "missing prediction role"
         exact = pred is not None and pred.label == expected.label
         key = pred is not None and label_key(pred.label) == label_key(expected.label)
         kind = pred is not None and pred.row_type == expected.row_type
@@ -122,22 +126,22 @@ def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
         expected_cols = [("previous_year", "previous"), ("current_year", "current")]
         predicted_cols = predicted_json.get("columns", [])
         col_den = max(len(expected_cols), len(predicted_cols))
-        for role, key in expected_cols:
-            matches = [c for c in predicted_cols if c.get("role") == role]
-            role_correct += len(matches) == 1
+        for index, (role, key) in enumerate(expected_cols):
+            matches = [c for c in predicted_cols if c.get("index") == index]
+            role_correct += len(matches) == 1 and matches[0].get("role") == role
             end = parse_period_end(gt_meta["period_end_dates"][key])
             iso = date(*end).isoformat() if end else None
             period_correct += len(matches) == 1 and matches[0].get("period_end") == iso
-            if len(matches) != 1 or matches[0].get("period_end") != iso:
+            if len(matches) != 1 or matches[0].get("role") != role or matches[0].get("period_end") != iso:
                 mismatches.append({"gt_row_id": None, "pred_row_id": None, "label": "",
-                                   "field": f"column:{role}", "expected": iso,
+                                   "field": f"column:{role}", "expected": {"index": index, "role": role, "period_end": iso},
                                    "predicted": matches})
         for col in predicted_cols:
-            if col.get("role") not in {r for r, _ in expected_cols}:
+            if col.get("index") not in range(len(expected_cols)):
                 mismatches.append({"gt_row_id": None, "pred_row_id": None, "label": "",
                                    "field": "extra_column", "expected": None, "predicted": col})
-    metrics["column_roles"] = ratio(role_correct, col_den, "unique correct expected roles / max(expected,predicted columns); optional JSON/meta")
-    metrics["column_periods"] = ratio(period_correct, col_den, "correct dates for unique roles / max(expected,predicted columns); optional JSON/meta")
+    metrics["column_roles"] = ratio(role_correct, col_den, "correct role at each unique expected column index / max(expected,predicted columns); optional JSON/meta")
+    metrics["column_periods"] = ratio(period_correct, col_den, "correct date at each unique expected column index / max(expected,predicted columns); optional JSON/meta")
     return {"metrics": metrics,
             "alignment": {"threshold": threshold, "matched": matched, "predicted_rows": np,
                           "gt_rows": ng, "pairs": [{"prediction": prediction.rows[i].row_id,
@@ -161,5 +165,14 @@ def aggregate_reports(reports: list[dict]) -> dict:
         defined = [v["score"] for v in values if v["score"] is not None]
         macro[key] = {"score": mean(defined) if defined else None, "defined_pages": len(defined),
                       "total_pages": len(reports)}
+    for name, numerator, denominator in [("accounting_pass_rate", "passed", "evaluable"),
+                                          ("truncation_fraction", "truncation_inside", "truncation_evaluable")]:
+        accounts = [r["accounting"] for r in reports if "accounting" in r]
+        if accounts:
+            micro[name] = ratio(sum(a[numerator] for a in accounts), sum(a[denominator] for a in accounts),
+                                "pooled accounting counts across pages")
+            defined = [a[numerator] / a[denominator] for a in accounts if a[denominator]]
+            macro[name] = {"score": mean(defined) if defined else None,
+                           "defined_pages": len(defined), "total_pages": len(reports)}
     return {"pages": len(reports), "micro": micro, "macro": macro,
             "note": "With a single page, defined micro and macro scores coincide."}

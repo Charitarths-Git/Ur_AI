@@ -59,7 +59,8 @@ def apply_fault(rows, fault):
 def run_fault_injection(rows: tuple[AccountRow, ...], columns: tuple[str, ...]) -> dict:
     baseline = accounting_checks(rows, columns)
     passed = {c.check_id: c for c in baseline if c.status in {"exact", "within_tolerance"}}
-    participation = {cell for c in passed.values() for cell in c.dependencies}
+    participation = {cell for c in baseline if c.status != "not_applicable" for cell in c.dependencies}
+    passed_participation = {cell for c in passed.values() for cell in c.dependencies}
     cells = numeric_cells(rows)
     covered = [(i, c) for i, c in cells if (rows[i].row_id, columns[c]) in participation]
     kinds, positions, reasons, tolerance_sizes = {}, {}, Counter(), Counter()
@@ -83,7 +84,7 @@ def run_fault_injection(rows: tuple[AccountRow, ...], columns: tuple[str, ...]) 
         old_value = rows[fault.row_index].values[fault.column_index]
         effective_new = 0 if fault.value is None and parse_amount(fault.raw).status == "nil" else fault.value
         if not impacted:
-            reason = "uncovered"
+            reason = "uncovered" if cell not in participation else "no_baseline_passing_check"
         elif old_value == effective_new:
             reason = "no_numeric_change"
         elif all(c.status in {"exact", "within_tolerance"} for c in impacted):
@@ -108,6 +109,7 @@ def run_fault_injection(rows: tuple[AccountRow, ...], columns: tuple[str, ...]) 
         grouped[name] = rate(counter)
     return {"numeric_cells": len(cells), "covered_cells": len(covered),
             "coverage": len(covered) / len(cells) if cells else None,
+            "baseline_pass_covered_cells": sum((rows[i].row_id, columns[c]) in passed_participation for i, c in cells),
             "uncovered_cells": [{"row_id": rows[i].row_id, "column": columns[c]}
                                 for i, c in cells if (i, c) not in covered],
             "faults": total, "by_fault_type": {kind: rate(count) for kind, count in sorted(kinds.items())},
