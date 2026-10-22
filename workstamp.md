@@ -57,8 +57,8 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 ## Plan for this prompt
 
 1. [x] Orient: baseline suite, protected-data fingerprints, inspect existing code and diagnostic formats.
-2. [~] Define frozen layout structures/config and PDF backend interface; implement extraction adapter.
-3. [ ] Implement pure relative-geometry reconstruction; inspect actual layout and resolve issues.
+2. [x] Define frozen layout structures/config and PDF backend interface; implement extraction adapter.
+3. [~] Implement pure relative-geometry reconstruction; inspect actual layout and resolve issues.
 4. [ ] Add dump_rows CLI and UTF-8 startup to existing scripts.
 5. [ ] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
 6. [ ] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
@@ -69,6 +69,10 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 - workstamp.md — P4 prompt and numbered plan.
 
 ## Last action and result
+
+Backend/types smoke check succeeded: page 595.20 x 841.80, 132 words and 58
+retained thin horizontal rule primitives. No semantic processing or GT access.
+Orientation commit: 5785b3f.
 
 Read brief/handoff. Clean tree at 6374dbf; previous P3 completed at b41840c,
 last suite 141 passed. Existing Session 5 continues; no interrupted phase found.
@@ -89,7 +93,7 @@ Configured upstream origin/main is gone; no remote work requested.
 
 ## Next action
 
-Implement frozen structures/config and the replaceable PDF backend.
+Implement pure row reconstruction and inspect real-page results.
 
 ## Prompt history
 
