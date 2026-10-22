@@ -1,0 +1,3 @@
+# Generated examples must remain byte-identical to fresh serializers on every OS.
+examples/*.csv text eol=lf
+examples/*.json text eol=lf

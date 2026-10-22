@@ -81,8 +81,8 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 3. [x] Implement pure row classification, evidence and typed warnings; commit section 3.
 4. [x] Implement indent-stack tree and partial flat fallback; commit section 4.
 5. [x] Extract metadata and date-based column roles, with clean headings; commit section 5.
-6. [~] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
-7. [ ] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
+6. [x] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
+7. [~] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
 8. [ ] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
 9. [ ] Full suite then ruff; integrity checks; final commit and DONE handoff.
 
@@ -91,6 +91,11 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 - workstamp.md — P5-P6 verbatim prompt, plan and orientation.
 
 ## Last action and result
+
+Section 6 pipeline/serializers/CLI smoke run succeeded: generated both required
+examples, 43 rows with expected types, indentation source, zero warnings.
+Stable LF example attributes added for byte-identical fresh-clone comparisons.
+Hierarchy commit 4cb6d06; metadata commit eeded2a.
 
 Metadata smoke run: two title lines; marker 訂正後; unit 千円, multiplier1000;
 printed page4; chronological previous/current roles; unit lines absent from
@@ -128,7 +133,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Implement pure parsed-page assembly, deterministic exports, CLI and examples.
+Add synthetic/GT/invariance/ablation/export/CLI and committed-example tests.
 
 ## Prompt history
 
