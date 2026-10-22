@@ -55,16 +55,21 @@ Orientation (repo state, test count before P3); the public function signatures; 
 ## Plan for this prompt
 
 1. [x] Orient: inspect package/config/docs, run baseline suite, fingerprint protected data.
-2. [~] Implement pure amount, label and period normalization utilities; document decisions.
-3. [ ] Add table-driven unit tests and read-only GT round-trip coverage; verify targeted tests.
+2. [x] Implement pure amount, label and period normalization utilities; document decisions.
+3. [~] Add table-driven unit tests and read-only GT round-trip coverage; verify targeted tests.
 4. [ ] Update README, run complete suite then ruff on new files; verify protected data unchanged.
 5. [ ] Final P3 commit, record hash and DONE handoff; next action P4 row reconstruction.
 
 ## Files created or modified
 
 - workstamp.md — verbatim P3 prompt, plan, authorization and orientation state.
+- src/parser/normalize.py — frozen AmountResult and four pure public helpers; decisions in module docstring.
 
 ## Last action and result
+
+Implemented src/parser/normalize.py; initial smoke checks passed for full-width
+amounts, negative zero, nil, unit rejection, label idempotence with combining
+marks and full-width period date. Orientation commit: 3a2434c.
 
 Read PROJECT_BRIEF.md and workstamp.md. Tree clean at 9805d79 (P2 human verification).
 P2 is DONE, GT VERIFIED. No interrupted work to resume. No AGENTS.md found in repository.
@@ -98,7 +103,7 @@ None at orientation; record implementation choices as they are resolved.
 
 ## Next action
 
-Implement pure normalization functions with documented edge-case choices.
+Add comprehensive table-driven unit tests and read-only GT round trip.
 
 ## Prompt history
 
