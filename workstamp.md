@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P3 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; unchanged/read-only |
-| Updated | 2026-10-22T18:55:06Z |
+| Updated | 2026-10-22T18:55:33Z |
 
 ## Current prompt (verbatim)
 
@@ -58,7 +58,7 @@ Orientation (repo state, test count before P3); the public function signatures; 
 2. [x] Implement pure amount, label and period normalization utilities; document decisions.
 3. [x] Add table-driven unit tests and read-only GT round-trip coverage; verify targeted tests.
 4. [x] Update README, run complete suite then ruff on new files; verify protected data unchanged.
-5. [~] Final P3 commit, record hash and DONE handoff; next action P4 row reconstruction.
+5. [x] Final P3 commit, record hash and DONE handoff; next action P4 row reconstruction.
 
 ## Files created or modified
 
@@ -83,7 +83,9 @@ PDF SHA-256: 0764bba6f5f0e7984a837e4cc19d8bb95db4a7ac22c26f18c95bbe652c983c74.
 No dependencies added; pyproject.toml and requirements.lock unchanged.
 
 Progress commits: 3a2434c orientation/plan; d9319f9 implementation;
-c99cccb unit tests and verified GT round trip. Final P3 commit next.
+c99cccb unit tests and verified GT round trip. Final P3 commit succeeded:
+b41840c83b95fa8fac0d48db8abd86e016a8d023 — P3: normalization utilities and tests.
+This metadata-only follow-up records the final hash and DONE handoff, following P2.
 
 ## Decisions and assumptions
 
@@ -113,7 +115,7 @@ the recorded human verification; protected GT files were not edited.
 
 ## Next action
 
-Create final P3 commit, then record its hash and DONE status for P4 row reconstruction.
+P4 row reconstruction
 
 ## Prompt history
 
@@ -122,6 +124,7 @@ Create final P3 commit, then record its hash and DONE status for P4 row reconstr
 | P0 | Scaffolding, dependencies, smoke tests done (pre-protocol) | 8c34c1d |
 | P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
 | P2 | Image-derived GT, 43 rows; now VERIFIED by human with no corrections; 12 tests pass | 0be2cf6 (initial GT); verification: 9805d79 |
+| P3 | Pure normalization utilities, 129 new tests; full suite 141 passed; GT unchanged | b41840c |
 
 ## Sessions
 
