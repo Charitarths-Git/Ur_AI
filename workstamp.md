@@ -4,135 +4,114 @@
 
 | Field | Value |
 |---|---|
-| Prompt | P4 |
-| State | DONE |
+| Prompt | P5-P6 |
+| State | IN PROGRESS |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T22:23:56Z |
+| Updated | 2026-10-22T22:34:55Z |
 
 ## Current prompt (verbatim)
 
-P4: Row reconstruction and indent clustering. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P4 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P4) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (you have no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
+P5-P6: Row types, hierarchy and parent paths, page metadata, and CSV/JSON export. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P5-P6 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P5-P6) commits (at least one per numbered section below). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (you have no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
 
 ## Goal
-Turn the words and drawings of a PDF page into clean visual rows, separating label text from the value columns, plus raw layout evidence for later phases. Hard scope limits: NO hierarchy (no parent, no level), NO row_type, NO accounting words or label rules (that is P5), NO CSV/JSON export (P6), NO evaluation module (P7). Use parse_amount, label_key and parse_period_end from src/parser/normalize.py (P3); change that file only to fix a real bug, and report it if you do.
+Turn the PageLayout from P4 into the two deliverables I promised: a flat CSV and a hierarchical JSON. Pipeline: PDF -> RawPage (P4 backend) -> PageLayout (P4) -> typed rows and tree (P5) -> files (P6). The algorithm must be general: language-specific words live in a replaceable RuleSet, not in the logic, and the logic must not use data/gt/ or any page-4-specific numbers. Scope limits: NO evaluation metrics module (that is P7), no OCR/VLM backend.
 
-## Design requirements
-1. Separate the PDF backend from the logic. Only one module (src/parser/pdf_backend.py) may import pymupdf. It returns a plain RawPage: page width/height, a list of Word (text, x0, y0, x1, y1, size or None), and a list of Rule (thin horizontal drawn rectangles or line segments with coordinates; also keep their height). Define the backend as a small interface so an OCR or VLM backend can be added later (do not implement one).
-2. All reconstruction logic is PURE functions on RawPage, so it can be tested without a PDF: reconstruct_page(raw_page, config) -> PageLayout. It must depend only on RELATIVE geometry: every threshold is a multiple of the median word height (or a fraction of the page size), collected in a documented LayoutConfig dataclass. No hard-coded point coordinates, no page-4-specific numbers (no row counts, no y limits like "skip y < 145"). A later phase will perturb word lists (shift, scale, jitter, shuffle) and re-run this, and your tests below check this property.
-3. Output structures (frozen dataclasses; names may vary if you justify them):
-   - Column: index, x1 centre, heading text, period_end (from parse_period_end, or None).
-   - Cell: column index, raw string exactly as printed, AmountResult from parse_amount.
-   - Row: index, zone ("header", "body", "footer"), y top/bottom, label (as printed, see 5), label_x0, indent_step (body rows with a label, else None), cells, rule_above (bool), source words.
-   - PageLayout: rows, columns, indent step centres, the thresholds actually used.
+## 1. Small fixes first (separate commits)
+a) notes/inspection.md Q5 says there are 4 indent levels; P4 found 5 indent steps (centres about 62.3, 75.2, 88.2, 101.3, 114.2 pt), the first being the root label. Correct that paragraph with evidence.
+b) P4 attached the unit line "（単位：千円）" to the heading of the right-hand column. Handle this where you judge cleanest (a minimal fix in rows.py with a regression test, or in the new metadata step) so that column headings no longer contain unit lines. Keep all P4 tests passing and do not weaken any.
 
-## Algorithm guidance (you may improve it; document your choices)
-1. Row clustering: sort words by vertical centre (PyMuPDF returns stream order, not visual order; the footer comes first), group words whose centre is within a tolerance of the group, sort each row by x0. Tolerance = factor x median word height. Report the value used on the real page.
-2. Value columns: candidate tokens are those parse_amount accepts as "ok" or "nil". A token is a VALUE only if its RIGHT edge lines up with a detected column; a parseable token elsewhere (a digit inside a title, the page number, a date) is not. Detect columns by clustering the right edges (x1) of candidates, with a minimum number of supporting rows (configurable), robust to stray tokens. Numbers are right-aligned and nil dashes share the same right edge. A numeric token with an invalid status that sits in a column is kept as a cell (status "invalid"), never dropped.
-3. Fused or split signs: the text layer fuses the minus marker with digits ("△2,979"). Also handle a lone sign token directly left of its digits by merging them (tested with synthetic words).
-4. Zones, structurally and not by coordinates: the header zone ends after the last row containing a period heading (parse_period_end finds a date) or, failing that, the last row above the first row with a value cell; document the fallback. The footer is every row after the last row with a value cell. State these limitations in the notes (e.g. a page that ends with a label-only row).
-5. Labels: label = body row tokens that are not values, joined in x order, inserting a space only where the gap is larger than a configurable fraction of the word height. Labels must be exactly as printed (no normalization). Report how many labels contain internal spaces.
-6. Column headings: for each column, collect the header-zone text above it; set period_end per column. Do not hard-code "previous" or "current"; leave the mapping to a later phase.
-7. Indent clustering: take the label_x0 of body rows, cluster them in 1D (gap-based, tolerance relative to word height) and assign indent_step 0..k-1 from left to right, keeping the raw x0 too. Do NOT turn indent steps into levels or parents.
-8. Rule evidence: rule_above is True when a thin horizontal Rule lies between the previous row and this row and overlaps a value column horizontally. Wide shaded backgrounds are not rules (use the Rule height limit as a config value). This is evidence only; do not interpret it.
-9. Add scripts/dump_rows.py PDF_PATH [--page N]: prints zone, y, indent_step, label, raw cells, rule_above for every row, plus the columns and thresholds. It must work WITHOUT PYTHONIOENCODING set (reconfigure stdout and stderr to UTF-8 at start). Apply the same fix to scripts/inspect_pdf.py and the other scripts.
+## 2. RuleSet (src/parser/rules.py)
+A frozen dataclass of language-specific patterns, plus one default instance for Japanese financial statements, e.g. JA_FINANCIAL_STATEMENT. All matching uses label_key from normalize.py; output labels stay exactly as printed.
+- total_labels (exact label_key matches or suffix patterns): 資産合計, 負債純資産合計, 負債及び純資産合計, 負債・純資産合計.
+- subtotal_suffixes: 合計.
+- net_suffixes: （純額） and (純額), compared after label_key normalisation.
+- contra_labels (prefix or exact): 減価償却累計額, 貸倒引当金, 自己株式.
+- unit patterns: a regex for lines such as （単位：千円）, with a map {千円: 1000, 百万円: 1000000, 円: 1}.
+- correction markers: （訂正後）, （訂正前）.
+- page number pattern for "- 4 -".
+Document in notes/hierarchy_and_export.md that ONLY page 4 has been validated; every other pattern (liabilities, equity, 自己株式, other units) is an untested heuristic. Do not claim more.
 
-## Tests
-- tests/test_rows.py with SYNTHETIC RawPage inputs (no PDF): jittered y values; shuffled word order (footer first); a label that contains a digit but is not right-aligned (must stay in the label); fused and split signs; nil tokens; invalid tokens in a column; a page with no body; empty input; a page with three value columns; different font sizes.
-- Invariance tests on a synthetic page and on the real page: shuffling the words, translating all coordinates by (dx, dy), and scaling all coordinates by a factor must give the same labels, cells, zones and indent steps. Small coordinate jitter (below your tolerance) must also leave results unchanged.
-- Integration test on data/raw/balance_sheet_after_correction.pdf compared READ-ONLY with data/gt/page4.csv and data/gt/page4_meta.json (utf-8-sig): body row count equals the GT row count; for every row in order, label_key equals the GT label_key, the raw strings equal GT prev_raw and curr_raw exactly (header rows have no cells), and parsed values equal the GT values; the number of columns equals 2; each column's period_end equals parse_period_end of the matching period heading in the meta file. Report (do not assert) how many labels match GT exactly, not only by label_key.
-- Informational report, not an assertion: a cross-tab of rule_above against the GT row_type, and the indent_step against the GT level. Put it in notes/row_reconstruction.md. Use the GT ONLY in tests and this report, never inside the algorithm.
-- A subprocess test that runs scripts/dump_rows.py and scripts/inspect_pdf.py with PYTHONIOENCODING and PYTHONUTF8 removed from the environment and checks that they exit successfully.
-- Run the complete suite, then ruff.
+## 3. Row types (src/parser/classify.py)
+Row types (exactly these, matching the GT convention in data/gt/README.md): header, line_item, contra, net, subtotal, total.
+- Decide in this order: no value cells -> header; label matches total_labels -> total; matches net_suffixes -> net; matches subtotal_suffixes -> subtotal; matches contra_labels -> contra; otherwise structural fallback: all numeric cells printed negative (AmountResult.negative, which includes the printed negative zero) -> contra; else line_item.
+- Compute structural evidence for every row regardless of the label rule: rule_above, all-negative-cells, no-cells. Emit a typed warning (not an override) when the label-rule type and the evidence disagree: a subtotal, net or total row without a rule above; a contra row without negative cells; a header row with a rule above is NOT a warning (the real page has 4 such headers), but report the counts in the notes.
+- Each row records "type_source": "label_rule" or "structural", and the warnings list.
 
-## Docs
-Update README (new modules, how to run dump_rows.py). Write notes/row_reconstruction.md: the algorithm, every threshold with its default and why, the observed values on the real page, the cross-tab report, and a "Known limitations" list (wrapped labels, multi-line headings, tables spanning pages, label-only last rows, sub-column headings, rotated or scanned pages, multiple tables on one page).
+## 4. Hierarchy (src/parser/hierarchy.py)
+- Primary method: a parent stack on indent_step. parent = the nearest preceding body row with a strictly smaller indent_step; level = number of ancestors in the resulting tree (do NOT copy the indent step into level). Emit warnings for the first row not being the least indented, and for a jump of more than one indent step.
+- Indentation is informative only if the body rows have at least 2 distinct indent steps. Otherwise use a documented, deliberately partial fallback and set hierarchy_source = "rules_fallback" with a warning: header rows attach to the root (their nesting is unknown, say so), line_item and subtotal rows attach to the most recent header, contra and net rows attach to the nearest preceding line_item, total rows attach to the root. Keep this small and clearly labelled partial.
+- Output: for each body row: row_id (1-based among body rows, reading order), parent_row_id, parent label, parent_path (ancestor labels joined by " > ", root first), level, children. Build an explicit tree.
+- Never read data/gt/ here.
+
+## 5. Page metadata and column roles (src/parser/metadata.py)
+- From the header and footer zones, using the RuleSet: title lines, correction marker, unit string and multiplier, printed page number; each None when not found, never guessed.
+- Column roles: if there are exactly two columns with distinct period_end values, the earlier is "previous_year" and the later "current_year". Otherwise roles are "value_1".."value_N" (left to right) with a warning. Headings are the cleaned heading text per column.
+- Do not multiply values: they stay in the printed unit (千円), as in the GT. Record unit and unit_multiplier as metadata only.
+
+## 6. Export (src/parser/export.py) and CLI
+- parse_page(path, page_number=1, layout_config=LayoutConfig(), rules=JA_FINANCIAL_STATEMENT) -> ParsedPage (frozen dataclasses holding rows, tree, metadata, warnings, hierarchy_source). Pure functions below it; the only PDF access is the P4 backend.
+- Flat CSV, UTF-8 with BOM, header exactly in this order: label, parent, level, row_type, previous_year_value, current_year_value, row_id, parent_row_id, parent_path, prev_raw, curr_raw. (The first six are the columns I promised; the rest match the GT file names.) Nil cells and header rows have empty values; raw strings are exactly as printed. If the roles are not previous/current, name the value columns value_1..value_N and the raw columns raw_1..raw_N.
+- Hierarchical JSON, UTF-8, ensure_ascii=False, indent=2: {"schema_version": "1.0", "source": {file name only, page, backend}, "page": {title, correction_marker, unit, unit_multiplier, printed_page_number}, "columns": [{index, role, heading, period_end as ISO date or null}], "hierarchy_source", "warnings": [...], "rows": [tree nodes]} where a node is {row_id, label, row_type, level, values: {role: {raw, value, status}}, children: [...]}. The tree follows the same convention as the GT: subtotal rows are children of the section they close; contra and net rows are children of their gross item. Deterministic output (stable key order, no timestamps, no absolute paths).
+- scripts/parse_page.py PDF [--page N] [--out-dir DIR]: writes <stem>_p<N>.csv and .json; prints a short summary (rows per type, hierarchy source, warnings). Must run without PYTHONIOENCODING set.
+- Commit the generated sample outputs for the real page to examples/ (balance_sheet_after_correction_p1.csv and .json); keep outputs/ git-ignored.
+
+## 7. Tests
+- Unit tests on synthetic PageLayouts (no PDF): stack parents (siblings, deeper, shallower, first row), skipped-indent warning, flat-indent fallback, each row-type rule and the structural fallback, evidence-conflict warnings, an unlabeled value row, empty body, column roles (two columns, one column, three columns, missing dates), unit parsing for 千円, 百万円 and missing.
+- Integration test on data/raw/balance_sheet_after_correction.pdf compared READ-ONLY with data/gt/page4.csv and page4_meta.json (utf-8-sig): for all 43 rows in order, exact label, parent label, parent_row_id, parent_path, level, row_type, previous and current values and raw strings; metadata unit, correction marker, printed page number and the column periods equal the GT meta; hierarchy_source == "indentation"; and report whether the warnings list is empty (my expectation: empty; if not, show it and explain, do not hide it).
+- Pipeline invariance: shuffling words, translating, scaling, and small jitter of the real page (reuse the P4 helpers) must give byte-identical CSV and JSON.
+- Ablation (not an accuracy claim): flatten the indentation of the real page by moving each row's label tokens to the same x0, then run the pipeline. Assert only: no crash, hierarchy_source == "rules_fallback", a warning is present, row types and values equal the GT. REPORT in the notes how many of the 43 parents the fallback gets right and which kinds of rows it gets wrong.
+- Export tests: the CSV column order and BOM; the JSON tree flattened equals the CSV rows; nil gives empty in the CSV and null in the JSON; an invalid cell keeps its status; the output is deterministic.
+- CLI subprocess test with PYTHONIOENCODING and PYTHONUTF8 removed from the environment; test that the committed examples/ files equal a fresh generation.
+- Run the full suite and ruff.
+
+## 8. Docs
+Update README (pipeline overview, how to run parse_page.py, the CSV and JSON schema). Write notes/hierarchy_and_export.md: algorithm, the RuleSet table with each pattern's validation status (validated on page 4 or untested heuristic), the evidence cross-tab (rule_above and negative cells against row types) as counts, the ablation result, design decisions, and a "Known limitations" list (hierarchy without indentation, subtotals without keywords, tables spanning pages, label-less rows, pages with several tables, non-Japanese statements, scanned pages).
 
 ## Constraints
-- Do not modify data/gt/, data/raw/ or the PDF. Dependencies: stdlib and the already installed pymupdf only. Do not weaken a test to make it pass; if the GT comparison fails, report it and investigate the algorithm. Do not edit the GT.
-- Final commit "P4: row reconstruction and indent clustering"; set workstamp.md to DONE with "Next action: P5 hierarchy and parent paths"; append P4 to the Prompt history with the commit hash.
+- Do not modify data/gt/, data/raw/ or the PDF. Stdlib and pymupdf only. Do not weaken a test to make it pass; if a GT comparison fails, report it and investigate the algorithm; never edit the GT.
+- Final commit "P5-P6: row types, hierarchy, metadata, CSV/JSON export"; set workstamp.md to DONE with "Next action: P7-P8 evaluation framework"; append P5-P6 to the Prompt history with the commit hash.
 
 ## Final message must show
-Orientation (repo state, test count before P4); the public API; the thresholds used and the values observed on the real page (row tolerance, column x1 centres, indent step centres, number of rows per zone); the GT comparison result; the rule_above and indent cross-tab; test and ruff output; invariance test results; files created or modified; commit hashes; known limitations; open questions.
+Orientation (repo state, test count before this prompt); the public API; the RuleSet; the GT comparison result for the real page (how many of 43 rows match on each field); the warnings on the real page; the evidence counts; the ablation result; invariance results; the first 12 lines of the generated CSV; test and ruff output; files created or modified; commit hashes; known limitations; open questions.
 
 ## Plan for this prompt
 
-1. [x] Orient: baseline suite, protected-data fingerprints, inspect existing code and diagnostic formats.
-2. [x] Define frozen layout structures/config and PDF backend interface; implement extraction adapter.
-3. [x] Implement pure relative-geometry reconstruction; inspect actual layout and resolve issues.
-4. [x] Add dump_rows CLI and UTF-8 startup to existing scripts.
-5. [x] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
-6. [x] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
-7. [x] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
+1. [~] Orient, baseline tests and fingerprints; separately fix Q5 and unit-heading metadata cleanup.
+2. [ ] Implement immutable replaceable RuleSet; commit section 2.
+3. [ ] Implement pure row classification, evidence and typed warnings; commit section 3.
+4. [ ] Implement indent-stack tree and partial flat fallback; commit section 4.
+5. [ ] Extract metadata and date-based column roles, with clean headings; commit section 5.
+6. [ ] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
+7. [ ] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
+8. [ ] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
+9. [ ] Full suite then ruff; integrity checks; final commit and DONE handoff.
 
 ## Files created or modified
 
-- src/parser/layout_types.py — frozen backend-neutral records, relative config and actual thresholds.
-- src/parser/pdf_backend.py — PageBackend protocol and PyMuPDF adapter for words/thin rules.
-- src/parser/rows.py — pure rows/columns/zones/indent/rule reconstruction.
-- scripts/dump_rows.py — one-based page CLI, text diagnostics only.
-- scripts/_console.py — shared UTF-8 stdout/stderr startup.
-- scripts/inspect_pdf.py, gt_selfcheck.py, gt_crosscheck.py, render_gt_crops.py,
-  export_chat.py — UTF-8 startup and lint/format cleanup; no diagnostic behavior changes.
-- tests/test_rows.py — 25 synthetic, invariance, integration and CLI tests.
-- notes/row_reconstruction.md — algorithm, thresholds, real-page evidence, GT cross-tabs and limitations.
-- README.md — P4 modules/API/CLI and P5 next phase.
-- workstamp.md — P4 prompt, plan, progress and completion evidence.
+- workstamp.md — P5-P6 verbatim prompt, plan and orientation.
 
 ## Last action and result
 
-Orientation: clean tree at 6374dbf; baseline 141 passed in 9.91s.
-P4 targeted suite: 25 passed in 6.19s. Final full suite: 166 passed in 6.86s.
-Then ruff on all new package modules, all scripts and test_rows.py: All checks passed!
-Twelve invariance cases pass on both synthetic and real pages: shuffle, translation,
-scales 0.45/2.75, combined transform and bounded jitter. Both no-encoding CLI
-subprocesses pass with -X utf8=0. Full evidence is in notes/row_reconstruction.md.
+Baseline 166 passed in 6.73s; protected data fingerprinted. Corrected Q5 and
+summary: five body indent steps including root, with P4 centre evidence.
 
-Observed H=8.963989, row tolerance=3.137396; value x1 centres=397.513123/522.553162.
-Indent centres=62.280000/75.239998/88.199997/101.279999/114.239998.
-Zones=6 header,43 body,1 footer. GT: all 43 rows and 74 printed cells match;
-43/43 labels match exactly, 0 labels with internal spaces. No GT failure/correction.
-Rule and indent cross-tabs are informational only and recorded in the report.
-
-Every GT/raw file SHA-256 equals its pre-P4 value. CSV remains UTF-8 BOM, hash
-c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
-P3 normalize.py and dependency manifests unchanged. Verbatim P4 prompt exact.
-
-Progress commits: 5785b3f plan/baseline; d34449f backend/types; 85698fe pure logic;
-265e765 CLI/encoding/rule span overlap; bd9022b tests; 1d24b2a docs/report/style.
-Final P4 commit succeeded:
-2582b5d96fa7950b23c1dd5a9ce2c9fda181b4dc — P4: row reconstruction and indent clustering.
-This metadata-only follow-up records the hash and DONE status, following P3.
+Read brief and handoff; tree clean at 9012bae; P4 DONE, previous full suite 166 passed.
+Existing Session 5 continues. No repository AGENTS.md found; no interrupted phase.
 
 ## Decisions and assumptions
 
-- Existing Session 5 continues; no session row added. PYTHONIOENCODING=utf-8 used.
-- Frozen layout records use tuples; raw input is never mutated. Only the package
-  pdf_backend imports pymupdf; legacy P1/P2 diagnostic scripts retain their imports.
-- Geometry uses H-relative configurable distances and a relative empty-input fallback.
-  Column support counts distinct rows. All actual thresholds are exposed in PageLayout.
-- P3 parsing/key/date helpers are reused; P3 normalization needed no changes.
-- Date rows end header; no-date fallback starts at first supported valid value row.
-  Last aligned cell ends body; invalid aligned values are retained, not dropped.
-- Headings are collected by geometric bands without previous/current assumptions;
-  units may be included. Labels retain original text with gap-based spacing.
-- Visual indent steps and thin-rule overlap are evidence only: no hierarchy,
-  semantic row types, accounting rules, exports or evaluation module implemented.
-- GT is used only in integration tests and the informational report, never algorithm code.
-- Shared UTF-8 CLI startup fixes Windows output. Lint formatting and removal of two
-  unused legacy exporter locals do not alter existing diagnostic/export behavior.
+- GT and raw data read-only. No evaluation metrics or OCR/VLM implementation.
+- Language-specific strings/patterns live only in RuleSet, using P3 label_key.
+- Address unit-heading contamination in new metadata, leaving pure P4 unchanged.
+- Continue Session 5; no new session row. Commands use PYTHONIOENCODING=utf-8.
 
 ## Known issues / open questions
 
-No unresolved P4 failures or open design questions. Known limitations are documented:
-wrapped labels; split/multi-line and sub-column headings; page-spanning/multiple
-tables; label-only boundary rows; repeated aligned label digits; very short/all-invalid
-columns; noise crossing decision boundaries. Rotated pages are rejected; scanned
-pages require a future backend. Rule flags are visual evidence, not financial roles.
-Configured upstream origin/main is gone; no remote operations requested.
+Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-P5 hierarchy and parent paths
+Run baseline suite and inspect current APIs; fingerprint protected files.
 
 ## Prompt history
 

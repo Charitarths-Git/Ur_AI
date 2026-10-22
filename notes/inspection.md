@@ -133,13 +133,18 @@ prev-year numeric tokens; **x1 ≥ 518 and x1 ≤ 527** for current-year.
 
 ## Q5 — Is hierarchy visible in the layout? Are indent levels enough?
 
-**Yes — hierarchy is clearly visible through label x0 positions.** There are 7 distinct
-x0 clusters for label words (x0 < 250), forming 4 meaningful indent levels:
+**Visual indentation is visible through label x0 positions.** P4 measured **five
+body indent steps**, including the root: centres 62.280000, 75.239998, 88.199997,
+101.279999 and 114.239998 pt (see `notes/row_reconstruction.md`). The earlier
+"4 meaningful indent levels" wording counted only the four non-root steps.
+Page headers are separate from these five body steps. Visual steps are evidence;
+semantic levels must be computed from ancestor paths rather than copied from x0.
 
 | x0 (rounded) | Count | Role | Example labels |
 |---|---|---|---|
 | 55 | 2 | Page header (non-table) | `（訂正後）`, `３．連結財務諸表及び主な注記` |
-| 62–64 | 2 | Section title / sub-header | `資産の部`, `（１）連結貸借対照表` |
+| 62 | 1 | **Step 0** — body root | `資産の部` |
+| 64 | 1 | Page subtitle (non-table) | `（１）連結貸借対照表` |
 | 75 | 3 | **Level 1** — major category | `流動資産`, `固定資産`, `資産合計` |
 | 88 | 15 | **Level 2** — sub-category | `現金及び預金`, `受取手形`, `有形固定資産`, `無形固定資産` |
 | 101 | 16 | **Level 3** — line items | `建物及び構築物`, `機械装置及び運搬具`, `土地`, `リース資産` |
@@ -162,10 +167,11 @@ x0 clusters for label words (x0 < 250), forming 4 meaningful indent levels:
    - Labels ending in `（純額）` are net values (gross − 減価償却累計額).
    - `減価償却累計額` rows are always Level 4 deductions.
 
-**Conclusion:** Indentation gives the level reliably. To assign the correct parent path
-for duplicate-label items, a rule must track the most recent Level-2 (x0≈88) header
-seen above each row. Text-based rules (合計, （純額）, 減価償却累計額) are needed as
-cross-checks but not as the primary method.
+**Conclusion:** Five visual body steps are observed, not four. A preceding-row
+stack can assign parents from strictly smaller steps, resolving duplicate labels
+by row context; semantic level is the resulting number of ancestors. Label rules
+can classify rows and cross-check evidence, but indentation itself is not a
+semantic level or parent path.
 
 ---
 
@@ -316,6 +322,6 @@ y0 > 800 before body processing.
 | Body section headers | 6 |
 | Page-level rows (five headers, date row, footer) | 7 |
 | Vector drawings | 341 rects |
-| Distinct label x0 positions | 7 (4 table levels) |
+| Distinct label x0 positions | 7 overall; 5 body indent steps including root |
 | Prev-year column x1 | ≈ 397.5 pt |
 | Current-year column x1 | ≈ 522.5 pt |
