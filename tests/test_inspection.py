@@ -4,12 +4,13 @@ P1 requirement: assert that expected output files are produced and non-empty.
 Do NOT assert any financial values or label counts.
 """
 
-from pathlib import Path
 import json
-import pytest
 
 # Bring the scripts directory onto sys.path so we can import inspect_pdf
 import sys
+from pathlib import Path
+
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
@@ -64,8 +65,7 @@ def test_inspection_png_exists_and_nonempty(inspection_summary):
     path = DERIVED_DIR / "page4_200dpi.png"
     assert path.exists(), f"page4_200dpi.png not found at {path}"
     assert path.stat().st_size > 10_000, (
-        f"page4_200dpi.png is too small ({path.stat().st_size} bytes) — "
-        "likely a failed render"
+        f"page4_200dpi.png is too small ({path.stat().st_size} bytes) — likely a failed render"
     )
 
 

@@ -10,8 +10,12 @@ from parser.normalize import label_key, parse_period_end
 
 
 def ratio(numerator, denominator, description):
-    return {"numerator": numerator, "denominator": denominator,
-            "score": numerator / denominator if denominator else None, "meaning": description}
+    return {
+        "numerator": numerator,
+        "denominator": denominator,
+        "score": numerator / denominator if denominator else None,
+        "meaning": description,
+    }
 
 
 def ancestor_ids(row, rows_by_id):
@@ -27,8 +31,9 @@ def ancestor_ids(row, rows_by_id):
     return tuple(ancestors)
 
 
-def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
-                 predicted_json=None, gt_meta=None) -> dict:
+def score_tables(
+    prediction: Table, gt: Table, *, threshold=0.5, predicted_json=None, gt_meta=None
+) -> dict:
     alignment = align_rows(prediction, gt, threshold)
     p_to_g = {prediction.rows[i].row_id: gt.rows[j].row_id for i, j in alignment.pairs}
     g_to_p = {j: i for i, j in alignment.pairs}
@@ -37,11 +42,19 @@ def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
     counts, mismatches, confusion = Counter(), [], Counter()
     for j, expected in enumerate(gt.rows):
         pred = prediction.rows[g_to_p[j]] if j in g_to_p else None
+
         def mismatch(field, wanted, actual):
-            mismatches.append({"gt_row_id": expected.row_id,
-                               "pred_row_id": pred.row_id if pred else None,
-                               "label": expected.label, "field": field,
-                               "expected": wanted, "predicted": actual})
+            mismatches.append(
+                {
+                    "gt_row_id": expected.row_id,
+                    "pred_row_id": pred.row_id if pred else None,
+                    "label": expected.label,
+                    "field": field,
+                    "expected": wanted,
+                    "predicted": actual,
+                }
+            )
+
         if pred is None:
             mismatch("missing_row", expected.row_id, None)
             confusion[expected.row_type, "__missing__"] += 1
@@ -74,33 +87,60 @@ def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
             parent = path = False
             jac = 0.0
         else:
-            parent = ((pred.parent_row_id is None and expected.parent_row_id is None)
-                      or (pred.parent_row_id is not None and expected.parent_row_id is not None
-                          and p_to_g.get(pred.parent_row_id) == expected.parent_row_id))
+            parent = (pred.parent_row_id is None and expected.parent_row_id is None) or (
+                pred.parent_row_id is not None
+                and expected.parent_row_id is not None
+                and p_to_g.get(pred.parent_row_id) == expected.parent_row_id
+            )
             path = pred.parent_path == expected.parent_path
             mapped = {p_to_g.get(a, f"__unaligned__:{a}") for a in ancestor_ids(pred, pred_ids)}
             wanted = set(ancestor_ids(expected, gt_ids))
             union = mapped | wanted
             jac = len(mapped & wanted) / len(union) if union else 1.0
-        for name, correct in [("label_exact", exact), ("label_key", key), ("row_type", kind),
-                              ("level", level), ("parent", parent), ("parent_path", path)]:
+        for name, correct in [
+            ("label_exact", exact),
+            ("label_key", key),
+            ("row_type", kind),
+            ("level", level),
+            ("parent", parent),
+            ("parent_path", path),
+        ]:
             counts[name] += correct
             if not correct:
                 field = "label" if name.startswith("label") else name
-                wanted = expected.parent_row_id if name == "parent" else getattr(expected, field, expected.label)
-                actual = (pred.parent_row_id if name == "parent" else getattr(pred, field, None)) if pred else None
+                wanted = (
+                    expected.parent_row_id
+                    if name == "parent"
+                    else getattr(expected, field, expected.label)
+                )
+                actual = (
+                    (pred.parent_row_id if name == "parent" else getattr(pred, field, None))
+                    if pred
+                    else None
+                )
                 # Exact and normalized label metrics share a single mismatch record.
                 if name != "label_key":
                     mismatch(field, wanted, actual)
         counts["ancestor_jaccard"] += jac
         if jac != 1:
-            mismatch("ancestor_chain", list(ancestor_ids(expected, gt_ids)),
-                     list(ancestor_ids(pred, pred_ids)) if pred else None)
+            mismatch(
+                "ancestor_chain",
+                list(ancestor_ids(expected, gt_ids)),
+                list(ancestor_ids(pred, pred_ids)) if pred else None,
+            )
         counts["fully_correct_rows"] += exact and values_correct and kind and parent and level
     for i in alignment.unmatched_prediction:
         row = prediction.rows[i]
-        mismatches.append({"gt_row_id": None, "pred_row_id": row.row_id, "label": row.label,
-                           "field": "extra_row", "expected": None, "predicted": row.row_id})
+        mismatches.append(
+            {
+                "gt_row_id": None,
+                "pred_row_id": row.row_id,
+                "label": row.label,
+                "field": "extra_row",
+                "expected": None,
+                "predicted": row.row_id,
+            }
+        )
     ng, np, matched = len(gt.rows), len(prediction.rows), len(alignment.pairs)
     meanings = {
         "label_exact": "exact printed labels / all GT rows (missing rows wrong)",
@@ -110,17 +150,32 @@ def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
         "parent": "parents mapped by row alignment (both roots correct) / all GT rows",
         "parent_path": "exact printed ancestor paths / all GT rows",
         "ancestor_jaccard": "sum of alignment-mapped ancestor-set Jaccards / all GT rows",
-        "fully_correct_rows": "exact label, both/all values, type, mapped parent and level / all GT rows",
+        "fully_correct_rows": "exact label, both/all values, type, mapped parent and "
+        "level / all GT rows",
     }
     metrics = {name: ratio(counts[name], ng, meaning) for name, meaning in meanings.items()}
-    metrics.update({
-        "cell_accuracy_all": ratio(counts["cell_accuracy_all"], ng * len(gt.columns), "correct integer/null cells / all GT row-column cells"),
-        "cell_accuracy_printed": ratio(counts["cell_accuracy_printed"], counts["printed_cells"], "correct integer/null cells / GT cells with nonempty raw"),
-        "raw_accuracy": ratio(counts["raw_accuracy"], ng * len(gt.columns), "identical raw strings / all GT row-column cells"),
-        "row_precision": ratio(matched, np, "aligned rows / predicted rows"),
-        "row_recall": ratio(matched, ng, "aligned rows / GT rows"),
-        "row_f1": ratio(2 * matched, np + ng, "2 * aligned rows / (prediction rows + GT rows)"),
-    })
+    metrics.update(
+        {
+            "cell_accuracy_all": ratio(
+                counts["cell_accuracy_all"],
+                ng * len(gt.columns),
+                "correct integer/null cells / all GT row-column cells",
+            ),
+            "cell_accuracy_printed": ratio(
+                counts["cell_accuracy_printed"],
+                counts["printed_cells"],
+                "correct integer/null cells / GT cells with nonempty raw",
+            ),
+            "raw_accuracy": ratio(
+                counts["raw_accuracy"],
+                ng * len(gt.columns),
+                "identical raw strings / all GT row-column cells",
+            ),
+            "row_precision": ratio(matched, np, "aligned rows / predicted rows"),
+            "row_recall": ratio(matched, ng, "aligned rows / GT rows"),
+            "row_f1": ratio(2 * matched, np + ng, "2 * aligned rows / (prediction rows + GT rows)"),
+        }
+    )
     role_correct = period_correct = col_den = 0
     if predicted_json is not None and gt_meta is not None:
         expected_cols = [("previous_year", "previous"), ("current_year", "current")]
@@ -132,26 +187,72 @@ def score_tables(prediction: Table, gt: Table, *, threshold=0.5,
             end = parse_period_end(gt_meta["period_end_dates"][key])
             iso = date(*end).isoformat() if end else None
             period_correct += len(matches) == 1 and matches[0].get("period_end") == iso
-            if len(matches) != 1 or matches[0].get("role") != role or matches[0].get("period_end") != iso:
-                mismatches.append({"gt_row_id": None, "pred_row_id": None, "label": "",
-                                   "field": f"column:{role}", "expected": {"index": index, "role": role, "period_end": iso},
-                                   "predicted": matches})
+            if (
+                len(matches) != 1
+                or matches[0].get("role") != role
+                or matches[0].get("period_end") != iso
+            ):
+                mismatches.append(
+                    {
+                        "gt_row_id": None,
+                        "pred_row_id": None,
+                        "label": "",
+                        "field": f"column:{role}",
+                        "expected": {"index": index, "role": role, "period_end": iso},
+                        "predicted": matches,
+                    }
+                )
         for col in predicted_cols:
             if col.get("index") not in range(len(expected_cols)):
-                mismatches.append({"gt_row_id": None, "pred_row_id": None, "label": "",
-                                   "field": "extra_column", "expected": None, "predicted": col})
-    metrics["column_roles"] = ratio(role_correct, col_den, "correct role at each unique expected column index / max(expected,predicted columns); optional JSON/meta")
-    metrics["column_periods"] = ratio(period_correct, col_den, "correct date at each unique expected column index / max(expected,predicted columns); optional JSON/meta")
-    return {"metrics": metrics,
-            "alignment": {"threshold": threshold, "matched": matched, "predicted_rows": np,
-                          "gt_rows": ng, "pairs": [{"prediction": prediction.rows[i].row_id,
-                          "gt": gt.rows[j].row_id, "similarity": sim}
-                          for (i, j), sim in zip(alignment.pairs, alignment.similarities, strict=True)],
-                          "unmatched_prediction": [prediction.rows[i].row_id for i in alignment.unmatched_prediction],
-                          "unmatched_gt": [gt.rows[j].row_id for j in alignment.unmatched_gt]},
-            "confusion_matrix": {kind: {p: confusion[kind, p] for p in sorted({b for a, b in confusion if a == kind})}
-                                 for kind in sorted({a for a, _ in confusion})},
-            "mismatches": mismatches, "input_issues": list(prediction.issues) + list(gt.issues)}
+                mismatches.append(
+                    {
+                        "gt_row_id": None,
+                        "pred_row_id": None,
+                        "label": "",
+                        "field": "extra_column",
+                        "expected": None,
+                        "predicted": col,
+                    }
+                )
+    metrics["column_roles"] = ratio(
+        role_correct,
+        col_den,
+        "correct role at each unique expected column index / max(expected,predicted "
+        "columns); optional JSON/meta",
+    )
+    metrics["column_periods"] = ratio(
+        period_correct,
+        col_den,
+        "correct date at each unique expected column index / max(expected,predicted "
+        "columns); optional JSON/meta",
+    )
+    return {
+        "metrics": metrics,
+        "alignment": {
+            "threshold": threshold,
+            "matched": matched,
+            "predicted_rows": np,
+            "gt_rows": ng,
+            "pairs": [
+                {
+                    "prediction": prediction.rows[i].row_id,
+                    "gt": gt.rows[j].row_id,
+                    "similarity": sim,
+                }
+                for (i, j), sim in zip(alignment.pairs, alignment.similarities, strict=True)
+            ],
+            "unmatched_prediction": [
+                prediction.rows[i].row_id for i in alignment.unmatched_prediction
+            ],
+            "unmatched_gt": [gt.rows[j].row_id for j in alignment.unmatched_gt],
+        },
+        "confusion_matrix": {
+            kind: {p: confusion[kind, p] for p in sorted({b for a, b in confusion if a == kind})}
+            for kind in sorted({a for a, _ in confusion})
+        },
+        "mismatches": mismatches,
+        "input_issues": list(prediction.issues) + list(gt.issues),
+    }
 
 
 def aggregate_reports(reports: list[dict]) -> dict:
@@ -160,19 +261,37 @@ def aggregate_reports(reports: list[dict]) -> dict:
     micro, macro = {}, {}
     for key in keys:
         values = [report["metrics"][key] for report in reports if key in report["metrics"]]
-        micro[key] = ratio(sum(v["numerator"] for v in values), sum(v["denominator"] for v in values),
-                           "pooled counts across pages")
+        micro[key] = ratio(
+            sum(v["numerator"] for v in values),
+            sum(v["denominator"] for v in values),
+            "pooled counts across pages",
+        )
         defined = [v["score"] for v in values if v["score"] is not None]
-        macro[key] = {"score": mean(defined) if defined else None, "defined_pages": len(defined),
-                      "total_pages": len(reports)}
-    for name, numerator, denominator in [("accounting_pass_rate", "passed", "evaluable"),
-                                          ("truncation_fraction", "truncation_inside", "truncation_evaluable")]:
+        macro[key] = {
+            "score": mean(defined) if defined else None,
+            "defined_pages": len(defined),
+            "total_pages": len(reports),
+        }
+    for name, numerator, denominator in [
+        ("accounting_pass_rate", "passed", "evaluable"),
+        ("truncation_fraction", "truncation_inside", "truncation_evaluable"),
+    ]:
         accounts = [r["accounting"] for r in reports if "accounting" in r]
         if accounts:
-            micro[name] = ratio(sum(a[numerator] for a in accounts), sum(a[denominator] for a in accounts),
-                                "pooled accounting counts across pages")
+            micro[name] = ratio(
+                sum(a[numerator] for a in accounts),
+                sum(a[denominator] for a in accounts),
+                "pooled accounting counts across pages",
+            )
             defined = [a[numerator] / a[denominator] for a in accounts if a[denominator]]
-            macro[name] = {"score": mean(defined) if defined else None,
-                           "defined_pages": len(defined), "total_pages": len(reports)}
-    return {"pages": len(reports), "micro": micro, "macro": macro,
-            "note": "With a single page, defined micro and macro scores coincide."}
+            macro[name] = {
+                "score": mean(defined) if defined else None,
+                "defined_pages": len(defined),
+                "total_pages": len(reports),
+            }
+    return {
+        "pages": len(reports),
+        "micro": micro,
+        "macro": macro,
+        "note": "With a single page, defined micro and macro scores coincide.",
+    }

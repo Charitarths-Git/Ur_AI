@@ -32,12 +32,27 @@ def transform(page: RawPage, mode: str, seed: int = 813, amplitude: float = 0.01
                 jy = 0
             elif mode == "jitter_y":
                 jx = 0
-        words.append(replace(word, x0=word.x0 * scale + dx + jx, x1=word.x1 * scale + dx + jx,
-                             y0=word.y0 * scale + dy + jy, y1=word.y1 * scale + dy + jy,
-                             size=word.size * scale if word.size is not None else None))
-    rules = [replace(r, x0=r.x0 * scale + dx, x1=r.x1 * scale + dx,
-                     y0=r.y0 * scale + dy, y1=r.y1 * scale + dy, height=r.height * scale)
-             for r in page.rules]
+        words.append(
+            replace(
+                word,
+                x0=word.x0 * scale + dx + jx,
+                x1=word.x1 * scale + dx + jx,
+                y0=word.y0 * scale + dy + jy,
+                y1=word.y1 * scale + dy + jy,
+                size=word.size * scale if word.size is not None else None,
+            )
+        )
+    rules = [
+        replace(
+            r,
+            x0=r.x0 * scale + dx,
+            x1=r.x1 * scale + dx,
+            y0=r.y0 * scale + dy,
+            y1=r.y1 * scale + dy,
+            height=r.height * scale,
+        )
+        for r in page.rules
+    ]
     if mode in {"shuffle", "combined", "jitter", "jitter_x", "jitter_y"}:
         rng.shuffle(words)
         rng.shuffle(rules)
@@ -54,7 +69,9 @@ def flatten_indentation(raw: RawPage) -> RawPage:
     for row in labels:
         shift = common - row.label_x0
         for word in row.source_words:
-            if not any(abs(word.x1 - c.x1_centre) <= page.thresholds.column_tolerance for c in page.columns):
+            if not any(
+                abs(word.x1 - c.x1_centre) <= page.thresholds.column_tolerance for c in page.columns
+            ):
                 replacements[word] = replace(word, x0=word.x0 + shift, x1=word.x1 + shift)
     return replace(raw, words=tuple(replacements.get(word, word) for word in raw.words))
 

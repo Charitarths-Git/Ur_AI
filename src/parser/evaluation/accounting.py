@@ -54,7 +54,8 @@ def _number(row, col):
 
 
 def accounting_checks(
-    rows: tuple[AccountRow, ...], columns: tuple[str, ...],
+    rows: tuple[AccountRow, ...],
+    columns: tuple[str, ...],
     tolerance_model: ToleranceModel = addend_tolerance,
 ) -> tuple[AccountingCheck, ...]:
     """Rebuild sibling groups in file order; never inspect labels or compare to GT.
@@ -75,9 +76,12 @@ def accounting_checks(
         if row.values[col] is not None or row.raws[col] or row.row_type != "header":
             return _number(row, col), row.row_id
         totals = [r for r in children.get(row.row_id, []) if r.row_type == "subtotal"]
-        return (_number(totals[0], col), totals[0].row_id) if len(totals) == 1 else (None, row.row_id)
+        return (
+            (_number(totals[0], col), totals[0].row_id) if len(totals) == 1 else (None, row.row_id)
+        )
 
     results = []
+
     def emit(kind, row, col, parts, applicable=True):
         role = columns[col]
         ident = row.row_id if row else None
@@ -94,19 +98,42 @@ def accounting_checks(
         elif residual is None:
             status = "not_evaluable"
         else:
-            status = "exact" if residual == 0 else "within_tolerance" if abs(residual) <= tolerance else "fail"
+            status = (
+                "exact"
+                if residual == 0
+                else "within_tolerance"
+                if abs(residual) <= tolerance
+                else "fail"
+            )
         low = -sum(v < 0 for v in values) if residual is not None else None
         high = sum(v > 0 for v in values) - 1 if residual is not None else None
         consistent = low <= residual <= high if residual is not None else None
-        dependencies = tuple(dict.fromkeys([(rid, role) for _, rid in parts]
-                                          + ([(ident, role)] if ident else [])))
-        results.append(AccountingCheck(f"{kind}:{ident or 'page'}:{role}", kind, ident, role, n,
-                                       expected, printed, residual, tolerance, status, low, high,
-                                       consistent, dependencies))
+        dependencies = tuple(
+            dict.fromkeys([(rid, role) for _, rid in parts] + ([(ident, role)] if ident else []))
+        )
+        results.append(
+            AccountingCheck(
+                f"{kind}:{ident or 'page'}:{role}",
+                kind,
+                ident,
+                role,
+                n,
+                expected,
+                printed,
+                residual,
+                tolerance,
+                status,
+                low,
+                high,
+                consistent,
+                dependencies,
+            )
+        )
+
     for row in rows:
         if row.row_type in {"subtotal", "total"}:
             siblings = children.get(row.parent_row_id, [])
-            preceding = siblings[:siblings.index(row)]
+            preceding = siblings[: siblings.index(row)]
             for col in range(len(columns)):
                 parts = [contribution(sibling, col) for sibling in preceding]
                 if row.parent_row_id is not None and row.parent_row_id not in by_id:
@@ -136,8 +163,16 @@ def accounting_summary(checks: tuple[AccountingCheck, ...]) -> dict:
     passed = counts["exact"] + counts["within_tolerance"]
     diagnostic = [c for c in checks if c.truncation_consistent is not None]
     inside = sum(c.truncation_consistent for c in diagnostic)
-    return {"statuses": {s: counts[s] for s in ["exact", "within_tolerance", "fail", "not_evaluable", "not_applicable"]},
-            "passed": passed, "evaluable": evaluable, "pass_rate": passed / evaluable if evaluable else None,
-            "truncation_inside": inside, "truncation_evaluable": len(diagnostic),
-            "truncation_fraction": inside / len(diagnostic) if diagnostic else None,
-            "truncation_note": "Hypothesis diagnostic only; never affects status/pass rate."}
+    return {
+        "statuses": {
+            s: counts[s]
+            for s in ["exact", "within_tolerance", "fail", "not_evaluable", "not_applicable"]
+        },
+        "passed": passed,
+        "evaluable": evaluable,
+        "pass_rate": passed / evaluable if evaluable else None,
+        "truncation_inside": inside,
+        "truncation_evaluable": len(diagnostic),
+        "truncation_fraction": inside / len(diagnostic) if diagnostic else None,
+        "truncation_note": "Hypothesis diagnostic only; never affects status/pass rate.",
+    }

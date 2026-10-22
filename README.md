@@ -2,8 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P5–P6 — row types, hierarchy, metadata and CSV/JSON export complete. GT is **VERIFIED**.
-> Next phase: P7–P8 evaluation framework.
+> **Status**: P7–P8 — file evaluation, accounting checks and robustness experiments complete. GT is **VERIFIED**.
+> Next action: independent review (P9).
 
 ## Quick start
 
@@ -42,7 +42,8 @@ pytest
 │       ├── classify.py    # Row types, independent evidence and typed warnings (P5)
 │       ├── hierarchy.py   # Parent stack, paths and partial flat fallback (P5)
 │       ├── metadata.py    # Page metadata and chronological column roles (P5)
-│       └── export.py      # Parsed-page pipeline and deterministic CSV/JSON (P6)
+│       ├── export.py      # Parsed-page pipeline and deterministic CSV/JSON (P6)
+│       └── evaluation/    # Independent file metrics, accounting and experiments (P7–P8)
 ├── tests/                 # Pytest test suite
 ├── scripts/               # CLI entry points and utilities
 │   ├── inspect_pdf.py     # PDF diagnostic tool (P1)
@@ -55,7 +56,7 @@ pytest
 │   └── derived/           # Rendered images, derived artifacts (tracked)
 ├── outputs/               # Generated CSV / JSON (git-ignored)
 ├── examples/              # Committed real-page CSV and hierarchical JSON
-├── eval/                  # Evaluation scripts and configs
+├── eval/                  # Evaluation CLIs and committed deterministic results
 ├── notes/                 # Inspection findings and design notes
 ├── PROJECT_BRIEF.md       # Full task description and plan
 ├── workstamp.md           # Session handoff state (read this first!)
@@ -74,8 +75,8 @@ pytest
 | P4 — Row reconstruction | Relative row/column reconstruction, visual indent steps and rule evidence ✅ |
 | P5 — Hierarchy inference | Typed rows, parent paths, metadata and partial fallback ✅ |
 | P6 — CSV and JSON export | Deterministic flat CSV and hierarchical JSON; committed examples ✅ |
-| P7 — Evaluation metrics | Cell accuracy, structural accuracy, accounting checks |
-| P8 — End-to-end run | Failure analysis and robustness testing |
+| P7 — Evaluation metrics | Independent file metrics, alignment and label-free accounting ✅ |
+| P8 — End-to-end run | 360 geometry sweeps, six ablations, exhaustive faults and failure analysis ✅ |
 | P9 — Independent review | Review by a different AI agent |
 | P10 — Review fixes | Apply fixes from the review |
 | P11 — Write-up | Report with design decisions, results, future work |
@@ -311,8 +312,75 @@ python -m ruff check src/parser scripts tests/test_hierarchy.py tests/test_metad
 The report documents all 43 rows' GT agreement, byte invariance under six
 coordinate transformations and a flat-indentation ablation. That ablation retains
 row types/values but only 38 of 43 parent links, illustrating the partial fallback;
-it is not a general accuracy claim. Evaluation metrics and robustness assessment
-remain P7–P8 work.
+it is not a general accuracy claim. The P7–P8 evaluation below measures these limitations explicitly.
+
+## Evaluation and robustness (P7–P8)
+
+With the virtual environment active, run from the repository root:
+
+```bash
+python eval/run_eval.py --pred examples/balance_sheet_after_correction_p1.csv --pred-json examples/balance_sheet_after_correction_p1.json --gt data/gt/page4.csv --gt-meta data/gt/page4_meta.json
+python eval/run_robustness.py
+```
+
+Both CLIs configure UTF-8 console output automatically. The evaluator accepts any
+prediction using the P6 flat CSV schema (`utf-8-sig`); JSON/meta inputs are optional
+and enable column-role/date checks. `--threshold` controls the default 0.5 ordered
+alignment threshold; `--out-dir` changes the report directory. Reports are
+[page4_report.md](eval/results/page4_report.md) and its adjacent JSON, with every
+metric numerator/denominator, mismatch, confusion matrix and accounting check.
+
+The public file API is:
+
+```python
+from parser.evaluation.report import evaluate_files, write_report
+from parser.evaluation.metrics import aggregate_reports
+
+report = evaluate_files(pred_csv, gt_csv, pred_json=pred_json, gt_meta=gt_meta)
+write_report(report, out_dir)
+combined = aggregate_reports([report, report])  # pooled counts + per-page means
+```
+
+Scoring reads files independently of parser internals. Order-preserving dynamic
+programming aligns rows using label/value similarity, including repeated labels.
+Missing GT rows count as wrong; extra predicted rows reduce row precision. Nil
+and integer zero are different. Empty metric denominators are undefined, not
+perfect. With one page the micro/macro averages coincide. `accounting_checks`
+accepts only `AccountRow` IDs, types, values and raw amounts: no labels or GT.
+Its replaceable tolerance defaults to the number of addends (at least one).
+
+The real page scores 1.0 on every GT metric (86/86 cells, 43/43 rows). Accounting
+has 7 exact and 13 within-tolerance checks, no failures, and two balance checks
+not applicable. Residuals range from -1 to +3 千円. All 20 evaluable checks fit
+the requested truncation interval, a diagnostic hypothesis that still needs
+human confirmation of the filing's policy.
+
+The robustness CLI reads the PDF once, perturbs RawPage geometry, then runs the
+full parser/export/file-evaluation pipeline. It retains all 20 seeds (0..19) for
+nine amplitudes on each axis: 360 runs, well under two minutes locally. It also
+runs six structural/geometry ablations and 3,817 exhaustive value faults. Results
+are committed in [robustness_report.md](eval/results/robustness_report.md) and its
+adjacent JSON. First measured degradation is at y-jitter 0.2 word heights and
+x-jitter 0.3; flattened indentation preserves values but damages parent structure.
+All 72 numeric cells participate in accounting checks, yet only 249/648 units-digit
+faults are detected because small changes can hide inside a many-addend tolerance.
+
+These are **development results on one page**, whose rules were designed after
+seeing it. They do not establish generalisation. The AI-drafted GT was verified
+by one human, who also reported an independent second review. Accounting pass
+rates must be read alongside not-evaluable counts: severe geometry damage can
+remove checks without producing failures. Exposed parser issues are documented
+for P9 review; they were not repaired during this phase.
+
+See [evaluation_design.md](notes/evaluation_design.md) for formulas, denominator
+rules, accounting derivation and experiment design, and
+[failure_analysis.md](notes/failure_analysis.md) for measured failures and untested
+expectations. Run all tests and lint with:
+
+```bash
+python -m pytest
+python -m ruff check src scripts tests eval
+```
 
 ## License
 

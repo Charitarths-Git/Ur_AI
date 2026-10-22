@@ -86,14 +86,42 @@ Orientation (repo state, test count before this prompt); the public API and the 
 6. [x] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
 7. [x] Document observed failure analysis, separated from untested expectations; commit section 7.
 8. [x] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
-9. [~] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
-10. [ ] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
+9. [x] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
+10. [~] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
 
 ## Files created or modified
 
-- workstamp.md — verbatim P7-P8 request, numbered plan and boundaries.
+- src/parser/evaluation/__init__.py — evaluator package.
+- src/parser/evaluation/data.py — independent CSV records and schema reader.
+- src/parser/evaluation/alignment.py — deterministic ordered dynamic programming.
+- src/parser/evaluation/metrics.py — GT metrics, mismatches and aggregation.
+- src/parser/evaluation/accounting.py — label-free checks and tolerance model.
+- src/parser/evaluation/report.py — file API and deterministic JSON/Markdown reports.
+- src/parser/evaluation/perturb.py — shared geometry and ablation helpers.
+- src/parser/evaluation/faults.py — exhaustive numeric fault experiments.
+- src/parser/evaluation/robustness.py — file-scored sweeps and ablations.
+- eval/run_eval.py; eval/run_robustness.py — UTF-8 command-line entry points.
+- eval/results/page4_report.json; eval/results/page4_report.md — real-page results.
+- eval/results/robustness_report.json; eval/results/robustness_report.md — full deterministic experiments.
+- tests/test_evaluation.py; tests/test_accounting.py; tests/test_perturbation.py — 52 new tests.
+- tests/test_rows.py; tests/test_export.py — reuse moved helpers, assertions preserved.
+- tests/test_inspection.py; tests/test_smoke.py — legacy import/format cleanup for full-tree ruff, assertions preserved.
+- notes/evaluation_design.md — formulas, accounting derivation, designs and limitations.
+- notes/failure_analysis.md — measured failures versus untested expectations.
+- README.md — API, commands and results; .gitattributes — report LF policy.
+- workstamp.md — verbatim request, plan, results, boundaries and handoff.
 
 ## Last action and result
+
+Full suite: 275 passed in 8.73s (baseline 223). Full-tree ruff check src scripts
+tests eval: All checks passed! Scoped formatting applied; no assertion weakened.
+19 protected-file hashes match baseline (all GT/raw/examples/original parser
+modules/dependency manifests); GT CSV still UTF-8 BOM. Verbatim request matches
+attachment exactly. Reports regenerated after evaluator fixes and artifact test passes.
+
+Section 9 documents every metric/denominator and accounting derivation, including
+the literal truncation interval's negative-only/zero edge cases. README includes
+public API and reproducible commands; report LF attributes added.
 
 52 new evaluator/accounting/perturbation tests pass in 2.76s. Tests exposed two
 new-evaluator issues: role presence was insufficient to score column assignment;
@@ -143,11 +171,16 @@ Existing Session 5 continues; no new session row and no interrupted work found.
 
 ## Known issues / open questions
 
-No new known issue yet. Pytest CLI fixtures previously needed unsandboxed temp access.
+Measured limitations: y row clustering breaks from tested 0.2H; x column/indent
+clustering from 0.3H; flat fallback loses five parent links. Accounting check
+disappearance and n-addend tolerance can mask errors. See failure_analysis.md.
+Open questions: human confirmation of filing truncation policy; negative-only
+edge cases in the requested diagnostic interval; held-out documents and ambiguous
+identical GT paths. Pytest fixtures need unsandboxed temp access in this environment.
 
 ## Next action
 
-Document every metric/denominator, alignment, tolerance derivation, experiments and limitations.
+Run full suite and ruff, verify protected bytes, then finalize P7-P8 and hand off to independent review (P9).
 
 ## Prompt history
 

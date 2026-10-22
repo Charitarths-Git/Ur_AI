@@ -8,6 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 
 from _console import configure_utf8  # noqa: E402
+
 from parser.evaluation.report import evaluate_files, write_report  # noqa: E402
 
 
@@ -21,7 +22,9 @@ def main():
     parser.add_argument("--out-dir", type=Path, default=ROOT / "eval/results")
     parser.add_argument("--threshold", type=float, default=0.5)
     args = parser.parse_args()
-    report = evaluate_files(args.pred, args.gt, args.pred_json, args.gt_meta, threshold=args.threshold)
+    report = evaluate_files(
+        args.pred, args.gt, args.pred_json, args.gt_meta, threshold=args.threshold
+    )
     for path in write_report(report, args.out_dir):
         print(f"Wrote {path}")
     print("GT cell accuracy:", report["metrics"]["cell_accuracy_all"])

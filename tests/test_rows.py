@@ -90,7 +90,6 @@ def signature(layout):
     )
 
 
-
 def test_synthetic_cells_labels_zones_and_evidence():
     page = synthetic_page()
     layout = reconstruct_page(page)

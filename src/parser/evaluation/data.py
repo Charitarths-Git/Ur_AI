@@ -43,8 +43,14 @@ def read_table(path: str | Path, *, ground_truth: bool = False) -> Table:
             raise ValueError(f"missing CSV fields: {sorted(required - set(fields))}")
         value_fields = [f for f in fields if f.endswith("_value") or f.startswith("value_")]
         columns = tuple(f.removesuffix("_value") for f in value_fields)
-        raw_fields = ["prev_raw" if c == "previous_year" else "curr_raw" if c == "current_year"
-                      else f"raw_{i + 1}" for i, c in enumerate(columns)]
+        raw_fields = [
+            "prev_raw"
+            if c == "previous_year"
+            else "curr_raw"
+            if c == "current_year"
+            else f"raw_{i + 1}"
+            for i, c in enumerate(columns)
+        ]
         if not set(raw_fields) <= set(fields):
             raise ValueError("missing raw value columns")
         records = list(reader)
@@ -79,12 +85,25 @@ def read_table(path: str | Path, *, ground_truth: bool = False) -> Table:
         except ValueError:
             level = None
             issues.append(f"row {ident}: invalid level")
-        rows.append(EvalRow(ident, record["label"], parent_id, record["parent"],
-                            record["parent_path"], level, record["row_type"], tuple(values),
-                            tuple(raws), tuple(valid)))
+        rows.append(
+            EvalRow(
+                ident,
+                record["label"],
+                parent_id,
+                record["parent"],
+                record["parent_path"],
+                level,
+                record["row_type"],
+                tuple(values),
+                tuple(raws),
+                tuple(valid),
+            )
+        )
     if not ground_truth and "parent_row_id" not in fields:
         issues.append("prediction lacks parent_row_id; nonroot parent links cannot be credited")
-        rows = [replace(r, parent_row_id="__missing_parent__") if r.parent_path else r for r in rows]
+        rows = [
+            replace(r, parent_row_id="__missing_parent__") if r.parent_path else r for r in rows
+        ]
     return Table(tuple(rows), columns, tuple(issues))
 
 

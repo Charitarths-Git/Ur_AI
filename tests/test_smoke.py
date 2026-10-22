@@ -4,8 +4,9 @@ from pathlib import Path
 
 import pymupdf
 
-
-PDF_PATH = Path(__file__).resolve().parents[1] / "data" / "raw" / "balance_sheet_after_correction.pdf"
+PDF_PATH = (
+    Path(__file__).resolve().parents[1] / "data" / "raw" / "balance_sheet_after_correction.pdf"
+)
 
 
 def test_pdf_exists():

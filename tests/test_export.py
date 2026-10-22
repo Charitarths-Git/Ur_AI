@@ -64,7 +64,6 @@ def comparison_counts(page, gt):
     return dict(counts)
 
 
-
 def test_real_page_all_fields_and_metadata_match_gt(parsed):
     gt = ground_truth()
     assert len(parsed.rows) == len(gt)

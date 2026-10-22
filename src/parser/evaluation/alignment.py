@@ -68,5 +68,10 @@ def align_rows(prediction: Table, gt: Table, threshold: float = 0.5) -> Alignmen
         else:
             j += 1
     used_p, used_g = {i for i, _ in pairs}, {j for _, j in pairs}
-    return Alignment(tuple(pairs), tuple(i for i in range(n) if i not in used_p),
-                     tuple(j for j in range(m) if j not in used_g), tuple(matched_sims), threshold)
+    return Alignment(
+        tuple(pairs),
+        tuple(i for i in range(n) if i not in used_p),
+        tuple(j for j in range(m) if j not in used_g),
+        tuple(matched_sims),
+        threshold,
+    )
