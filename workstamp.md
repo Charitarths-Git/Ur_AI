@@ -80,12 +80,12 @@ Goal: understand exactly what the text layer of data/raw/balance_sheet_after_cor
 ## Plan for this prompt
 
 1. [x] Create workstamp.md with P1 IN PROGRESS and verbatim prompt
-2. [~] Add "Agent working rules" to PROJECT_BRIEF.md
-3. [ ] Align phase numbering in PROJECT_BRIEF.md
-4. [ ] Align phase numbering in README.md
-5. [ ] Generate requirements.lock
-6. [ ] Commit Part A: "chore: add session handoff protocol and align phase numbering"
-7. [ ] Write scripts/inspect_pdf.py
+2. [x] Add "Agent working rules" to PROJECT_BRIEF.md
+3. [x] Align phase numbering in PROJECT_BRIEF.md
+4. [x] Align phase numbering in README.md
+5. [x] Generate requirements.lock
+6. [x] Commit Part A: "chore: add session handoff protocol and align phase numbering"
+7. [~] Write scripts/inspect_pdf.py
 8. [ ] Run inspect_pdf.py and generate output files
 9. [ ] Render page to PNG at data/derived/page4_200dpi.png
 10. [ ] Write notes/inspection.md answering Q1–Q9
@@ -97,15 +97,19 @@ Goal: understand exactly what the text layer of data/raw/balance_sheet_after_cor
 ## Files created or modified
 
 - workstamp.md — created, updated for session 3 resume
+- PROJECT_BRIEF.md — added Agent working rules, aligned P0–P13 phases
+- README.md — aligned phases, added requirements.lock and inspect_pdf docs
+- requirements.lock — created via pip freeze
 
 ## Last action and result
 
-Resume check: git log shows 1 commit (8c34c1d), tests 3/3 pass, no Part A/B artifacts exist yet. workstamp.md is the only untracked file.
+Committed Part A as 2a60dbd: "chore: add session handoff protocol and align phase numbering". Success.
 
 ## Decisions and assumptions
 
 - P0 was done before the handoff protocol existed; backfilled in prompt history.
 - Session 2 was cut off by usage limit right after creating workstamp.md; no work was lost.
+- Removed self-referencing `-e git+...` line from requirements.lock (won't resolve on fresh clone).
 
 ## Known issues / open questions
 
@@ -113,7 +117,7 @@ Resume check: git log shows 1 commit (8c34c1d), tests 3/3 pass, no Part A/B arti
 
 ## Next action
 
-Add "Agent working rules" section to PROJECT_BRIEF.md (step 2).
+Write scripts/inspect_pdf.py (step 7).
 
 ## Prompt history
 
