@@ -217,3 +217,24 @@ was then added. Final full-suite and ruff results are recorded below and in work
 - An indentation forest can have multiple roots. Partial fallback may attach a
   later contra/net to an older item across sections; tree traversal can then differ
   from flat reading order. Row IDs retain reading order; no corrective guessing is done.
+
+## Final validation
+
+```text
+python -m pytest
+collected 223 items
+test_export.py: 13 passed
+test_hierarchy.py: 30 passed
+test_metadata.py: 14 passed
+Existing P0–P4 tests: 166 passed
+223 passed in 7.88s
+
+python -m ruff check src/parser scripts tests/test_hierarchy.py tests/test_metadata.py tests/test_export.py
+All checks passed!
+```
+
+All GT/raw files have identical SHA-256 before and after work/tests. The original
+PDF, verified CSV bytes/BOM, P3/P4 production code and dependency manifests are
+unchanged. The verbatim user request is preserved. Generated examples are tested
+against fresh in-memory serialization and a fresh CLI generation. No P7/P8 work
+has started. The configured Git upstream is missing; no remote operation occurred.

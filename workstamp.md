@@ -7,7 +7,7 @@
 | Prompt | P5-P6 |
 | State | IN PROGRESS |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T22:34:55Z |
+| Updated | 2026-10-22T22:51:02Z |
 
 ## Current prompt (verbatim)
 
@@ -104,65 +104,64 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 
 ## Last action and result
 
-New files formatted and scoped ruff cleanup passed. Preparing full suite then
-ruff on package/scripts/new tests. Pytest needs unsandboxed temp-directory access
-for its CLI fixture; no test assertions or fixtures were weakened.
+Orientation: clean at 9012bae; baseline 166 passed in 6.73s. Existing Session 5.
+Final full suite: 223 passed in 7.88s (57 new tests). Ruff package/scripts/new tests:
+All checks passed! No assertions weakened. Pytest temporary-dir setup needed
+unsandboxed execution; the unchanged rerun succeeded. git diff --check passes.
 
-Section 8 docs complete: all pattern validation limits, algorithms, evidence
-counts, measured 38/43-parent ablation, deterministic schemas and limitations.
-README updated with full pipeline/CLI/API and samples. Test commit 8cc4dbf.
+GT: exact label, parent, parent_row_id, parent_path, level, row_type, both values
+and both raw fields each match 43/43. Metadata unit/correction/printed page/dates
+match; hierarchy_source=indentation, real warning list empty. Four ruled headers
+are accepted. Report includes independent evidence counts and pattern validity.
+Six transformations give byte-identical CSV and JSON; committed examples equal
+fresh in-memory and CLI generation. CLI passes with encoding env removed.
 
-Targeted 56 tests passed in 3.41s outside sandbox after pytest temporary-directory
-setup was blocked there (55 passed before setup error). No assertions weakened.
-Added one metadata edge-case regression: date-only headers are not titles.
-GT all 10 row fields match 43/43. Real warnings empty. Six CSV/JSON transform
-cases pass byte-for-byte. Flat ablation measurement is 38/43 correct parent IDs: three subsection headers,
-fixed-assets subtotal and allowance contra row are wrong; types/values unchanged.
-A provisional 39/43 note was corrected to the actual diagnostic output.
-Section 6 commit d466446.
+Flat-indentation ablation: fallback with warning; types/values unchanged;
+38/43 parent IDs agree (diagnostic only, no score asserted). Wrong: allowance
+contra row, three subsection headers, fixed-assets subtotal. A provisional
+39/43 handoff note was corrected to measured 38/43 before completion.
 
-Section 6 pipeline/serializers/CLI smoke run succeeded: generated both required
-examples, 43 rows with expected types, indentation source, zero warnings.
-Stable LF example attributes added for byte-identical fresh-clone comparisons.
-Hierarchy commit 4cb6d06; metadata commit eeded2a.
+All GT/raw hashes unchanged, including CSV
+c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
+P3/P4 production code and dependency manifests unchanged. Verbatim prompt exact.
 
-Metadata smoke run: two title lines; marker 訂正後; unit 千円, multiplier1000;
-printed page4; chronological previous/current roles; unit lines absent from
-metadata headings. No metadata warnings. No scaling of values.
-
-Hierarchy smoke run: 43 rows, one tree root, indentation source, no warnings.
-Gross item children are its contra and net rows. Levels count ancestor IDs.
-
-Classification smoke run: header=6,line_item=22,contra=5,net=4,subtotal=5,total=1;
-warnings empty. Evidence computed independently for every row. RuleSet commit 93ecd54; classification commit 712c2b1.
-
-Section 2 RuleSet smoke checks passed: normalized matching and immutable unit map.
-Separate fixes: d28504f Q5; e00ca2f unit-line cleanup helper/regression.
-
-Unit-heading cleanup helper added in metadata.py; regression test passes (1).
-It takes a caller-supplied pattern; RuleSet will supply the production pattern.
-P4 layout/API and tests are unchanged. Q5 fix commit recorded in Git history.
-
-Baseline 166 passed in 6.73s; protected data fingerprinted. Corrected Q5 and
-summary: five body indent steps including root, with P4 centre evidence.
-
-Read brief and handoff; tree clean at 9012bae; P4 DONE, previous full suite 166 passed.
-Existing Session 5 continues. No repository AGENTS.md found; no interrupted phase.
+Commits: d28504f Q5 fix; e00ca2f unit-heading fix; 93ecd54 RuleSet; 712c2b1 types;
+4cb6d06 hierarchy; eeded2a metadata; d466446 export/CLI/examples;
+8cc4dbf tests; 7f9eb82 docs/report/style. Final P5-P6 commit next.
 
 ## Decisions and assumptions
 
-- GT and raw data read-only. No evaluation metrics or OCR/VLM implementation.
-- Language-specific strings/patterns live only in RuleSet, using P3 label_key.
-- Address unit-heading contamination in new metadata, leaving pure P4 unchanged.
-- Continue Session 5; no new session row. Commands use PYTHONIOENCODING=utf-8.
+- Frozen RuleSet owns all language-specific patterns; matches use label_key and
+  printed output labels are unchanged. Only supplied printed page 4 has real-document
+  validation; liability/equity/self-stock/other-unit patterns are untested heuristics.
+- Classification order is structural no-cells, total, net, subtotal, contra, then
+  all-negative fallback. Numeric sign evidence excludes nil/invalid cells; negative
+  zero counts negative. Contra warning requires no negative numeric cell at all.
+- Strictly smaller indent stack gives parents; levels count ancestors. Insufficient
+  indentation always warns and uses the deliberately partial rule fallback.
+- P4 raw headings remain unchanged; metadata removes whole unit lines. Titles are
+  remaining header text, dates/known markers excluded. Missing metadata stays None.
+- Two distinct dates set chronological roles; all other cases use generic roles with
+  warning. Values remain printed units; unit multiplier is metadata only.
+- ParsedPage is frozen; pure stages and byte serializers sit between explicit PDF
+  backend and output writers. IDs are one-based body order; tree is an ordered forest.
+- CSV BOM/LF and JSON Unicode/indent=2/LF are deterministic. Source stores basename,
+  one-based PDF page/backend only; no timestamps/absolute paths/geometry in exports.
+- .gitattributes enforces LF only for generated examples; GT attributes untouched.
+- No evaluation metrics module or OCR/VLM implementation. No P7/P8 work started.
 
 ## Known issues / open questions
 
-Q5 indent-count statement and unit-line contamination will be fixed separately.
+No unresolved failures or open questions. Known limitations are documented in
+notes/hierarchy_and_export.md: flat hierarchy, unknown header nesting, missing
+subtotal keywords, label-less rows, page-spanning/multiple tables, non-Japanese
+rules and scanned pages, plus inherited P4 geometry limits. Fallback can attach
+contra/net across older contexts, changing tree traversal vs flat order. The
+configured upstream origin/main is gone; no remote work requested.
 
 ## Next action
 
-Format new files, run full suite then ruff, verify protected data and examples, finalize.
+Create final P5-P6 commit, then record its hash and DONE status for P7-P8 evaluation framework.
 
 ## Prompt history
 
