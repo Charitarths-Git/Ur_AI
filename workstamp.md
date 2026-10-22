@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P4 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T22:23:24Z |
+| Updated | 2026-10-22T22:23:56Z |
 
 ## Current prompt (verbatim)
 
@@ -62,7 +62,7 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 4. [x] Add dump_rows CLI and UTF-8 startup to existing scripts.
 5. [x] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
 6. [x] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
-7. [~] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
+7. [x] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
 
 ## Files created or modified
 
@@ -99,7 +99,9 @@ P3 normalize.py and dependency manifests unchanged. Verbatim P4 prompt exact.
 
 Progress commits: 5785b3f plan/baseline; d34449f backend/types; 85698fe pure logic;
 265e765 CLI/encoding/rule span overlap; bd9022b tests; 1d24b2a docs/report/style.
-Final P4 commit next.
+Final P4 commit succeeded:
+2582b5d96fa7950b23c1dd5a9ce2c9fda181b4dc — P4: row reconstruction and indent clustering.
+This metadata-only follow-up records the hash and DONE status, following P3.
 
 ## Decisions and assumptions
 
@@ -130,7 +132,7 @@ Configured upstream origin/main is gone; no remote operations requested.
 
 ## Next action
 
-Create final P4 commit, then record its hash and DONE handoff for P5 hierarchy and parent paths.
+P5 hierarchy and parent paths
 
 ## Prompt history
 
@@ -140,6 +142,7 @@ Create final P4 commit, then record its hash and DONE handoff for P5 hierarchy a
 | P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
 | P2 | Image-derived GT, 43 rows; now VERIFIED by human with no corrections; 12 tests pass | 0be2cf6 (initial GT); verification: 9805d79 |
 | P3 | Pure normalization utilities, 129 new tests; full suite 141 passed; GT unchanged | b41840c |
+| P4 | Pure relative row/column/indent reconstruction, GT matched; 166 tests pass | 2582b5d |
 
 ## Sessions
 
