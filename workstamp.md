@@ -80,8 +80,8 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 2. [x] Implement immutable replaceable RuleSet; commit section 2.
 3. [x] Implement pure row classification, evidence and typed warnings; commit section 3.
 4. [x] Implement indent-stack tree and partial flat fallback; commit section 4.
-5. [~] Extract metadata and date-based column roles, with clean headings; commit section 5.
-6. [ ] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
+5. [x] Extract metadata and date-based column roles, with clean headings; commit section 5.
+6. [~] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
 7. [ ] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
 8. [ ] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
 9. [ ] Full suite then ruff; integrity checks; final commit and DONE handoff.
@@ -91,6 +91,10 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 - workstamp.md — P5-P6 verbatim prompt, plan and orientation.
 
 ## Last action and result
+
+Metadata smoke run: two title lines; marker 訂正後; unit 千円, multiplier1000;
+printed page4; chronological previous/current roles; unit lines absent from
+metadata headings. No metadata warnings. No scaling of values.
 
 Hierarchy smoke run: 43 rows, one tree root, indentation source, no warnings.
 Gross item children are its contra and net rows. Levels count ancestor IDs.
@@ -124,7 +128,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Extract page metadata and date-based column roles with cleaned headings.
+Implement pure parsed-page assembly, deterministic exports, CLI and examples.
 
 ## Prompt history
 
