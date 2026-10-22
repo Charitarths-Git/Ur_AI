@@ -61,18 +61,29 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 1. [x] Orient: read brief/handoff, clean git status, log, baseline tests; add session.
 2. [x] Verify P1 Q6 from notes only; correct misleading count in separate fix(P1) commit.
 3. [x] Document exact ground-truth conventions.
-4. [~] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
-5. [ ] Add human checklist, informational self-check, one schema-only pytest test.
+4. [x] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
+5. [~] Add human checklist, informational self-check, one schema-only pytest test.
 6. [ ] After CSV commit, implement read-only text-layer cross-check and report disagreements.
 7. [ ] Update README, run full suite, record output and finalize draft handoff/commit.
 
 ## Files created or modified
+
+- data/gt/README.md — prescribed conventions and provenance.
+- data/gt/page4.csv — 43 image-transcribed DRAFT body rows, UTF-8 BOM.
+- data/gt/page4_meta.json — image-transcribed page metadata, human verification false.
+- scripts/render_gt_crops.py and data/derived/crops/ — image-only visual review aids.
 
 - notes/inspection.md — notes-only Q6 and summary correction, with coordinate evidence.
 
 - workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
 
 ## Last action and result
+
+Image transcription finished: 43 rows, header=6, line_item=22, contra=5, net=4,
+subtotal=5, total=1. CSV written as UTF-8 with BOM; metadata is DRAFT/false.
+Read full page plus heading and four overlapping body crops at 300 DPI. No
+uncertain numeric/label cells identified. No text-layer access during transcription.
+Conventions/crop renderer commit: ff2d8e1. CSV must now be committed before cross-check.
 
 Conventions copied exactly into data/gt/README.md. Viewed the entire 200 DPI
 page; preparing overlapping 300 DPI image-only crops for careful digit review.
@@ -100,7 +111,7 @@ by verified commit history. No implementation inconsistencies found.
 
 ## Next action
 
-Render/view overlapping crops, transcribe all printed body rows, commit CSV.
+Commit completed image-derived CSV, then add verification aids.
 
 ## Prompt history
 

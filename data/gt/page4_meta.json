@@ -1,0 +1,22 @@
+{
+  "page_number": 4,
+  "pdf_page_index": 0,
+  "correction_marker": "訂正後",
+  "title": "（１）連結貸借対照表",
+  "section_heading": "３．連結財務諸表及び主な注記",
+  "unit": "千円",
+  "unit_heading": "（単位：千円）",
+  "period_headings": {
+    "previous": "前連結会計年度",
+    "current": "当連結会計年度"
+  },
+  "period_end_dates": {
+    "previous": "(2025年３月31日)",
+    "current": "(2026年３月31日)"
+  },
+  "footer": "- 4 -",
+  "verified_by_human": false,
+  "status": "DRAFT — pending human verification",
+  "transcription_source": "data/derived/page4_200dpi.png and data/derived/crops/*_300dpi.png",
+  "uncertain_cells": []
+}
