@@ -131,7 +131,7 @@ def _columns(centres, row_words, header_end, token_rows, thresholds):
     return tuple(columns)
 
 
-def _has_rule(page, previous_bottom, row_top, centres, thresholds):
+def _has_rule(page, previous_bottom, row_top, value_spans, thresholds):
     if previous_bottom is None:
         return False
     slack = thresholds.rule_vertical_tolerance
@@ -140,8 +140,9 @@ def _has_rule(page, previous_bottom, row_top, centres, thresholds):
                 and rule.x1 - rule.x0 >= thresholds.rule_min_width
                 and rule.y0 >= previous_bottom - slack
                 and rule.y1 <= row_top + slack
-                and any(rule.x0 - thresholds.column_tolerance <= x
-                        <= rule.x1 + thresholds.column_tolerance for x in centres)):
+                and any(rule.x1 >= left - thresholds.column_tolerance
+                        and rule.x0 <= right + thresholds.column_tolerance
+                        for left, right in value_spans)):
             return True
     return False
 
@@ -173,6 +174,11 @@ def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -
     if not body_cells:
         header_end = last_body = len(groups) - 1
     columns = _columns(centres, row_words, header_end, token_rows, thresholds)
+    value_spans = []
+    for centre in centres:
+        starts = [t[0].x0 for tokens in token_rows[header_end + 1:last_body + 1] for t in tokens
+                  if abs(t[-1].x1 - centre) <= thresholds.column_tolerance]
+        value_spans.append((min(starts, default=centre), centre))
 
     rows = []
     for i, row in enumerate(row_words):
@@ -183,7 +189,7 @@ def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -
         previous_bottom = rows[-1].y_bottom if rows else None
         rows.append(Row(i, zone, top, bottom, _join_words(label_words, thresholds.label_space_gap),
                         label_words[0].x0 if label_words else None, None, cells,
-                        _has_rule(raw_page, previous_bottom, top, centres, thresholds), row))
+                        _has_rule(raw_page, previous_bottom, top, value_spans, thresholds), row))
 
     labels = [r for r in rows if r.zone == "body" and r.label_x0 is not None]
     indent_groups = _clusters(labels, lambda r: r.label_x0, thresholds.indent_tolerance)

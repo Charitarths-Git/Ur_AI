@@ -9,6 +9,8 @@ import hashlib
 import re
 from pathlib import Path
 
+from _console import configure_utf8
+
 import pymupdf
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,4 +76,5 @@ def main():
 
 
 if __name__ == "__main__":
+    configure_utf8()
     main()

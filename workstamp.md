@@ -59,8 +59,8 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 1. [x] Orient: baseline suite, protected-data fingerprints, inspect existing code and diagnostic formats.
 2. [x] Define frozen layout structures/config and PDF backend interface; implement extraction adapter.
 3. [x] Implement pure relative-geometry reconstruction; inspect actual layout and resolve issues.
-4. [~] Add dump_rows CLI and UTF-8 startup to existing scripts.
-5. [ ] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
+4. [x] Add dump_rows CLI and UTF-8 startup to existing scripts.
+5. [~] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
 6. [ ] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
 7. [ ] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
 
@@ -69,6 +69,11 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 - workstamp.md — P4 prompt and numbered plan.
 
 ## Last action and result
+
+CLI smoke checks pass for dump_rows.py and inspect_pdf.py with encoding env
+removed and -X utf8=0. Shared console startup applied to all existing CLIs.
+Rule overlap refined to observed value spans (not just their right-edge anchors).
+Pure-reconstruction commit: 85698fe.
 
 Pure reconstruction smoke run: 6 header / 43 body / 1 footer rows, 2 columns,
 5 visual indent centres, dates (2025,3,31)/(2026,3,31). No GT used in algorithm.
@@ -97,7 +102,7 @@ Configured upstream origin/main is gone; no remote work requested.
 
 ## Next action
 
-Add dump_rows CLI and UTF-8 console startup to all CLI scripts.
+Implement synthetic/invariance/GT/backend/subprocess tests, then investigate failures.
 
 ## Prompt history
 

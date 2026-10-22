@@ -11,6 +11,8 @@ import re
 import shutil
 import sys
 
+from _console import configure_utf8
+
 DEFAULT_LOG_PATH = pathlib.Path(
     r"C:\Users\gagan\.gemini\antigravity-ide\brain\04dc995e-54b1-483e-8d66-964372b8491e\.system_generated\logs\transcript_full.jsonl"
 )
@@ -99,4 +101,5 @@ def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OU
 
 
 if __name__ == "__main__":
+    configure_utf8()
     export()

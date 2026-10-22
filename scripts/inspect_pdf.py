@@ -23,6 +23,8 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
+from _console import configure_utf8
+
 import pdfplumber
 import pymupdf
 
@@ -408,6 +410,7 @@ def run_inspection(pdf_path: str | Path) -> dict:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    configure_utf8()
     if len(sys.argv) < 2:
         print(f"Usage: python {sys.argv[0]} <pdf_path>")
         sys.exit(1)
