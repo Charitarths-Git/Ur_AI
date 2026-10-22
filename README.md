@@ -2,8 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P3 — normalization utilities and tests complete. P2 ground truth is **VERIFIED**.
-> Next phase: P4 row reconstruction.
+> **Status**: P4 — row reconstruction and visual indent clustering complete. GT is **VERIFIED**.
+> Next phase: P5 hierarchy and parent paths.
 
 ## Quick start
 
@@ -34,10 +34,15 @@ pytest
 ├── src/
 │   └── parser/            # Main Python package
 │       ├── __init__.py
-│       └── normalize.py   # Pure amount, label-matching and period helpers (P3)
+│       ├── normalize.py   # Pure amount, label-matching and period helpers (P3)
+│       ├── layout_types.py # Frozen raw/layout structures and relative thresholds (P4)
+│       ├── pdf_backend.py # Replaceable PDF reader; package's only PyMuPDF import (P4)
+│       └── rows.py        # Pure visual reconstruction; no hierarchy or semantic roles (P4)
 ├── tests/                 # Pytest test suite
 ├── scripts/               # CLI entry points and utilities
-│   └── inspect_pdf.py     # PDF diagnostic tool (P1)
+│   ├── inspect_pdf.py     # PDF diagnostic tool (P1)
+│   ├── dump_rows.py       # Text diagnostic for rows, columns and layout evidence (P4)
+│   └── _console.py        # UTF-8 stdout/stderr startup shared by CLI scripts
 ├── data/
 │   ├── raw/               # Original PDFs (tracked in git)
 │   ├── gt/                # VERIFIED image-transcribed CSV, metadata and conventions (P2)
@@ -59,7 +64,7 @@ pytest
 | P1 — Inspect the PDF | Diagnostic extraction; understand text layer and layout ✅ |
 | P2 — Ground truth | Image-derived GT verified by human, no corrections ✅ |
 | P3 — Normalization | Pure amount, label-matching and period helpers with tests ✅ |
-| P4 — Row reconstruction | Cluster words into rows, assign columns |
+| P4 — Row reconstruction | Relative row/column reconstruction, visual indent steps and rule evidence ✅ |
 | P5 — Hierarchy inference | Parent-path assignment from indentation + rules |
 | P6 — CSV and JSON export | Generate flat CSV and hierarchical JSON |
 | P7 — Evaluation metrics | Cell accuracy, structural accuracy, accounting checks |
@@ -175,6 +180,48 @@ python -m ruff check src/parser/normalize.py tests/test_normalize.py
 The GT round-trip test reads the verified CSV with `utf-8-sig`, compares every
 previous/current raw cell with its stored value, and checks nil/header statuses.
 It neither writes GT nor accesses the PDF.
+
+## Visual row reconstruction (P4)
+
+```bash
+python scripts/dump_rows.py data/raw/balance_sheet_after_correction.pdf
+python scripts/dump_rows.py data/raw/balance_sheet_after_correction.pdf --page 1
+```
+
+`--page` is the one-based PDF page index (the input file's first page is printed
+as page 4). The command prints every row's zone, y bounds, raw label and cells,
+visual indent step and rule flag, then column/date and threshold evidence.
+All CLI scripts configure stdout/stderr as UTF-8 automatically; encoding
+environment variables are no longer required to print Japanese text.
+
+`parser.pdf_backend.read_pdf_page(path, page_number=1, config=LayoutConfig())`
+returns a backend-neutral `RawPage`. `PageBackend` is the interface for future
+OCR/VLM readers; only the default backend is implemented.
+`parser.rows.reconstruct_page(raw_page, config=LayoutConfig()) -> PageLayout`
+is pure and returns frozen rows, columns, cells, indent centres and thresholds.
+`parser.layout_types` defines these structures and the configurable relative
+thresholds. Pass the same config to the reader and reconstruction when changing
+rule limits. No fixed page coordinates or table row counts are used.
+
+Columns come from repeated right edges across distinct rows, not token meaning.
+Aligned invalid amounts remain cells. Labels preserve extracted text and use
+geometric spaces; indent steps are raw visual clusters. Header/footer zones and
+horizontal rules are structural evidence. Parent paths, semantic levels and row
+types wait for P5; this phase does not export CSV/JSON or calculate evaluation
+metrics. The P3 normalization module is unchanged.
+
+See [notes/row_reconstruction.md](notes/row_reconstruction.md) for the algorithm,
+all threshold defaults and actual page values, GT comparison, informational
+cross-tabs, transformation tests and limitations. In particular, wrapped labels,
+page-spanning/multiple tables, grouped headings and label-only boundary rows
+need further work. Rotated pages are rejected; scanned text requires a future
+backend.
+
+```bash
+python -m pytest tests/test_rows.py
+python -m pytest
+python -m ruff check src/parser/layout_types.py src/parser/pdf_backend.py src/parser/rows.py scripts tests/test_rows.py
+```
 
 ## License
 

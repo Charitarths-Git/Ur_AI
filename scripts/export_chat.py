@@ -44,13 +44,18 @@ def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OU
 
     # 2. Parse and format Markdown
     md_dest = out_dir / "chat_log.md"
-    with open(log_path, "r", encoding="utf-8") as f_in, open(md_dest, "w", encoding="utf-8") as f_out:
+    with (
+        open(log_path, "r", encoding="utf-8") as f_in,
+        open(md_dest, "w", encoding="utf-8") as f_out,
+    ):
         f_out.write("# Ur AI Internship Project — AI Interaction Log\n\n")
         f_out.write("> **Source:** Antigravity IDE session logs (`transcript_full.jsonl`)\n")
-        f_out.write("> **Task:** Document Intelligence & VLM R&D take-home (Japanese Balance Sheet PDF parsing)\n\n")
+        f_out.write(
+            "> **Task:** Document Intelligence & VLM R&D take-home "
+            "(Japanese Balance Sheet PDF parsing)\n\n"
+        )
         f_out.write("---\n\n")
 
-        step_num = 0
         current_user_step = 0
 
         for line in f_in:
@@ -63,7 +68,6 @@ def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OU
                 continue
 
             stype = item.get("type")
-            source = item.get("source")
             created_at = item.get("created_at", "")
 
             if stype == "USER_INPUT":

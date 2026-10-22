@@ -7,8 +7,16 @@ from _console import configure_utf8
 
 ROOT = Path(__file__).resolve().parents[1]
 COLUMNS = [
-    "row_id", "label", "parent", "parent_path", "level", "row_type",
-    "previous_year_value", "current_year_value", "prev_raw", "curr_raw",
+    "row_id",
+    "label",
+    "parent",
+    "parent_path",
+    "level",
+    "row_type",
+    "previous_year_value",
+    "current_year_value",
+    "prev_raw",
+    "curr_raw",
 ]
 ROW_TYPES = {"header", "line_item", "contra", "net", "subtotal", "total"}
 
@@ -39,8 +47,10 @@ def load_and_validate(path):
             raise ValueError(f"{ident}: immediate parent inconsistent with path")
         if ancestors and ancestors not in seen_paths:
             raise ValueError(f"{ident}: ancestor path has not appeared before this row")
-        for value_col, raw_col in [("previous_year_value", "prev_raw"),
-                                   ("current_year_value", "curr_raw")]:
+        for value_col, raw_col in [
+            ("previous_year_value", "prev_raw"),
+            ("current_year_value", "curr_raw"),
+        ]:
             value, raw = row[value_col], row[raw_col]
             if row["row_type"] == "header":
                 if value or raw:
@@ -62,16 +72,18 @@ def components_for(target, rows):
     target_path = path_parts(target)
     if target["row_type"] == "net":
         gross = next(r for r in rows if path_parts(r) + (r["label"],) == target_path)
-        return [gross] + [r for r in rows
-                          if path_parts(r) == target_path and r["row_type"] == "contra"]
+        return [gross] + [
+            r for r in rows if path_parts(r) == target_path and r["row_type"] == "contra"
+        ]
     components = []
     for row in rows:
         if path_parts(row) != target_path or row["row_type"] in {"subtotal", "total"}:
             continue
         child_path = target_path + (row["label"],)
         if row["row_type"] == "header":
-            components.extend(r for r in rows
-                              if path_parts(r) == child_path and r["row_type"] == "subtotal")
+            components.extend(
+                r for r in rows if path_parts(r) == child_path and r["row_type"] == "subtotal"
+            )
         elif row["row_type"] == "line_item":
             nets = [r for r in rows if path_parts(r) == child_path and r["row_type"] == "net"]
             components.extend(nets or [row])
@@ -96,11 +108,18 @@ def main():
             known_sum = sum(int(r[col]) for r in components if r[col] != "")
             printed = int(row[col])
             results.append(f"{known_sum} / {printed} / {known_sum - printed:+d}")
-        print(f'{row["row_id"]} | {row["label"]} | ' + " | ".join(results))
-        nulls = [f'{r["row_id"]}:{col}' for r in components
-                 for col in ["previous_year_value", "current_year_value"] if r[col] == ""]
-        print("  components=" + ",".join(r["row_id"] for r in components)
-              + ("; null omitted=" + ",".join(nulls) if nulls else ""))
+        print(f"{row['row_id']} | {row['label']} | " + " | ".join(results))
+        nulls = [
+            f"{r['row_id']}:{col}"
+            for r in components
+            for col in ["previous_year_value", "current_year_value"]
+            if r[col] == ""
+        ]
+        print(
+            "  components="
+            + ",".join(r["row_id"] for r in components)
+            + ("; null omitted=" + ",".join(nulls) if nulls else "")
+        )
 
 
 if __name__ == "__main__":

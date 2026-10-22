@@ -61,14 +61,33 @@ Orientation (repo state, test count before P4); the public API; the thresholds u
 3. [x] Implement pure relative-geometry reconstruction; inspect actual layout and resolve issues.
 4. [x] Add dump_rows CLI and UTF-8 startup to existing scripts.
 5. [x] Add synthetic, invariance, GT integration and no-encoding subprocess tests; investigate failures.
-6. [~] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
-7. [ ] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
+6. [x] Document algorithm/thresholds/observations/cross-tabs/limitations and README usage.
+7. [~] Run full suite then ruff, verify protected data unchanged, finalize P4 commit and handoff.
 
 ## Files created or modified
 
-- workstamp.md — P4 prompt and numbered plan.
+- src/parser/layout_types.py — frozen backend-neutral records, relative config and actual thresholds.
+- src/parser/pdf_backend.py — PageBackend protocol and PyMuPDF adapter for words/thin rules.
+- src/parser/rows.py — pure rows/columns/zones/indent/rule reconstruction.
+- scripts/dump_rows.py — one-based page CLI, text diagnostics only.
+- scripts/_console.py — shared UTF-8 stdout/stderr startup.
+- scripts/inspect_pdf.py, gt_selfcheck.py, gt_crosscheck.py, render_gt_crops.py,
+  export_chat.py — UTF-8 startup and lint/format cleanup; no diagnostic behavior changes.
+- tests/test_rows.py — 25 synthetic, invariance, integration and CLI tests.
+- notes/row_reconstruction.md — algorithm, thresholds, real-page evidence, GT cross-tabs and limitations.
+- README.md — P4 modules/API/CLI and P5 next phase.
+- workstamp.md — P4 prompt, plan, progress and completion evidence.
 
 ## Last action and result
+
+Formatting/import cleanup completed for new/modified Python files; removed two
+preexisting unused export_chat locals and split one long string without altering
+its output. P3 normalize.py remains unchanged. Full suite then ruff next.
+
+Documentation complete: algorithm/defaults/actual thresholds, 43/43 exact labels,
+0 labels with internal spaces, full informational cross-tabs and limitations.
+README documents API/CLI/backend and relative configuration. Test commit bd9022b.
+Preparing style cleanup before final full-suite/lint validation.
 
 P4 targeted suite: 25 passed in 6.19s. Includes 12 synthetic/real invariance
 cases (shuffle, translation, two scales, combined transform, bounded jitter),
@@ -107,7 +126,7 @@ Configured upstream origin/main is gone; no remote work requested.
 
 ## Next action
 
-Write algorithm/threshold/observation/cross-tab/limitation report and README updates.
+Format/lint changed Python files, run full suite then ruff, verify protected hashes.
 
 ## Prompt history
 

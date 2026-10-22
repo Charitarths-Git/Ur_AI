@@ -23,10 +23,9 @@ import sys
 from collections import defaultdict
 from pathlib import Path
 
-from _console import configure_utf8
-
 import pdfplumber
 import pymupdf
+from _console import configure_utf8
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -67,10 +66,12 @@ def extract_words_pymupdf(page: pymupdf.Page) -> list[dict]:
         for l_idx, line in enumerate(block["lines"]):
             spans = []
             for span in line["spans"]:
-                spans.append({
-                    "font": span.get("font", ""),
-                    "size": round(span.get("size", 0), 2),
-                })
+                spans.append(
+                    {
+                        "font": span.get("font", ""),
+                        "size": round(span.get("size", 0), 2),
+                    }
+                )
             font_lookup[(b_idx, l_idx)] = spans
 
     result = []
@@ -82,12 +83,17 @@ def extract_words_pymupdf(page: pymupdf.Page) -> list[dict]:
         spans = font_lookup.get((block_no, line_no), [])
         font_name = spans[0]["font"] if spans else ""
         font_size = spans[0]["size"] if spans else 0
-        result.append({
-            "text": text,
-            "x0": x0, "y0": y0, "x1": x1, "y1": y1,
-            "font": font_name,
-            "size": font_size,
-        })
+        result.append(
+            {
+                "text": text,
+                "x0": x0,
+                "y0": y0,
+                "x1": x1,
+                "y1": y1,
+                "font": font_name,
+                "size": font_size,
+            }
+        )
     return result
 
 
@@ -96,13 +102,15 @@ def extract_words_pdfplumber(page: pdfplumber.pdf.Page) -> list[dict]:
     words = page.extract_words(keep_blank_chars=True, use_text_flow=False)
     result = []
     for w in words:
-        result.append({
-            "text": w["text"],
-            "x0": round(float(w["x0"]), 2),
-            "y0": round(float(w["top"]), 2),  # pdfplumber uses 'top'
-            "x1": round(float(w["x1"]), 2),
-            "y1": round(float(w["bottom"]), 2),
-        })
+        result.append(
+            {
+                "text": w["text"],
+                "x0": round(float(w["x0"]), 2),
+                "y0": round(float(w["top"]), 2),  # pdfplumber uses 'top'
+                "x1": round(float(w["x1"]), 2),
+                "y1": round(float(w["bottom"]), 2),
+            }
+        )
     return result
 
 
@@ -118,43 +126,56 @@ def extract_drawings_pymupdf(page: pymupdf.Page) -> list[dict]:
             kind = item[0]
             if kind == "l":
                 p1, p2 = item[1], item[2]
-                items_out.append({
-                    "type": "line",
-                    "x0": round(p1.x, 2), "y0": round(p1.y, 2),
-                    "x1": round(p2.x, 2), "y1": round(p2.y, 2),
-                })
+                items_out.append(
+                    {
+                        "type": "line",
+                        "x0": round(p1.x, 2),
+                        "y0": round(p1.y, 2),
+                        "x1": round(p2.x, 2),
+                        "y1": round(p2.y, 2),
+                    }
+                )
             elif kind == "re":
                 rect = item[1]
-                items_out.append({
-                    "type": "rect",
-                    "x0": round(rect.x0, 2), "y0": round(rect.y0, 2),
-                    "x1": round(rect.x1, 2), "y1": round(rect.y1, 2),
-                })
+                items_out.append(
+                    {
+                        "type": "rect",
+                        "x0": round(rect.x0, 2),
+                        "y0": round(rect.y0, 2),
+                        "x1": round(rect.x1, 2),
+                        "y1": round(rect.y1, 2),
+                    }
+                )
             elif kind == "c":
                 # Bezier curve — just record the endpoints
-                items_out.append({
-                    "type": "curve",
-                    "points": [
-                        {"x": round(p.x, 2), "y": round(p.y, 2)}
-                        for p in item[1:]
-                    ],
-                })
+                items_out.append(
+                    {
+                        "type": "curve",
+                        "points": [{"x": round(p.x, 2), "y": round(p.y, 2)} for p in item[1:]],
+                    }
+                )
             elif kind == "qu":
                 # Quad — record bounding rect
                 quad = item[1]
-                items_out.append({
-                    "type": "quad",
-                    "rect": {
-                        "x0": round(quad.rect.x0, 2), "y0": round(quad.rect.y0, 2),
-                        "x1": round(quad.rect.x1, 2), "y1": round(quad.rect.y1, 2),
-                    },
-                })
-        result.append({
-            "fill": str(d.get("fill")),
-            "color": str(d.get("color")),
-            "width": d.get("width"),
-            "items": items_out,
-        })
+                items_out.append(
+                    {
+                        "type": "quad",
+                        "rect": {
+                            "x0": round(quad.rect.x0, 2),
+                            "y0": round(quad.rect.y0, 2),
+                            "x1": round(quad.rect.x1, 2),
+                            "y1": round(quad.rect.y1, 2),
+                        },
+                    }
+                )
+        result.append(
+            {
+                "fill": str(d.get("fill")),
+                "color": str(d.get("color")),
+                "width": d.get("width"),
+                "items": items_out,
+            }
+        )
     return result
 
 
@@ -163,9 +184,7 @@ def extract_drawings_pymupdf(page: pymupdf.Page) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
-def cluster_into_rows(
-    words: list[dict], tolerance: float = ROW_CLUSTER_TOLERANCE
-) -> list[dict]:
+def cluster_into_rows(words: list[dict], tolerance: float = ROW_CLUSTER_TOLERANCE) -> list[dict]:
     """Group words into visual rows by vertical midpoint.
 
     Algorithm: sort words by vertical midpoint, then greedily group
@@ -195,19 +214,23 @@ def cluster_into_rows(
             current_words.append(w)
         else:
             avg_mid = sum(current_mids) / len(current_mids)
-            rows.append({
-                "y_mid": round(avg_mid, 2),
-                "words": sorted(current_words, key=lambda ww: ww["x0"]),
-            })
+            rows.append(
+                {
+                    "y_mid": round(avg_mid, 2),
+                    "words": sorted(current_words, key=lambda ww: ww["x0"]),
+                }
+            )
             current_mids = [y_mid]
             current_words = [w]
 
     # Last cluster
     avg_mid = sum(current_mids) / len(current_mids)
-    rows.append({
-        "y_mid": round(avg_mid, 2),
-        "words": sorted(current_words, key=lambda ww: ww["x0"]),
-    })
+    rows.append(
+        {
+            "y_mid": round(avg_mid, 2),
+            "words": sorted(current_words, key=lambda ww: ww["x0"]),
+        }
+    )
 
     return rows
 
@@ -259,13 +282,15 @@ def get_page_metadata(pdf_path: str | Path) -> dict:
     meta = {"page_count": len(doc), "pages": []}
     for i, page in enumerate(doc):
         images = page.get_images(full=True)
-        meta["pages"].append({
-            "page_number": i + 1,
-            "width": round(page.rect.width, 2),
-            "height": round(page.rect.height, 2),
-            "rotation": page.rotation,
-            "image_count": len(images),
-        })
+        meta["pages"].append(
+            {
+                "page_number": i + 1,
+                "width": round(page.rect.width, 2),
+                "height": round(page.rect.height, 2),
+                "rotation": page.rotation,
+                "image_count": len(images),
+            }
+        )
     doc.close()
     return meta
 
@@ -275,9 +300,7 @@ def get_page_metadata(pdf_path: str | Path) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def render_page_to_png(
-    pdf_path: str | Path, page_index: int = 0, dpi: int = 200
-) -> Path:
+def render_page_to_png(pdf_path: str | Path, page_index: int = 0, dpi: int = 200) -> Path:
     """Render a page to PNG. Returns the output path."""
     pdf_path = Path(pdf_path)
     DERIVED_DIR.mkdir(parents=True, exist_ok=True)
@@ -313,8 +336,10 @@ def run_inspection(pdf_path: str | Path) -> dict:
     print("PAGE METADATA")
     print("=" * 60)
     for p in meta["pages"]:
-        print(f"  Page {p['page_number']}: {p['width']}x{p['height']} pt, "
-              f"rotation={p['rotation']}°, images={p['image_count']}")
+        print(
+            f"  Page {p['page_number']}: {p['width']}x{p['height']} pt, "
+            f"rotation={p['rotation']}°, images={p['image_count']}"
+        )
     print()
 
     # ---- PyMuPDF word extraction (page 1) ----
@@ -349,27 +374,23 @@ def run_inspection(pdf_path: str | Path) -> dict:
     with open(drawings_path, "w", encoding="utf-8") as f:
         json.dump(drawings, f, ensure_ascii=False, indent=2)
 
-    line_count = sum(
-        1 for d in drawings for item in d["items"] if item["type"] == "line"
+    line_count = sum(1 for d in drawings for item in d["items"] if item["type"] == "line")
+    rect_count = sum(1 for d in drawings for item in d["items"] if item["type"] == "rect")
+    print(
+        f"Drawings: {len(drawings)} draw commands, "
+        f"{line_count} lines, {rect_count} rects → {drawings_path.name}"
     )
-    rect_count = sum(
-        1 for d in drawings for item in d["items"] if item["type"] == "rect"
-    )
-    print(f"Drawings: {len(drawings)} draw commands, "
-          f"{line_count} lines, {rect_count} rects → {drawings_path.name}")
     print()
 
     # ---- Row clustering (using PyMuPDF words) ----
     rows = cluster_into_rows(words_mu)
     print("=" * 60)
-    print(f"ROW CLUSTERING (tolerance={ROW_CLUSTER_TOLERANCE} pt, "
-          f"using PyMuPDF words)")
+    print(f"ROW CLUSTERING (tolerance={ROW_CLUSTER_TOLERANCE} pt, using PyMuPDF words)")
     print("=" * 60)
     for i, row in enumerate(rows):
         first_x0 = row["words"][0]["x0"] if row["words"] else 0
         text = " | ".join(w["text"] for w in row["words"])
-        print(f"  Row {i + 1:3d}  y={row['y_mid']:7.2f}  "
-              f"x0={first_x0:7.2f}  {text}")
+        print(f"  Row {i + 1:3d}  y={row['y_mid']:7.2f}  x0={first_x0:7.2f}  {text}")
     print()
 
     # ---- x0 / x1 distributions ----
@@ -428,6 +449,8 @@ if __name__ == "__main__":
     print(f"  Pages: {summary['metadata']['page_count']}")
     print(f"  PyMuPDF words: {summary['words_pymupdf_count']}")
     print(f"  pdfplumber words: {summary['words_pdfplumber_count']}")
-    print(f"  Drawings: {summary['drawing_count']} "
-          f"(lines={summary['line_count']}, rects={summary['rect_count']})")
+    print(
+        f"  Drawings: {summary['drawing_count']} "
+        f"(lines={summary['line_count']}, rects={summary['rect_count']})"
+    )
     print(f"  Visual rows: {summary['row_count']}")

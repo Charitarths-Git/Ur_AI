@@ -9,9 +9,8 @@ import hashlib
 import re
 from pathlib import Path
 
-from _console import configure_utf8
-
 import pymupdf
+from _console import configure_utf8
 
 ROOT = Path(__file__).resolve().parents[1]
 TOKEN = re.compile(r"(?:△?[0-9]+(?:,[0-9]{3})*|－)\Z")
@@ -41,8 +40,10 @@ def main():
         ("previous", "previous_year_value", "prev_raw", 390, 402),
         ("current", "current_year_value", "curr_raw", 518, 528),
     ]:
-        tokens = sorted([w for w in words if left <= w[2] <= right and TOKEN.fullmatch(w[4])],
-                        key=lambda w: (w[1], w[0]))
+        tokens = sorted(
+            [w for w in words if left <= w[2] <= right and TOKEN.fullmatch(w[4])],
+            key=lambda w: (w[1], w[0]),
+        )
         print(f"{name}: GT cells={len(rows)}, text numeric/nil tokens={len(tokens)}")
         if len(tokens) != len(rows):
             disagreements.append(
@@ -50,19 +51,19 @@ def main():
             )
         for index, row in enumerate(rows):
             if index >= len(tokens):
-                disagreements.append(f'{row["row_id"]} {name}: missing text token')
+                disagreements.append(f"{row['row_id']} {name}: missing text token")
                 continue
             word = tokens[index]
             raw = word[4]
             value = int(row[value_col]) if row[value_col] != "" else None
             if value != token_value(raw) or row[raw_col] != raw:
                 disagreements.append(
-                    f'{row["row_id"]} {row["label"]} {name}: '
-                    f'GT={row[raw_col]!r} ({value}), text={raw!r} ({token_value(raw)}), '
-                    f'y0={word[1]:.2f}'
+                    f"{row['row_id']} {row['label']} {name}: "
+                    f"GT={row[raw_col]!r} ({value}), text={raw!r} ({token_value(raw)}), "
+                    f"y0={word[1]:.2f}"
                 )
             checked += 1
-        for word in tokens[len(rows):]:
+        for word in tokens[len(rows) :]:
             disagreements.append(f"{name}: extra text token {word[4]!r} at y0={word[1]:.2f}")
     print(f"Compared cells: {checked} (including nil marks and signed zero).")
     print(f"Disagreements: {len(disagreements)}")

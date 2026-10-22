@@ -27,14 +27,25 @@ class PyMuPDFBackend:
             page = document[page_number - 1]
             if page.rotation:
                 raise ValueError("rotated pages are unsupported by this backend")
-            spans = [span for block in page.get_text("dict")["blocks"]
-                     if block["type"] == 0 for line in block["lines"] for span in line["spans"]]
+            spans = [
+                span
+                for block in page.get_text("dict")["blocks"]
+                if block["type"] == 0
+                for line in block["lines"]
+                for span in line["spans"]
+            ]
             words = []
             for x0, y0, x1, y1, text, *_ in page.get_text("words"):
                 cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-                size = next((span["size"] for span in spans
-                             if span["bbox"][0] <= cx <= span["bbox"][2]
-                             and span["bbox"][1] <= cy <= span["bbox"][3]), None)
+                size = next(
+                    (
+                        span["size"]
+                        for span in spans
+                        if span["bbox"][0] <= cx <= span["bbox"][2]
+                        and span["bbox"][1] <= cy <= span["bbox"][3]
+                    ),
+                    None,
+                )
                 words.append(Word(text, x0, y0, x1, y1, size))
             heights = [w.y1 - w.y0 for w in words if w.y1 > w.y0]
             h = median(heights) if heights else page.rect.height * config.fallback_height_fraction
@@ -52,7 +63,10 @@ class PyMuPDFBackend:
                         height = max(y1 - y0, drawing.get("width") or 0)
                     else:
                         continue
-                    if height <= h * config.rule_max_height and x1 - x0 >= h * config.rule_min_width:
+                    if (
+                        height <= h * config.rule_max_height
+                        and x1 - x0 >= h * config.rule_min_width
+                    ):
                         rules.append(Rule(x0, y0, x1, y1, height))
             return RawPage(page.rect.width, page.rect.height, words, rules)
 

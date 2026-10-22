@@ -29,11 +29,19 @@ def word(text, x0, y0, width=40, height=10):
 def synthetic_page(columns=2):
     words = [word("Report", 10, 10, 70), word("9", 85, 10, 5)]
     for i in range(columns):
-        words += [word(f"Period {chr(65 + i)}", 120 + 100 * i, 25, 60),
-                  word(f"({2025 + i}年3月31日)", 120 + 100 * i, 40, 72)]
-    words += [word("Section", 20, 60), word("Series", 40, 80, 30),
-              word("2", 75, 80, 5), word("item", 84, 80, 20),
-              word("Second", 40, 100, 60), word("Third", 60, 120), word("Last", 40, 140)]
+        words += [
+            word(f"Period {chr(65 + i)}", 120 + 100 * i, 25, 60),
+            word(f"({2025 + i}年3月31日)", 120 + 100 * i, 40, 72),
+        ]
+    words += [
+        word("Section", 20, 60),
+        word("Series", 40, 80, 30),
+        word("2", 75, 80, 5),
+        word("item", 84, 80, 20),
+        word("Second", 40, 100, 60),
+        word("Third", 60, 120),
+        word("Last", 40, 140),
+    ]
     amounts = [("100", "200"), ("25", "△0"), ("－", "1.5"), ("1,234", "2,345")]
     for row, pair in enumerate(amounts):
         y = 80 + row * 20
@@ -45,8 +53,11 @@ def synthetic_page(columns=2):
             if row == 1 and col == 0:
                 words.append(word("△", right - width - 7, y, 5))
     # A short thin rule overlaps actual value ink without reaching the x1 centre.
-    rules = [Rule(170, 95, 190, 95.5, 0.5), Rule(110, 112, 310, 124, 12),
-             Rule(10, 135, 100, 135.5, 0.5)]
+    rules = [
+        Rule(170, 95, 190, 95.5, 0.5),
+        Rule(110, 112, 310, 124, 12),
+        Rule(10, 135, 100, 135.5, 0.5),
+    ]
     footer = [word("-", 135, 190, 5), word("7", 145, 190, 5), word("-", 155, 190, 5)]
     return RawPage(500, 240, footer + words, rules)
 
@@ -62,9 +73,19 @@ def body(layout):
 
 def signature(layout):
     return (
-        tuple((r.zone, r.label, r.indent_step, r.rule_above,
-               tuple((c.column_index, c.raw, c.amount.value, c.amount.status, c.amount.negative)
-                     for c in r.cells)) for r in layout.rows),
+        tuple(
+            (
+                r.zone,
+                r.label,
+                r.indent_step,
+                r.rule_above,
+                tuple(
+                    (c.column_index, c.raw, c.amount.value, c.amount.status, c.amount.negative)
+                    for c in r.cells
+                ),
+            )
+            for r in layout.rows
+        ),
         tuple((c.index, c.heading, c.period_end) for c in layout.columns),
     )
 
@@ -84,12 +105,27 @@ def transform(page, mode):
     h = reconstruct_page(page).thresholds.median_word_height
     for w in page.words:
         jx, jy = (rng.uniform(-0.015, 0.015) * h for _ in range(2)) if mode == "jitter" else (0, 0)
-        words.append(replace(w, x0=w.x0 * scale + dx + jx, x1=w.x1 * scale + dx + jx,
-                             y0=w.y0 * scale + dy + jy, y1=w.y1 * scale + dy + jy,
-                             size=w.size * scale if w.size is not None else None))
-    rules = [replace(r, x0=r.x0 * scale + dx, x1=r.x1 * scale + dx,
-                     y0=r.y0 * scale + dy, y1=r.y1 * scale + dy, height=r.height * scale)
-             for r in page.rules]
+        words.append(
+            replace(
+                w,
+                x0=w.x0 * scale + dx + jx,
+                x1=w.x1 * scale + dx + jx,
+                y0=w.y0 * scale + dy + jy,
+                y1=w.y1 * scale + dy + jy,
+                size=w.size * scale if w.size is not None else None,
+            )
+        )
+    rules = [
+        replace(
+            r,
+            x0=r.x0 * scale + dx,
+            x1=r.x1 * scale + dx,
+            y0=r.y0 * scale + dy,
+            y1=r.y1 * scale + dy,
+            height=r.height * scale,
+        )
+        for r in page.rules
+    ]
     if mode in {"shuffle", "combined", "jitter"}:
         rng.shuffle(words)
         rng.shuffle(rules)
@@ -127,10 +163,13 @@ def test_jittered_baselines_and_different_font_sizes():
     before = reconstruct_page(page)
     after = reconstruct_page(replace(page, words=varied))
     assert [(r.label, [c.raw for c in r.cells], r.zone, r.indent_step) for r in after.rows] == [
-        (r.label, [c.raw for c in r.cells], r.zone, r.indent_step) for r in before.rows]
+        (r.label, [c.raw for c in r.cells], r.zone, r.indent_step) for r in before.rows
+    ]
 
 
-@pytest.mark.parametrize("mode", ["shuffle", "translate", "scale_small", "scale_large", "combined", "jitter"])
+@pytest.mark.parametrize(
+    "mode", ["shuffle", "translate", "scale_small", "scale_large", "combined", "jitter"]
+)
 @pytest.mark.parametrize("source", ["synthetic", "real"])
 def test_invariance(source, mode, real_page):
     page = synthetic_page() if source == "synthetic" else real_page
@@ -139,7 +178,9 @@ def test_invariance(source, mode, real_page):
     assert signature(changed) == signature(original)
     if mode.startswith("scale") or mode == "combined":
         factor = {"scale_small": 0.45, "scale_large": 2.75, "combined": 1.7}[mode]
-        assert changed.thresholds.row_tolerance == pytest.approx(original.thresholds.row_tolerance * factor)
+        assert changed.thresholds.row_tolerance == pytest.approx(
+            original.thresholds.row_tolerance * factor
+        )
     elif mode == "translate":
         assert changed.indent_centres == pytest.approx([x - 240 for x in original.indent_centres])
 
@@ -175,8 +216,11 @@ def test_no_date_fallback_and_label_only_last_row():
 
 def test_invalid_last_value_row_is_retained():
     page = synthetic_page()
-    words = list(page.words) + [word("Invalid final", 40, 165, 70),
-                               word("oops", 176, 165, 24), word("1.5", 282, 165, 18)]
+    words = list(page.words) + [
+        word("Invalid final", 40, 165, 70),
+        word("oops", 176, 165, 24),
+        word("1.5", 282, 165, 18),
+    ]
     last = body(reconstruct_page(replace(page, words=words)))[-1]
     assert last.label == "Invalid final"
     assert [c.amount.status for c in last.cells] == ["invalid", "invalid"]
@@ -210,7 +254,9 @@ def test_frozen_output_and_pure_input():
         layout.rows[0].label = "changed"
     with pytest.raises(FrozenInstanceError):
         layout.columns[0].x1_centre = 0
-    assert not {"parent", "parent_path", "level", "row_type"} & set(layout.rows[0].__dataclass_fields__)
+    assert not {"parent", "parent_path", "level", "row_type"} & set(
+        layout.rows[0].__dataclass_fields__
+    )
 
 
 def test_backend_is_only_package_pymupdf_importer():
@@ -218,7 +264,9 @@ def test_backend_is_only_package_pymupdf_importer():
     for path in (ROOT / "src/parser").glob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"))
         for node in ast.walk(tree):
-            if isinstance(node, ast.Import) and any(a.name in {"pymupdf", "fitz"} for a in node.names):
+            if isinstance(node, ast.Import) and any(
+                a.name in {"pymupdf", "fitz"} for a in node.names
+            ):
                 importers.append(path.name)
             elif isinstance(node, ast.ImportFrom) and node.module in {"pymupdf", "fitz"}:
                 importers.append(path.name)
@@ -232,13 +280,20 @@ def gt_report(layout, gt):
     spaces = sum(any(char.isspace() for char in r.label) for r in rows)
     rule = Counter((g["row_type"], r.rule_above) for r, g in zip(rows, gt, strict=True))
     indent = Counter((r.indent_step, int(g["level"])) for r, g in zip(rows, gt, strict=True))
-    lines = [f"Exact label matches: {exact}/{len(gt)}; labels with internal spaces: {spaces}.",
-             "", "| GT row_type | rule_above=False | rule_above=True |", "|---|---:|---:|"]
+    lines = [
+        f"Exact label matches: {exact}/{len(gt)}; labels with internal spaces: {spaces}.",
+        "",
+        "| GT row_type | rule_above=False | rule_above=True |",
+        "|---|---:|---:|",
+    ]
     for kind in sorted({g["row_type"] for g in gt}):
         lines.append(f"| {kind} | {rule[kind, False]} | {rule[kind, True]} |")
     levels = sorted({int(g["level"]) for g in gt})
-    lines += ["", "| indent_step | " + " | ".join(f"GT level {i}" for i in levels) + " |",
-              "|---|" + "---:|" * len(levels)]
+    lines += [
+        "",
+        "| indent_step | " + " | ".join(f"GT level {i}" for i in levels) + " |",
+        "|---|" + "---:|" * len(levels),
+    ]
     for step in sorted({r.indent_step for r in rows}):
         lines.append(f"| {step} | " + " | ".join(str(indent[step, i]) for i in levels) + " |")
     return "\n".join(lines)
@@ -259,8 +314,12 @@ def test_real_page_matches_gt(real_page):
             assert not row.cells
             continue
         assert [c.column_index for c in row.cells] == [0, 1]
-        for cell, raw_col, val_col in zip(row.cells, ["prev_raw", "curr_raw"],
-                                         ["previous_year_value", "current_year_value"], strict=True):
+        for cell, raw_col, val_col in zip(
+            row.cells,
+            ["prev_raw", "curr_raw"],
+            ["previous_year_value", "current_year_value"],
+            strict=True,
+        ):
             assert cell.raw == expected[raw_col], expected["row_id"]
             value = int(expected[val_col]) if expected[val_col] else None
             assert cell.amount.value == value, expected["row_id"]
@@ -276,7 +335,12 @@ def test_cli_without_encoding_environment(script):
     env = dict(os.environ)
     env.pop("PYTHONIOENCODING", None)
     env.pop("PYTHONUTF8", None)
-    result = subprocess.run([sys.executable, "-X", "utf8=0", str(ROOT / "scripts" / script), str(PDF)],
-                            cwd=ROOT, env=env, capture_output=True, timeout=60)
+    result = subprocess.run(
+        [sys.executable, "-X", "utf8=0", str(ROOT / "scripts" / script), str(PDF)],
+        cwd=ROOT,
+        env=env,
+        capture_output=True,
+        timeout=60,
+    )
     assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
     assert "資産の部" in result.stdout.decode("utf-8")
