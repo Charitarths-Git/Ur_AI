@@ -173,8 +173,10 @@ cross-checks but not as the primary method.
 
 | Category | Count | Examples |
 |---|---|---|
-| Rows **with** numbers | 39 | 現金及び預金, 建物及び構築物, 資産合計, … |
-| Rows **without** numbers (headers/sections) | 11 | see list below |
+| Body rows **with numeric cells** (including printed nil marks) | 37 | Line items, net rows, subtotals, total |
+| Body rows **without numbers** (section headers) | 6 | 資産の部 and the five sections listed below |
+| Page-level rows previously counted as numeric | 2 | Period dates at y_mid=136.43; footer `- 4 -` at y_mid=823.43 |
+| Page-level rows without numeric-column tokens | 5 | Correction marker, two title lines, units, period heading line |
 
 **Header rows (no numbers):**
 
@@ -193,8 +195,17 @@ cross-checks but not as the primary method.
 | 571.31 | 88.20 | `投資その他の資産` |
 
 **Note:** `流動資産`, `固定資産`, `有形固定資産`, `無形固定資産`, `投資その他の資産`
-are hierarchy headers with no numbers. The first 6 rows are page-level headers, not part
-of the balance-sheet table body. A parser should classify them as `row_type="header"`.
+are hierarchy headers with no numbers, together with `資産の部`: six body headers.
+The first **five** entries in the table above are page-level headers; the sixth,
+`資産の部`, starts the table body. Page-level items belong in metadata, not body rows.
+
+**P2 correction (notes-only audit):** The original 39/11 split described all 50
+clustered page rows, not 39 numeric **body** rows. Q8 places the date row at
+y=131.95–140.91, above the body start y=148.27, and the footer at y_mid=823.43.
+Both were included among the 39 rows containing numeric tokens. Subtracting these
+two page-level rows gives 37 numeric body rows; subtracting the five page headers
+from the 11 nonnumeric rows gives six body headers. Thus the P1 notes imply
+43 body rows and seven page-level rows. This count audit is not GT transcription.
 
 ---
 
@@ -301,8 +312,9 @@ y0 > 800 before body processing.
 | Total PyMuPDF words | 132 |
 | Total pdfplumber words | 144 |
 | Visual rows (tolerance 3 pt) | 50 |
-| Body data rows (with numbers) | 39 |
-| Header/section rows | 11 |
+| Body rows with numeric cells (including nil) | 37 |
+| Body section headers | 6 |
+| Page-level rows (five headers, date row, footer) | 7 |
 | Vector drawings | 341 rects |
 | Distinct label x0 positions | 7 (4 table levels) |
 | Prev-year column x1 | ≈ 397.5 pt |

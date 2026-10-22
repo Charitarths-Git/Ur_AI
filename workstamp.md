@@ -59,8 +59,8 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 ## Plan for this prompt
 
 1. [x] Orient: read brief/handoff, clean git status, log, baseline tests; add session.
-2. [~] Verify P1 Q6 from notes only; correct misleading count in separate fix(P1) commit.
-3. [ ] Document exact ground-truth conventions.
+2. [x] Verify P1 Q6 from notes only; correct misleading count in separate fix(P1) commit.
+3. [~] Document exact ground-truth conventions.
 4. [ ] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
 5. [ ] Add human checklist, informational self-check, one schema-only pytest test.
 6. [ ] After CSV commit, implement read-only text-layer cross-check and report disagreements.
@@ -68,9 +68,14 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 
 ## Files created or modified
 
+- notes/inspection.md — notes-only Q6 and summary correction, with coordinate evidence.
+
 - workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
 
 ## Last action and result
+
+P1 Q6 audit complete: 39/11 was page-wide, including date/footer; corrected to
+37 numeric body rows and six body headers. Orientation WIP: 4d98884.
 
 Orientation: clean working tree at a46ee03; git log -5 confirms P1 final 0597652
 and handoff update 0c66de8. Full suite: 11 passed in 2.22s (Python 3.14.0,
@@ -87,11 +92,11 @@ by verified commit history. No implementation inconsistencies found.
 
 ## Known issues / open questions
 
-- P1 Q6 mixes page-level digit rows with body numeric rows; checking now.
+- No unresolved orientation issues. P1 Q6 corrected: 37 numeric body + 6 body headers; 7 page-level rows.
 
 ## Next action
 
-Correct P1 Q6 from its existing notes, then begin image-only GT work.
+Document conventions, then view images only for transcription.
 
 ## Prompt history
 
