@@ -4,132 +4,94 @@
 
 | Field | Value |
 |---|---|
-| Prompt | P1 |
-| State | DONE |
-| Updated | 2026-10-22T14:22:00Z |
+| Prompt | P2 |
+| State | IN PROGRESS |
+| Updated | 2026-10-22T18:00:38Z |
 
 ## Current prompt (verbatim)
 
-Phase 0 (setup) is complete, but it was executed with an earlier version of my instructions that did not include a session handoff protocol. This prompt (P1) first installs that protocol, then does the Phase 1 work: inspecting the PDF. Do NOT write any parsing, normalization or evaluation logic in this step; diagnostics only.
+## P2: Ground truth (draft for human verification)
+Copy this whole P2 section verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P2 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P2) commits.
 
-## Part A: Install the session handoff protocol (do this FIRST)
-My Claude Opus 4.6 usage limit can run out in the middle of a prompt, and I then continue in a new session with a different account. The new session will have NO memory of this chat. The only continuity is the files in this repository. From now on, for every prompt I give you, follow this protocol:
+Goal: create a hand-verifiable ground-truth table for page 4, created from the RENDERED PAGE IMAGE, independent of any parser. A human (me) will verify it against the page afterwards. Do not write any parsing, normalization or evaluation code for the package.
 
-1. workstamp.md at the repo root has this structure:
-   - "Status": current prompt ID (e.g. P1), state (NOT STARTED / IN PROGRESS / DONE), UTC timestamp of the last update.
-   - "Current prompt (verbatim)": the full text of the prompt I most recently gave you, copied exactly, so a new session can continue without me re-pasting it.
-   - "Plan for this prompt": numbered steps, each marked [ ] pending, [~] in progress, or [x] done.
-   - "Files created or modified" in this prompt, one line each on what changed.
-   - "Last action and result": the last command run and its outcome (pass/fail, key output).
-   - "Decisions and assumptions" so far (brief, with reasons).
-   - "Known issues / open questions".
-   - "Next action": one concrete sentence stating what to do next.
-   - "Prompt history": a table of completed prompts (ID, one-line outcome, commit hash).
-   - "Sessions": a table with session number, model name, UTC start time (write "unknown" if you cannot determine it), and a note on why it ended if known.
-2. At the START of every prompt: read PROJECT_BRIEF.md and workstamp.md, copy my new prompt verbatim into "Current prompt (verbatim)", write the numbered plan, and set state to IN PROGRESS BEFORE doing any other work.
-3. Write your INTENT before you act: mark a step [~] before starting it and [x] only after it has actually succeeded. Update workstamp.md after every step and before any long-running command. You may be cut off at any moment, so never batch updates for later.
-4. Make small WIP git commits frequently (at least after each completed step), with messages like "wip(P1): add pdf inspection script". Record the latest commit hash in workstamp.md. When a prompt is fully complete, make a final commit "P1: <summary>", set state to DONE, append to "Prompt history", and set "Next action" to "Await next prompt".
-5. If a session starts and workstamp.md shows an IN PROGRESS prompt (a previous session was interrupted), do NOT start over. Resume procedure: read workstamp.md and PROJECT_BRIEF.md; run git status, git log -5 and git diff to see the real state; run the test suite; compare reality with the plan; treat any step marked [~] as unverified and re-check it; fix inconsistencies; add a "Sessions" row noting "Resumed after interruption"; continue from the first incomplete step. Never redo steps verified as complete and never discard work already in the repo.
-6. Keep workstamp.md accurate and concise. It is a handoff note, not a diary.
+### Rules for independence (important)
+- Transcribe ONLY from the image data/derived/page4_200dpi.png. If your tooling cannot view images, STOP and tell me; do not fall back to the text layer.
+- If digits are hard to read at 200 DPI, render zoomed crops of the PDF with PyMuPDF (e.g. 300 DPI, horizontal strips of about 12 rows with overlap) into data/derived/crops/ and read those. Rendering crops is allowed; reading text from the PDF is NOT allowed during transcription.
+- During transcription do NOT open or use: the PDF text layer, get_text, pdfplumber, notes/words_*.json, notes/inspection.md. Do not copy numbers from earlier chat output or from any file other than the images.
+- If any character or digit is unclear, do not guess: write the best reading and list it under "uncertain cells" in your report.
 
-Part A tasks:
-- Create workstamp.md now, with P1 set to IN PROGRESS and this prompt copied verbatim, BEFORE doing anything else.
-- Backfill "Prompt history" with P0: scaffolding, dependencies and smoke tests done, commit 8c34c1d, with a note that P0 was executed before the protocol existed. Add Session 1 (Opus 4.6; start time "unknown").
-- Add a section "Agent working rules" to PROJECT_BRIEF.md summarising this protocol, and state that any agent must read workstamp.md before doing anything.
-- Align phase numbering in PROJECT_BRIEF.md and README.md with this plan (your earlier text mentions ground truth as "Phase 4" and the next step as "extraction"; fix that):
-  P0 setup (done); P1 inspect the PDF; P2 ground truth (hand-verified table, created from the rendered page image, independent of the parser); P3 normalization utilities and tests; P4 row reconstruction; P5 hierarchy and parent-path inference; P6 CSV and JSON export; P7 evaluation metrics (cell accuracy, structural accuracy, accounting checks); P8 end-to-end run, failure analysis, robustness test; P9 independent review by a different AI agent; P10 apply review fixes; P11 write-up; P12 optional OCR/VLM backend stub; P13 clean-clone reproducibility check.
-- Also generate a requirements.lock (pip freeze of the working environment) so the exact versions that passed are recorded, and mention it in the README. Keep pyproject.toml as it is.
-- Commit this as "chore: add session handoff protocol and align phase numbering".
+### Step 0 (before transcription): verify one P1 claim
+notes/inspection.md Q6 reports 39 rows with numbers and 11 without. I suspect 2 of the "numeric" rows are the date heading and the "- 4 -" footer, which contain digits but are not data rows. Check this from the P1 notes only (not for GT purposes), and if Q6 is wrong or misleading, correct that paragraph of notes/inspection.md with evidence and commit it as a separate "fix(P1): ..." commit. This does not count as using the text layer for GT.
 
-## Part B: Phase 1 work, inspect the PDF
-Goal: understand exactly what the text layer of data/raw/balance_sheet_after_correction.pdf contains, so that later phases rest on evidence instead of assumptions.
+### Step 1: define the ground-truth conventions
+Write data/gt/README.md documenting these conventions exactly:
+- File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
+- Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
+- label: exactly as printed (keep full-width parentheses （純額）, no normalization).
+- parent_path: ancestors' labels joined by " > ", root first; empty for the root. parent: the immediate parent label. level = number of ancestors (so the root 資産の部 has level 0).
+- Hierarchy convention (semantic, not just indentation):
+  * 流動資産 and 固定資産 are children of 資産の部. 有形固定資産, 無形固定資産 and 投資その他の資産 are children of 固定資産.
+  * Plain line items are children of their section header.
+  * Where a gross item is followed by a 減価償却累計額 row and a （純額） row, those two rows are CHILDREN OF THE GROSS ITEM (e.g. parent of 減価償却累計額 is 建物及び構築物). The gross item itself is a child of the section.
+  * A 合計 row is a child of the section it closes and has row_type subtotal; 資産合計 is a child of 資産の部 with row_type total.
+- row_type values (exactly these): header (no numbers), line_item, contra (減価償却累計額 and 貸倒引当金), net (（純額） rows), subtotal, total.
+- Values: integers in 千円 exactly as printed (do NOT multiply by 1000). △ means negative. A printed nil mark (－) is stored as an EMPTY value (null, not 0) and prev_raw/curr_raw keep the printed string. △0 is stored as 0 with raw "△0". prev_raw/curr_raw hold the string exactly as printed (including △, commas); empty for header rows. Use previous = 前連結会計年度 column, current = 当連結会計年度 column.
+- If you believe a convention above is ambiguous or wrong for this page, say so in the report rather than silently deviating.
 
-1. Write scripts/inspect_pdf.py (a diagnostic tool, not the parser). Using PyMuPDF and pdfplumber, it should:
-   - Report page count, page size, rotation, and whether any images are on the page.
-   - Dump every word with its bounding box (x0, y0, x1, y1), font name and size where available, into notes/words_pymupdf.json and notes/words_pdfplumber.json.
-   - Dump drawn vector elements (lines and rectangles) with coordinates into notes/drawings.json, and report whether there are any table rules, underlines or shaded regions.
-   - Cluster words into visual rows by vertical position (a simple tolerance-based grouping is fine for diagnostics; state the tolerance you used and why) and print each row as: row number, y position, left edge x0 of the first token, and the text with tokens separated by " | ".
-   - Print x0 and x1 distributions: the distinct left-edge positions of row labels, and the right-edge positions of numeric tokens.
-2. Render page 1 to a PNG at 200 DPI as data/derived/page4_200dpi.png (create data/derived/ and make sure it is NOT git-ignored; the image will be used later for ground-truth verification). Do not alter the original PDF.
-3. Write notes/inspection.md with findings based ONLY on what the script actually shows. Answer each question below with evidence (coordinates, counts, examples), and say "unclear" where the data does not settle it:
-   Q1. Do the two libraries agree on tokenization (word boundaries, bboxes)? Where do they differ?
-   Q2. Are labels and numbers separate tokens? Are △, －, commas, full-width digits and full-width parentheses preserved exactly as printed? Give examples.
-   Q3. Can rows be reconstructed reliably by vertical clustering? Are there rows where a label and its numbers have noticeably different y values, or wrapped labels spanning two lines?
-   Q4. Where are the two numeric columns (previous year, current year)? Give x-ranges, and say whether numbers are right-aligned.
-   Q5. Is hierarchy visible in the layout? List the distinct label left-edge (x0) positions, how many indent levels they suggest, and two or three example labels per level. State clearly whether indentation alone is enough to recover the hierarchy or whether rules based on label text (for example labels ending in 合計, （純額）, 減価償却累計額) are also needed.
-   Q6. Which rows have no numbers (headers such as 資産の部, 流動資産, 有形固定資産) and which have numbers? How many rows of each kind?
-   Q7. Are there any drawn lines, shaded areas, hidden text, overlapping text, or images that could matter for a parser?
-   Q8. How are the page header items (page number "- 4 -", （訂正後）, the title, the unit line 単位：千円 and the two period headings) positioned relative to the table body?
-   Q9. List anything surprising or risky for later phases.
-4. Add one pytest test that runs the inspection script's main functions on the PDF and asserts that the expected output files are produced and non-empty. Do not assert any financial values or label counts.
-5. Run the full test suite. Update README with how to run the inspection script.
+### Step 2: transcribe
+Create data/gt/page4.csv and data/gt/page4_meta.json (page_number, correction_marker "訂正後", title, unit "千円", period headings as printed, period end dates as printed, "verified_by_human": false). Number of rows: report what you count; do not pad.
 
-## Constraints
-- Diagnostics only: no number parsing, no label normalization, no hierarchy inference, no evaluation, and no ground-truth values. Do not invent data. Do not write anything into data/gt/.
-- Do not modify the original PDF.
-- Follow the handoff protocol for every step of this prompt, including Part A. Keep explaining your decisions as you go.
+### Step 3: verification aids (not part of the package)
+a) Write notes/gt_verification.md: a checklist table with one line per GT row (row_id, label, previous raw, current raw, a "[ ] verified" box) so I can tick rows against the page.
+b) Write a throwaway script scripts/gt_selfcheck.py that (1) validates the CSV schema, enums, level == number of path elements, and that nil cells are empty; and (2) prints, for each subtotal/net/total row, the components' sum vs the printed value and the difference, as INFORMATION ONLY (no pass/fail, no tolerance logic; that is P7).
+c) ONLY AFTER the CSV is finished and committed: write scripts/gt_crosscheck.py that compares GT numbers against the numeric tokens in the text layer and prints disagreements. It must never modify the GT. Report disagreements; do not fix them by yourself, because I adjudicate against the page.
 
-## Acceptance criteria
-- workstamp.md exists, shows P0 in the history, and shows P1 as DONE at the end, with the verbatim text of this prompt.
-- PROJECT_BRIEF.md has "Agent working rules" and the aligned phase list; README matches it.
-- notes/inspection.md answers Q1 to Q9 with evidence from the actual output.
-- data/derived/page4_200dpi.png exists and is committed.
-- pytest passes. Commit hashes are recorded in workstamp.md.
-- Your final message shows: the answers to Q1 to Q9 in condensed form, the file list, the test output, and any assumptions or uncertainties.
+### Constraints
+- Do not use the text layer for GT values; do not invent data; do not touch the original PDF; do not add anything under src/.
+- Add one pytest test that only checks schema (columns present, allowed row_type values, level consistent with parent_path). Assert NO financial values and no row counts.
+- Run the full test suite. Update README (data/gt description, how to run the two scripts).
+- Final commit "P2: draft ground truth (pending human verification)"; workstamp.md set to DONE with "Next action: human verification of GT, then P3". Mark in workstamp.md that the GT is a DRAFT until I confirm.
+
+### Final message must show
+Orientation results (repo state, tests, session row added); row count and row-type counts; the list of uncertain cells; the self-check output; the cross-check disagreements (if any); convention questions; files created; test output; commit hashes.
 
 ## Plan for this prompt
 
-1. [x] Create workstamp.md with P1 IN PROGRESS and verbatim prompt
-2. [x] Add "Agent working rules" to PROJECT_BRIEF.md
-3. [x] Align phase numbering in PROJECT_BRIEF.md
-4. [x] Align phase numbering in README.md
-5. [x] Generate requirements.lock
-6. [x] Commit Part A: "chore: add session handoff protocol and align phase numbering"
-7. [x] Write scripts/inspect_pdf.py
-8. [x] Run inspect_pdf.py and generate output files
-9. [x] Render page to PNG at data/derived/page4_200dpi.png
-10. [x] Write notes/inspection.md answering Q1–Q9
-11. [x] Add pytest test for inspection script
-12. [x] Update README with inspection script usage
-13. [x] Run full test suite — 11/11 passed
-14. [x] Final commit "P1: PDF inspection and diagnostics"
+1. [x] Orient: read brief/handoff, clean git status, log, baseline tests; add session.
+2. [~] Verify P1 Q6 from notes only; correct misleading count in separate fix(P1) commit.
+3. [ ] Document exact ground-truth conventions.
+4. [ ] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
+5. [ ] Add human checklist, informational self-check, one schema-only pytest test.
+6. [ ] After CSV commit, implement read-only text-layer cross-check and report disagreements.
+7. [ ] Update README, run full suite, record output and finalize draft handoff/commit.
 
 ## Files created or modified
 
-- workstamp.md — created, updated for sessions 3 and 4
-- PROJECT_BRIEF.md — added Agent working rules, aligned P0–P13 phases
-- README.md — aligned phases, added requirements.lock and inspect_pdf docs
-- requirements.lock — created via pip freeze
-- scripts/inspect_pdf.py — diagnostic inspection tool (commit 66f0ac8)
-- notes/words_pymupdf.json — word dump from PyMuPDF (untracked, generated)
-- notes/words_pdfplumber.json — word dump from pdfplumber (untracked, generated)
-- notes/drawings.json — vector drawing dump (untracked, generated)
-- notes/inspection.md — answers Q1–Q9 with evidence from actual output
-- notes/analyze_output.py — scratch analysis script (tracked for reproducibility)
-- notes/words_pymupdf.json — word dump from PyMuPDF
-- notes/words_pdfplumber.json — word dump from pdfplumber
-- notes/drawings.json — vector drawing dump
-- data/derived/page4_200dpi.png — rendered page at 200 DPI
-- tests/test_inspection.py — 8 pytest tests for inspection script
-- README.md — updated status, scripts section
+- workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
 
 ## Last action and result
 
-Full test suite: 11/11 passed (3 smoke + 8 inspection). Final commit pending.
+Orientation: clean working tree at a46ee03; git log -5 confirms P1 final 0597652
+and handoff update 0c66de8. Full suite: 11 passed in 2.22s (Python 3.14.0,
+pytest 9.1.1, venv interpreter, PYTHONIOENCODING=utf-8).
+P1 is DONE as recorded. Its stale “Final commit pending” line was superseded
+by verified commit history. No implementation inconsistencies found.
 
 ## Decisions and assumptions
 
-- P0 was done before the handoff protocol existed; backfilled in prompt history.
-- Session 2 was cut off by usage limit right after creating workstamp.md; no work was lost.
-- Removed self-referencing `-e git+...` line from requirements.lock (won't resolve on fresh clone).
+- Repository is the only continuity source. Actual model identity supplied to this agent: GPT-6 (Codex).
+- GT is a DRAFT until the human explicitly confirms it; verified_by_human remains false.
+- Step 0 may read P1 notes for count correction only; transcription uses images exclusively.
+- No package changes under src/; original PDF must remain unchanged.
 
 ## Known issues / open questions
 
-- None yet.
+- P1 Q6 mixes page-level digit rows with body numeric rows; checking now.
 
 ## Next action
 
-Await next prompt.
+Correct P1 Q6 from its existing notes, then begin image-only GT work.
 
 ## Prompt history
 
@@ -146,3 +108,4 @@ Await next prompt.
 | 2 | Claude Opus 4.6 | 2026-10-22T12:54Z | P1 started; cut off by usage limit after step 1 |
 | 3 | Claude Opus 4.6 | 2026-10-22T13:05Z | Ran inspect_pdf.py, generated outputs; cut off before updating workstamp |
 | 4 | Claude Sonnet 4.6 | 2026-10-22T14:19Z | Resumed after interruption (usage limit) |
+| 5 | GPT-6 (Codex) | 2026-10-22T18:00:38Z | Resumed in new session; previous agent hit usage limit |
