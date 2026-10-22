@@ -79,8 +79,8 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 1. [x] Orient, baseline tests and fingerprints; separately fix Q5 and unit-heading metadata cleanup.
 2. [x] Implement immutable replaceable RuleSet; commit section 2.
 3. [x] Implement pure row classification, evidence and typed warnings; commit section 3.
-4. [~] Implement indent-stack tree and partial flat fallback; commit section 4.
-5. [ ] Extract metadata and date-based column roles, with clean headings; commit section 5.
+4. [x] Implement indent-stack tree and partial flat fallback; commit section 4.
+5. [~] Extract metadata and date-based column roles, with clean headings; commit section 5.
 6. [ ] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
 7. [ ] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
 8. [ ] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
@@ -92,8 +92,11 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 
 ## Last action and result
 
+Hierarchy smoke run: 43 rows, one tree root, indentation source, no warnings.
+Gross item children are its contra and net rows. Levels count ancestor IDs.
+
 Classification smoke run: header=6,line_item=22,contra=5,net=4,subtotal=5,total=1;
-warnings empty. Evidence computed independently for every row. RuleSet commit 7e (see Git history).
+warnings empty. Evidence computed independently for every row. RuleSet commit 93ecd54; classification commit 712c2b1.
 
 Section 2 RuleSet smoke checks passed: normalized matching and immutable unit map.
 Separate fixes: d28504f Q5; e00ca2f unit-line cleanup helper/regression.
@@ -121,7 +124,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Implement parent stack, explicit immutable tree and partial flat fallback.
+Extract page metadata and date-based column roles with cleaned headings.
 
 ## Prompt history
 
