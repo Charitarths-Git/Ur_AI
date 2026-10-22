@@ -136,7 +136,7 @@ Await next prompt.
 | ID | Outcome | Commit |
 |---|---|---|
 | P0 | Scaffolding, dependencies, smoke tests done (pre-protocol) | 8c34c1d |
-| P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | (final commit) |
+| P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
 
 ## Sessions
 
