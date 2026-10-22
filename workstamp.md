@@ -60,8 +60,8 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 
 1. [x] Orient: read brief/handoff, clean git status, log, baseline tests; add session.
 2. [x] Verify P1 Q6 from notes only; correct misleading count in separate fix(P1) commit.
-3. [~] Document exact ground-truth conventions.
-4. [ ] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
+3. [x] Document exact ground-truth conventions.
+4. [~] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
 5. [ ] Add human checklist, informational self-check, one schema-only pytest test.
 6. [ ] After CSV commit, implement read-only text-layer cross-check and report disagreements.
 7. [ ] Update README, run full suite, record output and finalize draft handoff/commit.
@@ -73,6 +73,10 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 - workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
 
 ## Last action and result
+
+Conventions copied exactly into data/gt/README.md. Viewed the entire 200 DPI
+page; preparing overlapping 300 DPI image-only crops for careful digit review.
+Latest commit: 9a0e517 (separate P1 correction).
 
 P1 Q6 audit complete: 39/11 was page-wide, including date/footer; corrected to
 37 numeric body rows and six body headers. Orientation WIP: 4d98884.
@@ -96,7 +100,7 @@ by verified commit history. No implementation inconsistencies found.
 
 ## Next action
 
-Document conventions, then view images only for transcription.
+Render/view overlapping crops, transcribe all printed body rows, commit CSV.
 
 ## Prompt history
 
