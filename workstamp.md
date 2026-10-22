@@ -6,7 +6,7 @@
 |---|---|
 | Prompt | P2 |
 | State | IN PROGRESS |
-| Updated | 2026-10-22T18:00:38Z |
+| Updated | 2026-10-22T18:09:18Z |
 
 ## Current prompt (verbatim)
 
@@ -68,68 +68,61 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 
 ## Files created or modified
 
-- scripts/gt_crosscheck.py — post-freeze, read-only PDF numeric-token comparison.
-- README.md — draft status, data/gt description and diagnostic commands.
-
-- notes/gt_verification.md — one checklist row per GT row and metadata/hierarchy checks.
-- scripts/gt_selfcheck.py — schema/nil validation and informational arithmetic.
+- data/gt/README.md — exact supplied conventions; DRAFT/provenance notice.
+- data/gt/page4.csv — 43 image-derived body rows, UTF-8 BOM, null nil cells.
+- data/gt/page4_meta.json — image-derived page/period metadata, verified_by_human=false.
+- data/derived/crops/ — heading + four overlapping 300 DPI body crops.
+- scripts/render_gt_crops.py — image rendering only, reproducible visual aids.
+- scripts/gt_selfcheck.py — schema checks and informational sums/differences.
+- scripts/gt_crosscheck.py — read-only text-layer comparison, written after CSV commit.
 - tests/test_gt_schema.py — one schema-only test; no financial or row-count assertions.
-
-- data/gt/README.md — prescribed conventions and provenance.
-- data/gt/page4.csv — 43 image-transcribed DRAFT body rows, UTF-8 BOM.
-- data/gt/page4_meta.json — image-transcribed page metadata, human verification false.
-- scripts/render_gt_crops.py and data/derived/crops/ — image-only visual review aids.
-
-- notes/inspection.md — notes-only Q6 and summary correction, with coordinate evidence.
-
-- workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
+- notes/gt_verification.md — checklist for all GT rows plus metadata/hierarchy.
+- notes/p2_report.md — complete captured self-check, cross-check and test outputs.
+- notes/inspection.md — separate P1 Q6 count/summary correction.
+- README.md — DRAFT status, data/gt description and script commands.
+- workstamp.md — P2 prompt/plan, session, evidence and handoff.
 
 ## Last action and result
 
-Read-only cross-check: 37 tokens per column, 74 cells compared, zero raw/value
-disagreements. GT SHA-256 unchanged: c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
-New schema-only pytest passed (1 passed in 0.06s); new-file lint passed except
-one long cross-check line, now wrapped. Verification-aids commit: 43d8298.
+Final checks: full suite 12 passed in 1.82s; new-file ruff checks pass;
+git diff --check passes. Verbatim P2 section matches the supplied file.
+Cross-check compared 74 cells (37 per column), zero disagreements; working CSV
+SHA-256 unchanged: c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
+GT content is unchanged from image-only freeze 7ca2ef8 (Git stores LF while the
+working CSV writer uses CRLF; a first raw-blob equality check was corrected to
+account for this). Original PDF and src/ unchanged relative to baseline a46ee03.
 
-Verification aids completed: per-row human checklist, schema-only pytest and
-informational arithmetic script. Self-check schema OK; all 10 net/subtotal/total
-relations printed for both years, differences range from -3 to +1 千円. Null
-components explicitly listed; no financial pass/fail or tolerance applied.
-CSV freeze commit: 7ca2ef81fc11039598a95aae611b8ec9433df90c.
+Orientation: clean tree at a46ee03; P1 DONE at 0597652; baseline 11 passed in
+2.22s. Stale P1 “Final commit pending” note superseded by verified Git history.
 
-Image transcription finished: 43 rows, header=6, line_item=22, contra=5, net=4,
-subtotal=5, total=1. CSV written as UTF-8 with BOM; metadata is DRAFT/false.
-Read full page plus heading and four overlapping body crops at 300 DPI. No
-uncertain numeric/label cells identified. No text-layer access during transcription.
-Conventions/crop renderer commit: ff2d8e1. CSV must now be committed before cross-check.
-
-Conventions copied exactly into data/gt/README.md. Viewed the entire 200 DPI
-page; preparing overlapping 300 DPI image-only crops for careful digit review.
-Latest commit: 9a0e517 (separate P1 correction).
-
-P1 Q6 audit complete: 39/11 was page-wide, including date/footer; corrected to
-37 numeric body rows and six body headers. Orientation WIP: 4d98884.
-
-Orientation: clean working tree at a46ee03; git log -5 confirms P1 final 0597652
-and handoff update 0c66de8. Full suite: 11 passed in 2.22s (Python 3.14.0,
-pytest 9.1.1, venv interpreter, PYTHONIOENCODING=utf-8).
-P1 is DONE as recorded. Its stale “Final commit pending” line was superseded
-by verified commit history. No implementation inconsistencies found.
+Commits so far: 4d98884 orientation; 9a0e517 separate fix(P1); ff2d8e1 conventions;
+7ca2ef8 independent image-derived CSV; 43d8298 verification aids;
+8695260 read-only cross-check and documentation. Final commit next.
 
 ## Decisions and assumptions
 
-- Repository is the only continuity source. Actual model identity supplied to this agent: GPT-6 (Codex).
-- GT is a DRAFT until the human explicitly confirms it; verified_by_human remains false.
-- Step 0 may read P1 notes for count correction only; transcription uses images exclusively.
-- No package changes under src/; original PDF must remain unchanged.
+- Actual model identity supplied to this agent: GPT-6 (Codex); Session 5 added.
+- GT is a DRAFT until human confirmation; verified_by_human remains false.
+- Q6 audit used P1 notes only, before transcription: 37 numeric body + 6 headers;
+  date row/footer and five page headers are excluded from the 43 body rows.
+- Transcription used only the full 200 DPI image and five 300 DPI crops. No PDF
+  text layer, word dumps or P1 notes accessed during transcription.
+- CSV was completed and committed in 7ca2ef8 BEFORE cross-check code was written.
+- Row counts: header=6, line_item=22, contra=5, net=4, subtotal=5, total=1.
+- Nil cells stay null; sums of present components explicitly list omitted nulls.
+  Arithmetic differences (-3 to +1 千円) are information only, with no tolerance
+  or financial pass/fail; printed values were not changed to force agreement.
+- No new dependencies, package parsing/normalization/evaluation code or src/ changes.
 
 ## Known issues / open questions
 
-- No unresolved orientation issues. P1 Q6 corrected: 37 numeric body + 6 body headers; 7 page-level rows.
+- Uncertain cells: none identified after enlarged visual review.
+- Convention questions/deviations: none.
+- Human verification is outstanding by design; do not start P3 before confirmation.
 
 ## Next action
 
-Save diagnostic outputs, run full tests and final lint, inspect diff; finalize draft handoff.
+Create the final P2 draft commit, then record its hash and set the handoff to DONE.
 
 ## Prompt history
 
