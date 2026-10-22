@@ -2,8 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P2 — draft image-derived ground truth complete, **pending human verification**.
-> Start with [notes/gt_verification.md](notes/gt_verification.md); P3 waits for human confirmation.
+> **Status**: P3 — normalization utilities and tests complete. P2 ground truth is **VERIFIED**.
+> Next phase: P4 row reconstruction.
 
 ## Quick start
 
@@ -33,13 +33,14 @@ pytest
 ```
 ├── src/
 │   └── parser/            # Main Python package
-│       └── __init__.py
+│       ├── __init__.py
+│       └── normalize.py   # Pure amount, label-matching and period helpers (P3)
 ├── tests/                 # Pytest test suite
 ├── scripts/               # CLI entry points and utilities
 │   └── inspect_pdf.py     # PDF diagnostic tool (P1)
 ├── data/
 │   ├── raw/               # Original PDFs (tracked in git)
-│   ├── gt/                # DRAFT image-transcribed CSV, metadata and conventions (P2)
+│   ├── gt/                # VERIFIED image-transcribed CSV, metadata and conventions (P2)
 │   └── derived/           # Rendered images, derived artifacts (tracked)
 ├── outputs/               # Generated CSV / JSON (git-ignored)
 ├── eval/                  # Evaluation scripts and configs
@@ -56,8 +57,8 @@ pytest
 |---|---|
 | P0 — Setup | Repository layout, dependencies, smoke test ✅ |
 | P1 — Inspect the PDF | Diagnostic extraction; understand text layer and layout ✅ |
-| P2 — Ground truth | Image-derived draft complete; human verification pending |
-| P3 — Normalization | Full-width→half-width, △, －, commas; with tests |
+| P2 — Ground truth | Image-derived GT verified by human, no corrections ✅ |
+| P3 — Normalization | Pure amount, label-matching and period helpers with tests ✅ |
 | P4 — Row reconstruction | Cluster words into rows, assign columns |
 | P5 — Hierarchy inference | Parent-path assignment from indentation + rules |
 | P6 — CSV and JSON export | Generate flat CSV and hierarchical JSON |
@@ -102,7 +103,7 @@ python scripts/inspect_pdf.py data/raw/balance_sheet_after_correction.pdf
 #   data/derived/page4_200dpi.png  (200 DPI PNG; used for ground-truth in P2)
 ```
 
-## Draft ground truth (P2)
+## Verified ground truth (P2)
 
 `data/gt/page4.csv` contains one row per printed body row in reading order,
 from 資産の部 through 資産合計. It is UTF-8 with BOM and retains raw printed
@@ -111,9 +112,10 @@ Printed `－` cells have empty values; `△0` has value 0 with its raw sign reta
 See [data/gt/README.md](data/gt/README.md) for the exact conventions and
 [data/gt/page4_meta.json](data/gt/page4_meta.json) for page and period metadata.
 
-This is a **DRAFT**: `verified_by_human` is false. Use the per-row checklist in
-[notes/gt_verification.md](notes/gt_verification.md) to verify it against the
-rendered page and crops. The CSV was committed before the text-layer check.
+This GT is **VERIFIED**: `verified_by_human` is true. The user confirmed all
+43 rows against the page image, including hierarchy columns, and reported an
+independent second review with no discrepancies. The completed checklist is in
+[notes/gt_verification.md](notes/gt_verification.md). The CSV was committed before the text-layer check.
 Arithmetic differences and text-layer checks never authorize automatic GT edits.
 The captured diagnostics are in [notes/p2_report.md](notes/p2_report.md).
 
@@ -135,6 +137,44 @@ there is no financial pass/fail or tolerance logic (reserved for P7).
 both raw strings and values by column and vertical order. It uses page-specific
 body bounds, excludes headings/footer, reports disagreements and never writes GT.
 Both scripts are throwaway verification aids outside `src/`, not package code.
+
+## Normalization (P3)
+
+The stdlib-only helpers in `src/parser/normalize.py` are pure and do not access
+PDFs or infer rows, hierarchy or accounting roles:
+
+- `parse_amount(raw) -> AmountResult`: returns a frozen result with the exact
+  raw input, integer/null value, status (`ok`, `nil`, `invalid`, `empty`), negative
+  flag and note. Units remain 千円; no scaling is applied. Full-width digits and
+  commas, negative signs and parentheses are supported. A standalone dash run
+  is nil (`None`), while printed `△0` is integer zero with `negative=True` and
+  note `negative zero printed`. Empty and invalid inputs remain distinct from nil
+  and never become zero. Non-string amount inputs are invalid.
+- `label_key(label) -> str` and `labels_equal(a, b) -> bool`: NFKC comparison
+  with all Unicode whitespace removed. **label_key is for matching only**;
+  output labels retain their exact printed form, including full-width （純額）.
+- `parse_period_end(text) -> tuple[int, int, int] | None`: extracts the first
+  complete Gregorian date, allowing full-width digits and arbitrary spaces.
+  Missing or impossible dates return `None`. Japanese-era (和暦) dates are unsupported.
+
+Decimals and unit suffixes are invalid because amounts are whole printed 千円.
+All listed nil dash variants can also serve as a single negative prefix before
+digits. Whitespace after a sign or inside parentheses is allowed; whitespace
+between digits, repeated signs and signed parentheses are invalid. Nonempty
+comma groups of unusual widths are accepted with an informational note; leading,
+trailing or repeated commas are invalid. Very long integers are supported without
+changing Python's global conversion limits. Further decisions are documented in
+the module docstring.
+
+```bash
+python -m pytest tests/test_normalize.py
+python -m pytest
+python -m ruff check src/parser/normalize.py tests/test_normalize.py
+```
+
+The GT round-trip test reads the verified CSV with `utf-8-sig`, compares every
+previous/current raw cell with its stored value, and checks nil/header statuses.
+It neither writes GT nor accesses the PDF.
 
 ## License
 

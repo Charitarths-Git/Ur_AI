@@ -7,7 +7,7 @@
 | Prompt | P3 |
 | State | IN PROGRESS |
 | GT | VERIFIED by human; unchanged/read-only |
-| Updated | 2026-10-22T18:48:35Z |
+| Updated | 2026-10-22T18:55:06Z |
 
 ## Current prompt (verbatim)
 
@@ -57,32 +57,33 @@ Orientation (repo state, test count before P3); the public function signatures; 
 1. [x] Orient: inspect package/config/docs, run baseline suite, fingerprint protected data.
 2. [x] Implement pure amount, label and period normalization utilities; document decisions.
 3. [x] Add table-driven unit tests and read-only GT round-trip coverage; verify targeted tests.
-4. [~] Update README, run complete suite then ruff on new files; verify protected data unchanged.
-5. [ ] Final P3 commit, record hash and DONE handoff; next action P4 row reconstruction.
+4. [x] Update README, run complete suite then ruff on new files; verify protected data unchanged.
+5. [~] Final P3 commit, record hash and DONE handoff; next action P4 row reconstruction.
 
 ## Files created or modified
 
 - workstamp.md — verbatim P3 prompt, plan, authorization and orientation state.
 - src/parser/normalize.py — frozen AmountResult and four pure public helpers; decisions in module docstring.
 - tests/test_normalize.py — 129 table-driven tests, including read-only verified GT round trip.
+- README.md — normalization documentation and corrected verified-GT/project status.
 
 ## Last action and result
 
-Targeted normalization suite: 129 passed in 0.29s, including read-only GT round
-trip, 10,000-digit positive/negative integers, each dash variant, malformed
-inputs, label idempotence and period dates. No GT failures or corrections.
-Implementation commit: d9319f9.
+Baseline: clean tree at 9805d79; P2 DONE and GT VERIFIED; 12 passed in 3.05s.
+Targeted P3 tests: 129 passed in 0.29s.
+Complete suite: 141 passed in 3.47s (Python 3.14.0, pytest 9.1.1, venv).
+Then ruff check src/parser/normalize.py tests/test_normalize.py: All checks passed!
+git diff --check passes. Verbatim P3 prompt matches the supplied attachment.
 
-Implemented src/parser/normalize.py; initial smoke checks passed for full-width
-amounts, negative zero, nil, unit rejection, label idempotence with combining
-marks and full-width period date. Orientation commit: 3a2434c.
+Read-only GT round trip: all 43 rows / 86 cells match exactly:
+72 ok, 2 nil, 12 empty header cells; no invalid cells or value mismatches.
+Every data/gt/ and data/raw/ file has identical SHA-256 before/after work/tests.
+CSV SHA-256: c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
+PDF SHA-256: 0764bba6f5f0e7984a837e4cc19d8bb95db4a7ac22c26f18c95bbe652c983c74.
+No dependencies added; pyproject.toml and requirements.lock unchanged.
 
-Read PROJECT_BRIEF.md and workstamp.md. Tree clean at 9805d79 (P2 human verification).
-P2 is DONE, GT VERIFIED. No interrupted work to resume. No AGENTS.md found in repository.
-Baseline suite: 12 passed in 3.05s. Fingerprinted every file under data/gt/ and
-data/raw/ before implementation; CSV SHA-256 remains
-c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
-README still describes GT as a draft; update that stale status as part of P3 docs.
+Progress commits: 3a2434c orientation/plan; d9319f9 implementation;
+c99cccb unit tests and verified GT round trip. Final P3 commit next.
 
 ## Decisions and assumptions
 
@@ -105,11 +106,14 @@ README still describes GT as a draft; update that stale status as part of P3 doc
 
 ## Known issues / open questions
 
-None at orientation; record implementation choices as they are resolved.
+No open questions or GT failures. Documented choices cover the ambiguous dash,
+comma-width, internal-whitespace and period-date cases. Japanese-era dates are
+unsupported by design. Root README's stale P2 draft claims were corrected using
+the recorded human verification; protected GT files were not edited.
 
 ## Next action
 
-Update README; run full suite then ruff on both new Python files; recheck protected hashes.
+Create final P3 commit, then record its hash and DONE status for P4 row reconstruction.
 
 ## Prompt history
 
