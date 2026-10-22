@@ -2,7 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P1 — PDF inspection complete. See [notes/inspection.md](notes/inspection.md) for findings.
+> **Status**: P2 — draft image-derived ground truth complete, **pending human verification**.
+> Start with [notes/gt_verification.md](notes/gt_verification.md); P3 waits for human confirmation.
 
 ## Quick start
 
@@ -38,7 +39,7 @@ pytest
 │   └── inspect_pdf.py     # PDF diagnostic tool (P1)
 ├── data/
 │   ├── raw/               # Original PDFs (tracked in git)
-│   ├── gt/                # Hand-labeled ground-truth files
+│   ├── gt/                # DRAFT image-transcribed CSV, metadata and conventions (P2)
 │   └── derived/           # Rendered images, derived artifacts (tracked)
 ├── outputs/               # Generated CSV / JSON (git-ignored)
 ├── eval/                  # Evaluation scripts and configs
@@ -55,7 +56,7 @@ pytest
 |---|---|
 | P0 — Setup | Repository layout, dependencies, smoke test ✅ |
 | P1 — Inspect the PDF | Diagnostic extraction; understand text layer and layout ✅ |
-| P2 — Ground truth | Hand-verified table from rendered page image |
+| P2 — Ground truth | Image-derived draft complete; human verification pending |
 | P3 — Normalization | Full-width→half-width, △, －, commas; with tests |
 | P4 — Row reconstruction | Cluster words into rows, assign columns |
 | P5 — Hierarchy inference | Parent-path assignment from indentation + rules |
@@ -100,6 +101,40 @@ python scripts/inspect_pdf.py data/raw/balance_sheet_after_correction.pdf
 # Also renders page 1 to:
 #   data/derived/page4_200dpi.png  (200 DPI PNG; used for ground-truth in P2)
 ```
+
+## Draft ground truth (P2)
+
+`data/gt/page4.csv` contains one row per printed body row in reading order,
+from 資産の部 through 資産合計. It is UTF-8 with BOM and retains raw printed
+strings alongside integer 千円 values, semantic parents and ancestor paths.
+Printed `－` cells have empty values; `△0` has value 0 with its raw sign retained.
+See [data/gt/README.md](data/gt/README.md) for the exact conventions and
+[data/gt/page4_meta.json](data/gt/page4_meta.json) for page and period metadata.
+
+This is a **DRAFT**: `verified_by_human` is false. Use the per-row checklist in
+[notes/gt_verification.md](notes/gt_verification.md) to verify it against the
+rendered page and crops. The CSV was committed before the text-layer check.
+Arithmetic differences and text-layer checks never authorize automatic GT edits.
+The captured diagnostics are in [notes/p2_report.md](notes/p2_report.md).
+
+With the venv active (PowerShell: `$env:PYTHONIOENCODING="utf-8"`):
+
+```bash
+python scripts/gt_selfcheck.py
+python scripts/gt_crosscheck.py
+# Optional: regenerate overlapping 300 DPI visual aids (rendering only)
+python scripts/render_gt_crops.py
+python -m pytest
+```
+
+`gt_selfcheck.py` validates the schema and reports component sums, printed values
+and differences for every net/subtotal/total, in 千円. It lists omitted null
+components without changing them to zero. Arithmetic is **information only**:
+there is no financial pass/fail or tolerance logic (reserved for P7).
+`gt_crosscheck.py` reads numeric/nil tokens from the PDF text layer and compares
+both raw strings and values by column and vertical order. It uses page-specific
+body bounds, excludes headings/footer, reports disagreements and never writes GT.
+Both scripts are throwaway verification aids outside `src/`, not package code.
 
 ## License
 

@@ -63,10 +63,13 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 3. [x] Document exact ground-truth conventions.
 4. [x] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
 5. [x] Add human checklist, informational self-check, one schema-only pytest test.
-6. [~] After CSV commit, implement read-only text-layer cross-check and report disagreements.
-7. [ ] Update README, run full suite, record output and finalize draft handoff/commit.
+6. [x] After CSV commit, implement read-only text-layer cross-check and report disagreements.
+7. [~] Update README, run full suite, record output and finalize draft handoff/commit.
 
 ## Files created or modified
+
+- scripts/gt_crosscheck.py — post-freeze, read-only PDF numeric-token comparison.
+- README.md — draft status, data/gt description and diagnostic commands.
 
 - notes/gt_verification.md — one checklist row per GT row and metadata/hierarchy checks.
 - scripts/gt_selfcheck.py — schema/nil validation and informational arithmetic.
@@ -82,6 +85,11 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 - workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
 
 ## Last action and result
+
+Read-only cross-check: 37 tokens per column, 74 cells compared, zero raw/value
+disagreements. GT SHA-256 unchanged: c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835.
+New schema-only pytest passed (1 passed in 0.06s); new-file lint passed except
+one long cross-check line, now wrapped. Verification-aids commit: 43d8298.
 
 Verification aids completed: per-row human checklist, schema-only pytest and
 informational arithmetic script. Self-check schema OK; all 10 net/subtotal/total
@@ -121,7 +129,7 @@ by verified commit history. No implementation inconsistencies found.
 
 ## Next action
 
-Create and run read-only text-layer cross-check; preserve frozen GT unchanged.
+Save diagnostic outputs, run full tests and final lint, inspect diff; finalize draft handoff.
 
 ## Prompt history
 
