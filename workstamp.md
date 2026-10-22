@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P5-P6 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T22:51:02Z |
+| Updated | 2026-10-22T22:51:45Z |
 
 ## Current prompt (verbatim)
 
@@ -84,7 +84,7 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 6. [x] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
 7. [x] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
 8. [x] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
-9. [~] Full suite then ruff; integrity checks; final commit and DONE handoff.
+9. [x] Full suite then ruff; integrity checks; final commit and DONE handoff.
 
 ## Files created or modified
 
@@ -127,7 +127,9 @@ P3/P4 production code and dependency manifests unchanged. Verbatim prompt exact.
 
 Commits: d28504f Q5 fix; e00ca2f unit-heading fix; 93ecd54 RuleSet; 712c2b1 types;
 4cb6d06 hierarchy; eeded2a metadata; d466446 export/CLI/examples;
-8cc4dbf tests; 7f9eb82 docs/report/style. Final P5-P6 commit next.
+8cc4dbf tests; 7f9eb82 docs/report/style. Final P5-P6 commit succeeded:
+2f6fa0672814755d7621d59433437fb79b05c179 — P5-P6: row types, hierarchy, metadata, CSV/JSON export.
+This metadata-only follow-up records the final hash and DONE status, following P4.
 
 ## Decisions and assumptions
 
@@ -161,7 +163,7 @@ configured upstream origin/main is gone; no remote work requested.
 
 ## Next action
 
-Create final P5-P6 commit, then record its hash and DONE status for P7-P8 evaluation framework.
+P7-P8 evaluation framework
 
 ## Prompt history
 
@@ -172,6 +174,7 @@ Create final P5-P6 commit, then record its hash and DONE status for P7-P8 evalua
 | P2 | Image-derived GT, 43 rows; now VERIFIED by human with no corrections; 12 tests pass | 0be2cf6 (initial GT); verification: 9805d79 |
 | P3 | Pure normalization utilities, 129 new tests; full suite 141 passed; GT unchanged | b41840c |
 | P4 | Pure relative row/column/indent reconstruction, GT matched; 166 tests pass | 2582b5d |
+| P5-P6 | Typed rows, parent tree, metadata and deterministic exports; 223 tests pass; GT unchanged | 2f6fa06 |
 
 ## Sessions
 
