@@ -76,8 +76,8 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 
 ## Plan for this prompt
 
-1. [~] Orient, baseline tests and fingerprints; separately fix Q5 and unit-heading metadata cleanup.
-2. [ ] Implement immutable replaceable RuleSet; commit section 2.
+1. [x] Orient, baseline tests and fingerprints; separately fix Q5 and unit-heading metadata cleanup.
+2. [~] Implement immutable replaceable RuleSet; commit section 2.
 3. [ ] Implement pure row classification, evidence and typed warnings; commit section 3.
 4. [ ] Implement indent-stack tree and partial flat fallback; commit section 4.
 5. [ ] Extract metadata and date-based column roles, with clean headings; commit section 5.
@@ -91,6 +91,10 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 - workstamp.md — P5-P6 verbatim prompt, plan and orientation.
 
 ## Last action and result
+
+Unit-heading cleanup helper added in metadata.py; regression test passes (1).
+It takes a caller-supplied pattern; RuleSet will supply the production pattern.
+P4 layout/API and tests are unchanged. Q5 fix commit recorded in Git history.
 
 Baseline 166 passed in 6.73s; protected data fingerprinted. Corrected Q5 and
 summary: five body indent steps including root, with P4 centre evidence.
@@ -111,7 +115,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Run baseline suite and inspect current APIs; fingerprint protected files.
+Commit standalone unit-line cleanup, then implement replaceable RuleSet.
 
 ## Prompt history
 
