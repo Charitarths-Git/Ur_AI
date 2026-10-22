@@ -79,8 +79,8 @@ Orientation (repo state, test count before this prompt); the public API and the 
 ## Plan for this prompt
 
 1. [x] Orient, baseline tests/fingerprints; define independent file schema and evaluator contracts; commit section 1.
-2. [~] Implement deterministic ordered alignment with duplicate/gap cases; commit section 2.
-3. [ ] Implement metrics, mismatch records and aggregation with denominators; commit section 3.
+2. [x] Implement deterministic ordered alignment with duplicate/gap cases; commit section 2.
+3. [~] Implement metrics, mismatch records and aggregation with denominators; commit section 3.
 4. [ ] Implement label-free accounting, replaceable tolerance and truncation diagnostics; commit section 4.
 5. [ ] Generate JSON/Markdown reports and evaluator CLI; commit section 5.
 6. [ ] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
@@ -94,6 +94,10 @@ Orientation (repo state, test count before this prompt); the public API and the 
 - workstamp.md — verbatim P7-P8 request, numbered plan and boundaries.
 
 ## Last action and result
+
+Section 2 alignment smoke checks pass: full real-page alignment; dropped
+duplicate-label row correctly left unmatched. Similarity uses labels/values only.
+Section 1 commit 464b2cc.
 
 Baseline: 223 passed in 8.72s. All GT/raw/examples/parser files fingerprinted.
 Independent exported-file reader smoke check passes: 43 rows, two named value
@@ -115,7 +119,7 @@ No new known issue yet. Pytest CLI fixtures previously needed unsandboxed temp a
 
 ## Next action
 
-Implement deterministic order-preserving sequence alignment.
+Implement GT metrics, parent mapping, ancestor Jaccard, mismatches and aggregation.
 
 ## Prompt history
 
