@@ -43,16 +43,35 @@ Key properties of the document:
 
 | Phase | Scope |
 |---|---|
-| 0 — Setup | Repository layout, dependencies, smoke test, brief ✅ |
-| 1 — Extraction | Extract raw text + coordinates from the PDF using PyMuPDF / pdfplumber |
-| 2 — Parsing | Normalize text (full-width, △, －), assign hierarchy via layout rules |
-| 3 — Output | Generate flat CSV and hierarchical JSON |
-| 4 — Ground truth | Hand-label one page, build ground-truth CSV/JSON |
-| 5 — Evaluation | Implement accuracy metrics (cell, structure, accounting checks) |
-| 6 — Report | Write findings, decisions, limitations, future work |
+| P0 — Setup | Repository layout, dependencies, smoke test, brief ✅ |
+| P1 — Inspect the PDF | Diagnostic extraction; understand text layer, layout, coordinates |
+| P2 — Ground truth | Hand-verified table from the rendered page image, independent of the parser |
+| P3 — Normalization | Utilities for full-width→half-width, △, －, commas; with tests |
+| P4 — Row reconstruction | Cluster words into rows, assign label vs. numeric columns |
+| P5 — Hierarchy inference | Parent-path assignment from indentation + text-based rules |
+| P6 — CSV and JSON export | Generate flat CSV and hierarchical JSON |
+| P7 — Evaluation metrics | Cell accuracy, structural accuracy, accounting checks |
+| P8 — End-to-end run | Failure analysis and robustness testing |
+| P9 — Independent review | Review by a different AI agent |
+| P10 — Review fixes | Apply fixes from the review |
+| P11 — Write-up | Report with design decisions, results, future work |
+| P12 — OCR/VLM stub | Optional backend stub for scanned pages |
+| P13 — Reproducibility check | Clean-clone reproducibility verification |
+
+## Agent Working Rules
+
+Any agent (human or AI) working on this repository **must read `workstamp.md` before doing anything**. The workstamp file is the single source of truth for the current state of work.
+
+**Handoff protocol summary:**
+1. `workstamp.md` tracks: current prompt ID and state, the verbatim prompt text, a numbered plan with step status ([ ] / [~] / [x]), files modified, last action, decisions, issues, next action, prompt history, and session log.
+2. At the start of every new prompt: read `PROJECT_BRIEF.md` and `workstamp.md`, copy the new prompt verbatim, write the plan, set state to IN PROGRESS before doing any work.
+3. Mark steps [~] before starting, [x] only after verified success. Update `workstamp.md` after every step.
+4. Make frequent WIP git commits. Final commit uses format `P<N>: <summary>`.
+5. On session resume (IN PROGRESS state found): do NOT start over. Run `git status`, `git log -5`, `git diff`, and the test suite. Compare reality with the plan. Treat [~] as unverified. Fix inconsistencies. Add a Sessions row. Continue from the first incomplete step.
 
 ## Constraints
 
 - Keep dependencies minimal.
 - Everything must be reproducible from a fresh clone with documented commands.
 - Full AI chat log must be submitted alongside the code.
+
