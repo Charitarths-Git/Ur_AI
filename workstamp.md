@@ -62,11 +62,15 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 2. [x] Verify P1 Q6 from notes only; correct misleading count in separate fix(P1) commit.
 3. [x] Document exact ground-truth conventions.
 4. [x] View rendered page/crops, transcribe CSV and metadata; commit completed CSV before text cross-check.
-5. [~] Add human checklist, informational self-check, one schema-only pytest test.
-6. [ ] After CSV commit, implement read-only text-layer cross-check and report disagreements.
+5. [x] Add human checklist, informational self-check, one schema-only pytest test.
+6. [~] After CSV commit, implement read-only text-layer cross-check and report disagreements.
 7. [ ] Update README, run full suite, record output and finalize draft handoff/commit.
 
 ## Files created or modified
+
+- notes/gt_verification.md — one checklist row per GT row and metadata/hierarchy checks.
+- scripts/gt_selfcheck.py — schema/nil validation and informational arithmetic.
+- tests/test_gt_schema.py — one schema-only test; no financial or row-count assertions.
 
 - data/gt/README.md — prescribed conventions and provenance.
 - data/gt/page4.csv — 43 image-transcribed DRAFT body rows, UTF-8 BOM.
@@ -78,6 +82,12 @@ Orientation results (repo state, tests, session row added); row count and row-ty
 - workstamp.md — P2 prompt, plan, orientation evidence and Session 5.
 
 ## Last action and result
+
+Verification aids completed: per-row human checklist, schema-only pytest and
+informational arithmetic script. Self-check schema OK; all 10 net/subtotal/total
+relations printed for both years, differences range from -3 to +1 千円. Null
+components explicitly listed; no financial pass/fail or tolerance applied.
+CSV freeze commit: 7ca2ef81fc11039598a95aae611b8ec9433df90c.
 
 Image transcription finished: 43 rows, header=6, line_item=22, contra=5, net=4,
 subtotal=5, total=1. CSV written as UTF-8 with BOM; metadata is DRAFT/false.
@@ -111,7 +121,7 @@ by verified commit history. No implementation inconsistencies found.
 
 ## Next action
 
-Commit completed image-derived CSV, then add verification aids.
+Create and run read-only text-layer cross-check; preserve frozen GT unchanged.
 
 ## Prompt history
 
