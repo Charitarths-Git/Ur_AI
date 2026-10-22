@@ -53,22 +53,36 @@ def build_hierarchy(typed_rows: tuple[TypedRow, ...]) -> Hierarchy:
         stack = []
         previous_step = None
         if rows[0].row.indent_step is not None and rows[0].row.indent_step != min(steps):
-            warnings.append(ParseWarning("first_row_not_least_indented", "first row is not least indented", 1))
+            warnings.append(
+                ParseWarning("first_row_not_least_indented", "first row is not least indented", 1)
+            )
         for i, row in enumerate(rows):
             step = row.row.indent_step
             if step is None:
                 parents.append(stack[-1][0] if stack else None)
-                warnings.append(ParseWarning("missing_indent", "row lacks an indent step; attach to active context", i + 1))
+                warnings.append(
+                    ParseWarning(
+                        "missing_indent",
+                        "row lacks an indent step; attach to active context",
+                        i + 1,
+                    )
+                )
                 continue
             if previous_step is not None and step - previous_step > 1:
-                warnings.append(ParseWarning("skipped_indent", "indent jump exceeds one visual step", i + 1))
+                warnings.append(
+                    ParseWarning("skipped_indent", "indent jump exceeds one visual step", i + 1)
+                )
             while stack and stack[-1][1] >= step:
                 stack.pop()
             parents.append(stack[-1][0] if stack else None)
             stack.append((i, step))
             previous_step = step
     else:
-        warnings.append(ParseWarning("insufficient_indentation", "partial rules fallback: header nesting is unknown"))
+        warnings.append(
+            ParseWarning(
+                "insufficient_indentation", "partial rules fallback: header nesting is unknown"
+            )
+        )
         latest_header = None
         latest_item = None
         for i, row in enumerate(rows):
@@ -101,10 +115,17 @@ def build_hierarchy(typed_rows: tuple[TypedRow, ...]) -> Hierarchy:
     for i in reversed(range(len(rows))):
         parent = parents[i]
         nodes[i] = TreeRow(
-            i + 1, rows[i], parent + 1 if parent is not None else None,
+            i + 1,
+            rows[i],
+            parent + 1 if parent is not None else None,
             rows[parent].row.label if parent is not None else "",
-            " > ".join(rows[a].row.label for a in ancestors[i]), len(ancestors[i]),
+            " > ".join(rows[a].row.label for a in ancestors[i]),
+            len(ancestors[i]),
             tuple(nodes[c] for c in child_indices[i]),
         )
-    return Hierarchy(tuple(nodes[i] for i in range(len(rows))),
-                     tuple(nodes[i] for i in roots), source, tuple(warnings))
+    return Hierarchy(
+        tuple(nodes[i] for i in range(len(rows))),
+        tuple(nodes[i] for i in roots),
+        source,
+        tuple(warnings),
+    )

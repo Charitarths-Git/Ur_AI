@@ -36,23 +36,36 @@ class ParsedPage:
 
 
 def parse_layout(
-    layout: PageLayout, source_name: str, page_number: int = 1, backend: str = "pymupdf",
+    layout: PageLayout,
+    source_name: str,
+    page_number: int = 1,
+    backend: str = "pymupdf",
     rules: RuleSet = JA_FINANCIAL_STATEMENT,
 ) -> ParsedPage:
     """Pure assembly from a P4 layout; source provenance is supplied, never inferred."""
     hierarchy = build_hierarchy(classify_rows(layout, rules))
     metadata = extract_metadata(layout, rules)
-    return ParsedPage(Source(Path(source_name).name, page_number, backend), hierarchy.rows,
-                      hierarchy.tree, metadata.page, metadata.columns,
-                      hierarchy.warnings + metadata.warnings, hierarchy.hierarchy_source)
+    return ParsedPage(
+        Source(Path(source_name).name, page_number, backend),
+        hierarchy.rows,
+        hierarchy.tree,
+        metadata.page,
+        metadata.columns,
+        hierarchy.warnings + metadata.warnings,
+        hierarchy.hierarchy_source,
+    )
 
 
 def parse_page(
-    path: str | Path, page_number: int = 1, layout_config: LayoutConfig = LayoutConfig(),
+    path: str | Path,
+    page_number: int = 1,
+    layout_config: LayoutConfig = LayoutConfig(),
     rules: RuleSet = JA_FINANCIAL_STATEMENT,
 ) -> ParsedPage:
     raw = read_pdf_page(path, page_number, layout_config)
-    return parse_layout(reconstruct_page(raw, layout_config), Path(path).name, page_number, rules=rules)
+    return parse_layout(
+        reconstruct_page(raw, layout_config), Path(path).name, page_number, rules=rules
+    )
 
 
 def row_values(row: TreeRow, columns: tuple[RoleColumn, ...]) -> dict:
@@ -61,17 +74,35 @@ def row_values(row: TreeRow, columns: tuple[RoleColumn, ...]) -> dict:
     for column in columns:
         cell = cells.get(column.index)
         amount = cell.amount if cell else parse_amount("")
-        values[column.role] = {"raw": cell.raw if cell else "", "value": amount.value,
-                               "status": amount.status}
+        values[column.role] = {
+            "raw": cell.raw if cell else "",
+            "value": amount.value,
+            "status": amount.status,
+        }
     return values
 
 
 def csv_columns(page: ParsedPage) -> list[str]:
     standard = {c.role for c in page.columns} == {"previous_year", "current_year"}
-    values = ["previous_year_value", "current_year_value"] if standard else [c.role for c in page.columns]
-    raws = ["prev_raw", "curr_raw"] if standard else [f"raw_{i + 1}" for i in range(len(page.columns))]
-    return ["label", "parent", "level", "row_type", *values,
-            "row_id", "parent_row_id", "parent_path", *raws]
+    values = (
+        ["previous_year_value", "current_year_value"]
+        if standard
+        else [c.role for c in page.columns]
+    )
+    raws = (
+        ["prev_raw", "curr_raw"] if standard else [f"raw_{i + 1}" for i in range(len(page.columns))]
+    )
+    return [
+        "label",
+        "parent",
+        "level",
+        "row_type",
+        *values,
+        "row_id",
+        "parent_row_id",
+        "parent_path",
+        *raws,
+    ]
 
 
 def csv_bytes(page: ParsedPage) -> bytes:
@@ -84,26 +115,52 @@ def csv_bytes(page: ParsedPage) -> bytes:
     writer.writerow(columns)
     for row in page.rows:
         values = row_values(row, page.columns)
-        writer.writerow([row.label, row.parent, row.level, row.row_type,
-                         *(values[role]["value"] for role in roles), row.row_id, row.parent_row_id,
-                         row.parent_path, *(values[role]["raw"] for role in roles)])
+        writer.writerow(
+            [
+                row.label,
+                row.parent,
+                row.level,
+                row.row_type,
+                *(values[role]["value"] for role in roles),
+                row.row_id,
+                row.parent_row_id,
+                row.parent_path,
+                *(values[role]["raw"] for role in roles),
+            ]
+        )
     return stream.getvalue().encode("utf-8-sig")
 
 
 def json_document(page: ParsedPage) -> dict:
     def node(row):
-        return {"row_id": row.row_id, "label": row.label, "row_type": row.row_type,
-                "level": row.level, "values": row_values(row, page.columns),
-                "children": [node(child) for child in row.children]}
+        return {
+            "row_id": row.row_id,
+            "label": row.label,
+            "row_type": row.row_type,
+            "level": row.level,
+            "values": row_values(row, page.columns),
+            "children": [node(child) for child in row.children],
+        }
 
     return {
-        "schema_version": "1.0", "source": asdict(page.source),
-        "page": {"title": page.metadata.title, "correction_marker": page.metadata.correction_marker,
-                 "unit": page.metadata.unit, "unit_multiplier": page.metadata.unit_multiplier,
-                 "printed_page_number": page.metadata.printed_page_number},
-        "columns": [{"index": c.index, "role": c.role, "heading": c.heading,
-                     "period_end": date(*c.period_end).isoformat() if c.period_end else None}
-                    for c in page.columns],
+        "schema_version": "1.0",
+        "source": asdict(page.source),
+        "page": {
+            "title": page.metadata.title,
+            "correction_marker": page.metadata.correction_marker,
+            "unit": page.metadata.unit,
+            "unit_multiplier": page.metadata.unit_multiplier,
+            "printed_page_number": page.metadata.printed_page_number,
+        },
+        "columns": [
+            {
+                "index": c.index,
+                "role": c.role,
+                "heading": c.heading,
+                "period_end": date(*c.period_end).isoformat() if c.period_end else None,
+            }
+            for c in page.columns
+        ],
         "hierarchy_source": page.hierarchy_source,
         "warnings": [asdict(warning) for warning in page.warnings],
         "rows": [node(row) for row in page.tree],

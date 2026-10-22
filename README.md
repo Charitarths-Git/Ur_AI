@@ -2,8 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P4 — row reconstruction and visual indent clustering complete. GT is **VERIFIED**.
-> Next phase: P5 hierarchy and parent paths.
+> **Status**: P5–P6 — row types, hierarchy, metadata and CSV/JSON export complete. GT is **VERIFIED**.
+> Next phase: P7–P8 evaluation framework.
 
 ## Quick start
 
@@ -37,17 +37,24 @@ pytest
 │       ├── normalize.py   # Pure amount, label-matching and period helpers (P3)
 │       ├── layout_types.py # Frozen raw/layout structures and relative thresholds (P4)
 │       ├── pdf_backend.py # Replaceable PDF reader; package's only PyMuPDF import (P4)
-│       └── rows.py        # Pure visual reconstruction; no hierarchy or semantic roles (P4)
+│       ├── rows.py        # Pure visual reconstruction; no hierarchy or semantic roles (P4)
+│       ├── rules.py       # Replaceable language patterns (P5)
+│       ├── classify.py    # Row types, independent evidence and typed warnings (P5)
+│       ├── hierarchy.py   # Parent stack, paths and partial flat fallback (P5)
+│       ├── metadata.py    # Page metadata and chronological column roles (P5)
+│       └── export.py      # Parsed-page pipeline and deterministic CSV/JSON (P6)
 ├── tests/                 # Pytest test suite
 ├── scripts/               # CLI entry points and utilities
 │   ├── inspect_pdf.py     # PDF diagnostic tool (P1)
 │   ├── dump_rows.py       # Text diagnostic for rows, columns and layout evidence (P4)
+│   ├── parse_page.py      # PDF → typed tree → CSV and JSON (P5–P6)
 │   └── _console.py        # UTF-8 stdout/stderr startup shared by CLI scripts
 ├── data/
 │   ├── raw/               # Original PDFs (tracked in git)
 │   ├── gt/                # VERIFIED image-transcribed CSV, metadata and conventions (P2)
 │   └── derived/           # Rendered images, derived artifacts (tracked)
 ├── outputs/               # Generated CSV / JSON (git-ignored)
+├── examples/              # Committed real-page CSV and hierarchical JSON
 ├── eval/                  # Evaluation scripts and configs
 ├── notes/                 # Inspection findings and design notes
 ├── PROJECT_BRIEF.md       # Full task description and plan
@@ -65,8 +72,8 @@ pytest
 | P2 — Ground truth | Image-derived GT verified by human, no corrections ✅ |
 | P3 — Normalization | Pure amount, label-matching and period helpers with tests ✅ |
 | P4 — Row reconstruction | Relative row/column reconstruction, visual indent steps and rule evidence ✅ |
-| P5 — Hierarchy inference | Parent-path assignment from indentation + rules |
-| P6 — CSV and JSON export | Generate flat CSV and hierarchical JSON |
+| P5 — Hierarchy inference | Typed rows, parent paths, metadata and partial fallback ✅ |
+| P6 — CSV and JSON export | Deterministic flat CSV and hierarchical JSON; committed examples ✅ |
 | P7 — Evaluation metrics | Cell accuracy, structural accuracy, accounting checks |
 | P8 — End-to-end run | Failure analysis and robustness testing |
 | P9 — Independent review | Review by a different AI agent |
@@ -207,7 +214,7 @@ Columns come from repeated right edges across distinct rows, not token meaning.
 Aligned invalid amounts remain cells. Labels preserve extracted text and use
 geometric spaces; indent steps are raw visual clusters. Header/footer zones and
 horizontal rules are structural evidence. Parent paths, semantic levels and row
-types wait for P5; this phase does not export CSV/JSON or calculate evaluation
+types are supplied by the P5 stage below; P4 does not export CSV/JSON or calculate evaluation
 metrics. The P3 normalization module is unchanged.
 
 See [notes/row_reconstruction.md](notes/row_reconstruction.md) for the algorithm,
@@ -222,6 +229,90 @@ python -m pytest tests/test_rows.py
 python -m pytest
 python -m ruff check src/parser/layout_types.py src/parser/pdf_backend.py src/parser/rows.py scripts tests/test_rows.py
 ```
+
+## Full parsing and export pipeline (P5–P6)
+
+```text
+PDF → RawPage → PageLayout → classified rows → parent tree + metadata → CSV/JSON
+```
+
+```bash
+python scripts/parse_page.py data/raw/balance_sheet_after_correction.pdf
+python scripts/parse_page.py data/raw/balance_sheet_after_correction.pdf --page 1 --out-dir outputs
+```
+
+`--page` is one-based within the PDF. Outputs are named
+`balance_sheet_after_correction_p1.csv` and `.json`; the summary reports types,
+hierarchy source and warnings. UTF-8 console configuration is automatic.
+Identical committed samples are in [examples/](examples/). Only the supplied
+printed page 4 has been validated against real-document GT.
+
+The public PDF entry point is:
+
+```python
+from parser.export import parse_page
+from parser.layout_types import LayoutConfig
+from parser.rules import JA_FINANCIAL_STATEMENT
+
+page = parse_page(path, page_number=1, layout_config=LayoutConfig(),
+                  rules=JA_FINANCIAL_STATEMENT)
+```
+
+For an already reconstructed layout, `parse_layout(layout, source_name, ...)`
+performs pure assembly. `classify_rows`, `build_hierarchy` and `extract_metadata`
+are pure stages. `csv_bytes` and `json_bytes` return deterministic bytes;
+`write_exports(page, out_dir)` is the explicit file-writing boundary. ParsedPage
+is frozen and holds flat reading-order rows, a root forest, page metadata,
+role-bearing columns, typed warnings and hierarchy_source.
+
+Language-specific matching lives in the frozen RuleSet. The Japanese default
+contains total labels, subtotal/net suffixes, contra prefixes, unit patterns/map,
+correction markers and the page-number pattern. Matching uses label_key while
+output labels retain their exact printed form. Liability/equity labels, other
+units and other unobserved patterns remain untested real-document heuristics.
+See [notes/hierarchy_and_export.md](notes/hierarchy_and_export.md) for every
+pattern's validation status, independent evidence counts and limitations.
+
+With at least two visual indent steps, a preceding-row stack determines parents;
+level counts ancestors. Otherwise a deliberately partial, warned rules fallback
+is used. It cannot recover unknown header nesting. Conflicting label/evidence
+signals emit warnings without overriding the label type. Structural type_source
+and evidence remain available via each parsed row's `.typed` record.
+
+Page metadata comes from header/footer zones. Exported column headings exclude
+unit lines. Exactly two distinct dates determine previous/current roles by date,
+otherwise columns use value_1..value_N and warn. Unit multipliers are metadata
+only: financial values are never scaled.
+
+The CSV uses **UTF-8 with BOM**, with this exact column order:
+
+```text
+label,parent,level,row_type,previous_year_value,current_year_value,row_id,parent_row_id,parent_path,prev_raw,curr_raw
+```
+
+Generic roles instead use value_1..value_N and raw_1..raw_N. Row IDs are one-based
+among body rows. Parent paths join printed ancestor labels with ` > `. Nil and
+header values are empty CSV fields; raw nil marks and printed negative zero are
+preserved. Invalid values stay empty with raw retained and an invalid JSON status.
+
+The JSON uses UTF-8, schema_version `1.0`, stable key order, ensure_ascii=False
+and indent=2. Top-level fields are source (file basename/PDF page/backend), page
+(title/correction/unit/multiplier/printed page), columns (index/role/cleaned
+heading/ISO date), hierarchy_source, warnings and rows. Every tree node contains
+row_id, label, row_type, level, values keyed by role (raw/value/status), and
+children. Nil values are JSON null; header cells have empty status. There are
+no timestamps or absolute paths. Generated samples use enforced LF line endings.
+
+```bash
+python -m pytest
+python -m ruff check src/parser scripts tests/test_hierarchy.py tests/test_metadata.py tests/test_export.py
+```
+
+The report documents all 43 rows' GT agreement, byte invariance under six
+coordinate transformations and a flat-indentation ablation. That ablation retains
+row types/values but only 38 of 43 parent links, illustrating the partial fallback;
+it is not a general accuracy claim. Evaluation metrics and robustness assessment
+remain P7–P8 work.
 
 ## License
 

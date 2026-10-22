@@ -11,13 +11,13 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
+from test_hierarchy import layout, row
+from test_rows import transform
 
 from parser.export import csv_bytes, csv_columns, json_bytes, parse_layout, parse_page, row_values
 from parser.normalize import parse_period_end
 from parser.pdf_backend import read_pdf_page
 from parser.rows import reconstruct_page
-from test_hierarchy import layout, row
-from test_rows import transform
 
 ROOT = Path(__file__).resolve().parents[1]
 PDF = ROOT / "data/raw/balance_sheet_after_correction.pdf"
@@ -73,7 +73,9 @@ def flatten_indentation(raw):
             continue
         shift = common - r.label_x0
         for w in r.source_words:
-            if not any(abs(w.x1 - c.x1_centre) <= page.thresholds.column_tolerance for c in page.columns):
+            if not any(
+                abs(w.x1 - c.x1_centre) <= page.thresholds.column_tolerance for c in page.columns
+            ):
                 replacements[w] = replace(w, x0=w.x0 + shift, x1=w.x1 + shift)
     return replace(raw, words=tuple(replacements.get(w, w) for w in raw.words))
 
@@ -94,7 +96,9 @@ def test_real_page_all_fields_and_metadata_match_gt(parsed):
     print("Real-page warnings:", parsed.warnings)
 
 
-@pytest.mark.parametrize("mode", ["shuffle", "translate", "scale_small", "scale_large", "combined", "jitter"])
+@pytest.mark.parametrize(
+    "mode", ["shuffle", "translate", "scale_small", "scale_large", "combined", "jitter"]
+)
 def test_pipeline_byte_invariance(raw_page, parsed, mode):
     changed = parse_layout(reconstruct_page(transform(raw_page, mode)), PDF.name)
     assert csv_bytes(changed) == csv_bytes(parsed)
@@ -114,9 +118,18 @@ def test_flat_indent_ablation(raw_page):
             assert values[role]["value"] == expected
     # Parent agreement is a diagnostic, not an ablation accuracy assertion.
     parents = expected_parent_ids(gt)
-    print("Ablation parents correct:", sum(r.parent_row_id == p for r, p in zip(changed.rows, parents, strict=True)))
-    print("Ablation errors:", [(r.row_id, r.label, g["row_type"], r.parent_row_id, p)
-                              for r, g, p in zip(changed.rows, gt, parents, strict=True) if r.parent_row_id != p])
+    print(
+        "Ablation parents correct:",
+        sum(r.parent_row_id == p for r, p in zip(changed.rows, parents, strict=True)),
+    )
+    print(
+        "Ablation errors:",
+        [
+            (r.row_id, r.label, g["row_type"], r.parent_row_id, p)
+            for r, g, p in zip(changed.rows, gt, parents, strict=True)
+            if r.parent_row_id != p
+        ],
+    )
 
 
 def flatten_json(nodes, parent=None, ancestors=()):
@@ -131,9 +144,19 @@ def test_csv_schema_json_tree_nulls_and_determinism(parsed):
     data = csv_bytes(parsed)
     assert data.startswith(b"\xef\xbb\xbf")
     reader = csv.DictReader(io.StringIO(data.decode("utf-8-sig")))
-    assert reader.fieldnames == ["label", "parent", "level", "row_type", "previous_year_value",
-                                "current_year_value", "row_id", "parent_row_id", "parent_path",
-                                "prev_raw", "curr_raw"]
+    assert reader.fieldnames == [
+        "label",
+        "parent",
+        "level",
+        "row_type",
+        "previous_year_value",
+        "current_year_value",
+        "row_id",
+        "parent_row_id",
+        "parent_path",
+        "prev_raw",
+        "curr_raw",
+    ]
     rows = list(reader)
     doc = json.loads(json_bytes(parsed))
     assert doc["schema_version"] == "1.0"
@@ -149,7 +172,9 @@ def test_csv_schema_json_tree_nulls_and_determinism(parsed):
         for role, raw_key in [("previous_year", "prev_raw"), ("current_year", "curr_raw")]:
             value = node["values"][role]
             assert value["raw"] == flat[raw_key]
-            assert (str(value["value"]) if value["value"] is not None else "") == flat[role + "_value"]
+            assert (str(value["value"]) if value["value"] is not None else "") == flat[
+                role + "_value"
+            ]
             if value["raw"] == "－":
                 assert value["value"] is None and value["status"] == "nil"
     assert csv_bytes(parsed) == data
@@ -162,8 +187,19 @@ def test_invalid_status_and_generic_value_columns():
     base = layout([row("Root", 0), row("Invalid", 1, ("1.5", "－"))])
     generic = replace(base, columns=tuple(replace(c, period_end=None) for c in base.columns))
     page = parse_layout(generic, "synthetic.pdf")
-    assert csv_columns(page) == ["label", "parent", "level", "row_type", "value_1", "value_2",
-                                 "row_id", "parent_row_id", "parent_path", "raw_1", "raw_2"]
+    assert csv_columns(page) == [
+        "label",
+        "parent",
+        "level",
+        "row_type",
+        "value_1",
+        "value_2",
+        "row_id",
+        "parent_row_id",
+        "parent_path",
+        "raw_1",
+        "raw_2",
+    ]
     doc = json.loads(json_bytes(page))
     invalid = doc["rows"][0]["children"][0]["values"]
     assert invalid["value_1"] == {"raw": "1.5", "value": None, "status": "invalid"}
@@ -172,8 +208,13 @@ def test_invalid_status_and_generic_value_columns():
 
 def test_reversed_column_dates_map_values_by_role():
     base = layout([row("Root", 0), row("Item", 1, ("202", "101"))])
-    swapped = replace(base, columns=tuple(replace(c, period_end=base.columns[1 - i].period_end)
-                                          for i, c in enumerate(base.columns)))
+    swapped = replace(
+        base,
+        columns=tuple(
+            replace(c, period_end=base.columns[1 - i].period_end)
+            for i, c in enumerate(base.columns)
+        ),
+    )
     page = parse_layout(swapped, "synthetic.pdf")
     record = list(csv.DictReader(io.StringIO(csv_bytes(page).decode("utf-8-sig"))))[1]
     assert record["previous_year_value"] == "101"
@@ -184,17 +225,35 @@ def test_parse_page_wrapper_and_committed_examples(parsed):
     fresh = parse_page(PDF)
     assert csv_bytes(fresh) == csv_bytes(parsed)
     assert json_bytes(fresh) == json_bytes(parsed)
-    assert (ROOT / "examples/balance_sheet_after_correction_p1.csv").read_bytes() == csv_bytes(fresh)
-    assert (ROOT / "examples/balance_sheet_after_correction_p1.json").read_bytes() == json_bytes(fresh)
+    assert (ROOT / "examples/balance_sheet_after_correction_p1.csv").read_bytes() == csv_bytes(
+        fresh
+    )
+    assert (ROOT / "examples/balance_sheet_after_correction_p1.json").read_bytes() == json_bytes(
+        fresh
+    )
 
 
 def test_cli_without_encoding_environment(tmp_path):
     env = dict(os.environ)
     env.pop("PYTHONIOENCODING", None)
     env.pop("PYTHONUTF8", None)
-    result = subprocess.run([sys.executable, "-X", "utf8=0", str(ROOT / "scripts/parse_page.py"),
-                             str(PDF), "--page", "1", "--out-dir", str(tmp_path)],
-                            env=env, cwd=ROOT, capture_output=True, timeout=60)
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8=0",
+            str(ROOT / "scripts/parse_page.py"),
+            str(PDF),
+            "--page",
+            "1",
+            "--out-dir",
+            str(tmp_path),
+        ],
+        env=env,
+        cwd=ROOT,
+        capture_output=True,
+        timeout=60,
+    )
     assert result.returncode == 0, result.stderr.decode("utf-8", errors="replace")
     for suffix in ["csv", "json"]:
         name = f"balance_sheet_after_correction_p1.{suffix}"

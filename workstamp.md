@@ -83,21 +83,42 @@ Orientation (repo state, test count before this prompt); the public API; the Rul
 5. [x] Extract metadata and date-based column roles, with clean headings; commit section 5.
 6. [x] Implement pure parsing pipeline/export serialization, CLI and committed examples; commit section 6.
 7. [x] Add synthetic, real GT, byte-invariance, ablation/export/CLI/example tests; commit section 7.
-8. [~] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
-9. [ ] Full suite then ruff; integrity checks; final commit and DONE handoff.
+8. [x] Document patterns, evidence counts, ablation, schemas and limitations; commit section 8.
+9. [~] Full suite then ruff; integrity checks; final commit and DONE handoff.
 
 ## Files created or modified
 
-- workstamp.md — P5-P6 verbatim prompt, plan and orientation.
+- notes/inspection.md — Q5 five-step/root correction, separate fix commit.
+- src/parser/rules.py — immutable replaceable RuleSet and Japanese default.
+- src/parser/classify.py — ordered row types, independent evidence and typed warnings.
+- src/parser/hierarchy.py — explicit parent-stack tree and partial flat fallback.
+- src/parser/metadata.py — unit-line cleanup, header/footer metadata and date-based roles.
+- src/parser/export.py — frozen ParsedPage, pure assembly/serializers and I/O wrappers.
+- scripts/parse_page.py — UTF-8 CLI writing both deliverables and summary.
+- examples/balance_sheet_after_correction_p1.csv and .json — real-page generated outputs.
+- .gitattributes — LF for example bytes across operating systems.
+- tests/test_hierarchy.py, test_metadata.py, test_export.py — synthetic and end-to-end coverage.
+- notes/hierarchy_and_export.md — algorithms, RuleSet validation status, evidence and ablation.
+- README.md — pipeline, CLI, APIs, schemas, examples and P7-P8 next phase.
+- workstamp.md — verbatim prompt, section-by-section progress and evidence.
 
 ## Last action and result
+
+New files formatted and scoped ruff cleanup passed. Preparing full suite then
+ruff on package/scripts/new tests. Pytest needs unsandboxed temp-directory access
+for its CLI fixture; no test assertions or fixtures were weakened.
+
+Section 8 docs complete: all pattern validation limits, algorithms, evidence
+counts, measured 38/43-parent ablation, deterministic schemas and limitations.
+README updated with full pipeline/CLI/API and samples. Test commit 8cc4dbf.
 
 Targeted 56 tests passed in 3.41s outside sandbox after pytest temporary-directory
 setup was blocked there (55 passed before setup error). No assertions weakened.
 Added one metadata edge-case regression: date-only headers are not titles.
 GT all 10 row fields match 43/43. Real warnings empty. Six CSV/JSON transform
-cases pass byte-for-byte. Flat ablation reports 39/43 correct parent IDs, with
-three subsection headers and fixed-assets subtotal wrong; types/values unchanged.
+cases pass byte-for-byte. Flat ablation measurement is 38/43 correct parent IDs: three subsection headers,
+fixed-assets subtotal and allowance contra row are wrong; types/values unchanged.
+A provisional 39/43 note was corrected to the actual diagnostic output.
 Section 6 commit d466446.
 
 Section 6 pipeline/serializers/CLI smoke run succeeded: generated both required
@@ -141,7 +162,7 @@ Q5 indent-count statement and unit-line contamination will be fixed separately.
 
 ## Next action
 
-Document RuleSet validation limits, evidence counts, ablation, schemas and decisions.
+Format new files, run full suite then ruff, verify protected data and examples, finalize.
 
 ## Prompt history
 

@@ -38,13 +38,17 @@ def classify_row(
 ) -> TypedRow:
     numeric = [c for c in row.cells if c.amount.status == "ok"]
     evidence = StructuralEvidence(
-        row.rule_above, bool(numeric) and all(c.amount.negative for c in numeric),
-        not row.cells, any(c.amount.negative for c in numeric),
+        row.rule_above,
+        bool(numeric) and all(c.amount.negative for c in numeric),
+        not row.cells,
+        any(c.amount.negative for c in numeric),
     )
     source = "label_rule"
     if evidence.no_cells:
         kind, source = "header", "structural"
-    elif rules.exact(row.label, rules.total_labels) or rules.suffix(row.label, rules.total_suffixes):
+    elif rules.exact(row.label, rules.total_labels) or rules.suffix(
+        row.label, rules.total_suffixes
+    ):
         kind = "total"
     elif rules.suffix(row.label, rules.net_suffixes):
         kind = "net"
@@ -56,16 +60,26 @@ def classify_row(
         kind, source = ("contra" if evidence.all_negative_cells else "line_item"), "structural"
     warnings = []
     if kind in {"subtotal", "net", "total"} and not evidence.rule_above:
-        warnings.append(ParseWarning("missing_rule_above", f"{kind} label has no rule above", row_id))
+        warnings.append(
+            ParseWarning("missing_rule_above", f"{kind} label has no rule above", row_id)
+        )
     if kind == "contra" and not evidence.has_negative_cells:
-        warnings.append(ParseWarning("contra_without_negative", "contra label has no negative numeric cell", row_id))
+        warnings.append(
+            ParseWarning(
+                "contra_without_negative", "contra label has no negative numeric cell", row_id
+            )
+        )
     if row.cells and not row.label:
-        warnings.append(ParseWarning("unlabeled_value_row", "value row has no printed label", row_id))
+        warnings.append(
+            ParseWarning("unlabeled_value_row", "value row has no printed label", row_id)
+        )
     return TypedRow(row, kind, source, evidence, tuple(warnings))
 
 
 def classify_rows(
     layout: PageLayout, rules: RuleSet = JA_FINANCIAL_STATEMENT
 ) -> tuple[TypedRow, ...]:
-    return tuple(classify_row(row, rules, index) for index, row in
-                 enumerate((r for r in layout.rows if r.zone == "body"), 1))
+    return tuple(
+        classify_row(row, rules, index)
+        for index, row in enumerate((r for r in layout.rows if r.zone == "body"), 1)
+    )

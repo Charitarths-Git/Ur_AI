@@ -20,8 +20,14 @@ class RuleSet:
     page_number_pattern: str = r"(?!)"
 
     def __post_init__(self):
-        for name in ("total_labels", "total_suffixes", "subtotal_suffixes", "net_suffixes",
-                     "contra_labels", "correction_markers"):
+        for name in (
+            "total_labels",
+            "total_suffixes",
+            "subtotal_suffixes",
+            "net_suffixes",
+            "contra_labels",
+            "correction_markers",
+        ):
             value = getattr(self, name)
             if name == "correction_markers":
                 value = tuple(tuple(pair) for pair in value)
