@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P7-P8 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T23:09:01Z |
+| Updated | 2026-10-22T23:41:02Z |
 
 ## Current prompt (verbatim)
 
@@ -87,7 +87,7 @@ Orientation (repo state, test count before this prompt); the public API and the 
 7. [x] Document observed failure analysis, separated from untested expectations; commit section 7.
 8. [x] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
 9. [x] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
-10. [~] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
+10. [x] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
 
 ## Files created or modified
 
@@ -112,6 +112,10 @@ Orientation (repo state, test count before this prompt); the public API and the 
 - workstamp.md — verbatim request, plan, results, boundaries and handoff.
 
 ## Last action and result
+
+P7-P8 complete. Sections 1–9 committed; all requested real-page reports,
+360 sweeps, six ablations and 3,817 faults recorded. Final tests/lint/integrity
+checks pass. No existing parser behavior changed. P9 has not started.
 
 Full suite: 275 passed in 8.73s (baseline 223). Full-tree ruff check src scripts
 tests eval: All checks passed! Scoped formatting applied; no assertion weakened.
@@ -180,7 +184,7 @@ identical GT paths. Pytest fixtures need unsandboxed temp access in this environ
 
 ## Next action
 
-Run full suite and ruff, verify protected bytes, then finalize P7-P8 and hand off to independent review (P9).
+independent review (P9)
 
 ## Prompt history
 
@@ -192,6 +196,7 @@ Run full suite and ruff, verify protected bytes, then finalize P7-P8 and hand of
 | P3 | Pure normalization utilities, 129 new tests; full suite 141 passed; GT unchanged | b41840c |
 | P4 | Pure relative row/column/indent reconstruction, GT matched; 166 tests pass | 2582b5d |
 | P5-P6 | Typed rows, parent tree, metadata and deterministic exports; 223 tests pass; GT unchanged | 2f6fa06 |
+| P7-P8 | Independent file evaluator, label-free accounting, deterministic robustness/fault experiments, failure analysis; 275 tests pass; protected files unchanged | Final commit hash recorded in the next metadata-only handoff commit |
 
 ## Sessions
 
