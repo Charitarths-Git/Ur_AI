@@ -83,8 +83,8 @@ Orientation (repo state, test count before this prompt); the public API and the 
 3. [x] Implement metrics, mismatch records and aggregation with denominators; commit section 3.
 4. [x] Implement label-free accounting, replaceable tolerance and truncation diagnostics; commit section 4.
 5. [x] Generate JSON/Markdown reports and evaluator CLI; commit section 5.
-6. [~] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
-7. [ ] Document observed failure analysis, separated from untested expectations; commit section 7.
+6. [x] Implement deterministic perturbations, geometry/ablation sweeps and exhaustive fault injection; run and commit section 6.
+7. [~] Document observed failure analysis, separated from untested expectations; commit section 7.
 8. [ ] Test evaluator/accounting/perturbations/faults/CLI against synthetic and real files; commit section 8.
 9. [ ] Document formulas, accounting derivation, designs, limitations and README commands; commit section 9.
 10. [ ] Full suite then ruff, final integrity checks, completion commit and DONE handoff.
@@ -94,6 +94,12 @@ Orientation (repo state, test count before this prompt); the public API and the 
 - workstamp.md — verbatim P7-P8 request, numbered plan and boundaries.
 
 ## Last action and result
+
+Section 6 full experiment ran: 360 sweeps, all 20 seeds retained, no crashes.
+First tested degradation y=0.2H, x=0.3H. All six ablations completed. Numeric
+coverage 72/72; faults=3817; digit detection3256/3673, sign71/72, nil71/72.
+Units digit249/648; higher3007/3025. Helpers moved from tests, unchanged
+existing assertions; 35 helper/integration tests passed (3 CLI deselected here).
 
 Real-file JSON/Markdown reports generated: GT metrics perfect; accounting
 7 exact +13 within tolerance, 2 balance N/A; 20/20 truncation intervals agree.
@@ -130,7 +136,7 @@ No new known issue yet. Pytest CLI fixtures previously needed unsandboxed temp a
 
 ## Next action
 
-Implement deterministic perturbation sweeps, ablations and exhaustive value faults.
+Write failure analysis from actual sweep records, ablations and hidden faults.
 
 ## Prompt history
 

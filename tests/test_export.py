@@ -14,6 +14,7 @@ import pytest
 from test_hierarchy import layout, row
 from test_rows import transform
 
+from parser.evaluation.perturb import flatten_indentation
 from parser.export import csv_bytes, csv_columns, json_bytes, parse_layout, parse_page, row_values
 from parser.normalize import parse_period_end
 from parser.pdf_backend import read_pdf_page
@@ -62,22 +63,6 @@ def comparison_counts(page, gt):
             counts[prefix + "_raw"] += values[role]["raw"] == g[prefix + "_raw"]
     return dict(counts)
 
-
-def flatten_indentation(raw):
-    """Controlled ablation: move label ink only, keeping values/headings/rules fixed."""
-    page = reconstruct_page(raw)
-    common = min(r.label_x0 for r in page.rows if r.zone == "body" and r.label_x0 is not None)
-    replacements = {}
-    for r in page.rows:
-        if r.zone != "body" or r.label_x0 is None:
-            continue
-        shift = common - r.label_x0
-        for w in r.source_words:
-            if not any(
-                abs(w.x1 - c.x1_centre) <= page.thresholds.column_tolerance for c in page.columns
-            ):
-                replacements[w] = replace(w, x0=w.x0 + shift, x1=w.x1 + shift)
-    return replace(raw, words=tuple(replacements.get(w, w) for w in raw.words))
 
 
 def test_real_page_all_fields_and_metadata_match_gt(parsed):

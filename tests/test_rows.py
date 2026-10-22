@@ -4,7 +4,6 @@ import ast
 import csv
 import json
 import os
-import random
 import subprocess
 import sys
 from collections import Counter
@@ -13,6 +12,7 @@ from pathlib import Path
 
 import pytest
 
+from parser.evaluation.perturb import transform
 from parser.layout_types import LayoutConfig, RawPage, Rule, Word
 from parser.normalize import label_key, parse_period_end
 from parser.pdf_backend import read_pdf_page
@@ -89,47 +89,6 @@ def signature(layout):
         tuple((c.index, c.heading, c.period_end) for c in layout.columns),
     )
 
-
-def transform(page, mode):
-    rng = random.Random(813)
-    scale, dx, dy = 1, 0, 0
-    if mode == "translate":
-        dx, dy = -240, 375
-    elif mode == "scale_small":
-        scale = 0.45
-    elif mode == "scale_large":
-        scale = 2.75
-    elif mode == "combined":
-        scale, dx, dy = 1.7, 220, -400
-    words = []
-    h = reconstruct_page(page).thresholds.median_word_height
-    for w in page.words:
-        jx, jy = (rng.uniform(-0.015, 0.015) * h for _ in range(2)) if mode == "jitter" else (0, 0)
-        words.append(
-            replace(
-                w,
-                x0=w.x0 * scale + dx + jx,
-                x1=w.x1 * scale + dx + jx,
-                y0=w.y0 * scale + dy + jy,
-                y1=w.y1 * scale + dy + jy,
-                size=w.size * scale if w.size is not None else None,
-            )
-        )
-    rules = [
-        replace(
-            r,
-            x0=r.x0 * scale + dx,
-            x1=r.x1 * scale + dx,
-            y0=r.y0 * scale + dy,
-            y1=r.y1 * scale + dy,
-            height=r.height * scale,
-        )
-        for r in page.rules
-    ]
-    if mode in {"shuffle", "combined", "jitter"}:
-        rng.shuffle(words)
-        rng.shuffle(rules)
-    return RawPage(page.width * scale, page.height * scale, words, rules)
 
 
 def test_synthetic_cells_labels_zones_and_evidence():
