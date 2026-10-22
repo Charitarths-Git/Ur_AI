@@ -113,7 +113,8 @@ Orientation (repo state, test count before this prompt); the public API and the 
 
 ## Last action and result
 
-P7-P8 complete. Sections 1–9 committed; all requested real-page reports,
+P7-P8 complete. Final implementation commit f3dcc47251642cb368bf5f69aab3c82df7ae9534.
+Sections 1–9 committed; all requested real-page reports,
 360 sweeps, six ablations and 3,817 faults recorded. Final tests/lint/integrity
 checks pass. No existing parser behavior changed. P9 has not started.
 
@@ -196,7 +197,7 @@ independent review (P9)
 | P3 | Pure normalization utilities, 129 new tests; full suite 141 passed; GT unchanged | b41840c |
 | P4 | Pure relative row/column/indent reconstruction, GT matched; 166 tests pass | 2582b5d |
 | P5-P6 | Typed rows, parent tree, metadata and deterministic exports; 223 tests pass; GT unchanged | 2f6fa06 |
-| P7-P8 | Independent file evaluator, label-free accounting, deterministic robustness/fault experiments, failure analysis; 275 tests pass; protected files unchanged | Final commit hash recorded in the next metadata-only handoff commit |
+| P7-P8 | Independent file evaluator, label-free accounting, deterministic robustness/fault experiments, failure analysis; 275 tests pass; protected files unchanged | f3dcc47251642cb368bf5f69aab3c82df7ae9534 |
 
 ## Sessions
 
