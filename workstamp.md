@@ -4,90 +4,90 @@
 
 | Field | Value |
 |---|---|
-| Prompt | P10 |
-| State | DONE |
+| Prompt | P10b |
+| State | IN PROGRESS |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T10:45:00Z |
+| Updated | 2026-10-23T11:00:40+00:00 |
 
 ## Current prompt (verbatim)
 
-The P9 review is good and nobody needs to redo it. On a read-through the summary is credible: it verified 14 builder claims by running things (clean-clone install, determinism, protected files, GT-leak, test-weakening) and found two real major defects. I also checked the two worked examples in failure_analysis.md by hand (changing 2,002,429 to 2,002,439 moves the 10-addend residual from +3 to −7, and the units-digit case lands exactly on the ±10 boundary) and both hold.
+P10b: Audit the P10 fixes and close the small gaps. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P10b IN PROGRESS, mark steps [~]/[x] as you go, and make small commits ("fix(P10b): ...", "test(P10b): ...", "docs(P10b): ..."). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure. If this is a new session: first run git status, git log -8 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8. Explain decisions as you go.
 
-The review’s fix list needs three adjustments before it goes to Codex.
+## Context
+The fixes from the independent review (notes/review_P9.md) were NOT applied by you: they were applied in a different tool and session (commits 5565491 and d51c47f, tests 275 -> 282), by the same agent that wrote the review. You are now the independent auditor, and you built the original code. Do not redo the fixes. Verify them. Do not modify data/gt/, data/raw/ or the PDF. Do not weaken or delete any test. Do not tune any threshold to page-4 numbers.
 
-F2 (gross item with a contra child but no net row). The list says “document + add test”. That leaves a known false-failure bug in place. It’s a small fix: the contribution should be gross plus its contra children when there’s no net row. P10 below implements it.
-F10 (chat_logs/). Don’t add it to .gitignore. Your chat logs are a required deliverable, and ignoring the folder wouldn’t remove the 430 KB transcript from git history anyway. P10 skips this fix, and you handle it manually (steps below).
-F4 and F5 are the same weakness, and F5 (columns) isn’t in the fix list as its own item. The cliff at x-jitter 0.3 H comes from the same running-median clustering as the y-jitter cliff. P10 replaces it with gap-based clustering for rows and columns together, then re-measures both sweeps. If the numbers don’t improve, the report has to say so.
+## A. Audit table (first, before any change)
+For each requirement below, report PASS / PARTIAL / MISSING with evidence (file:line, a test name, or command output). Put the table in notes/p10_audit.md.
+1. eval/results/baseline_P8/ holds the P8 results and was committed BEFORE the code changes (check git history order).
+2. F2: contribution = net child, else own value plus contra children values; tests for gross+contra with no net row, with a net row, nil and invalid cases, nested case; page-4 accounting still 20/20 with the same residuals.
+3. F1: no structural contra classification; a non-listed label with all-negative cells gives line_item plus the warning code possible_contra_or_loss (on the row and the page); page 4 has 5 contra rows by label rule and ZERO warnings; notes/hierarchy_and_export.md updated.
+4. F3: evaluable_fraction in accounting_summary(); pass rate N/A when nothing is evaluable; both shown in the headline of the markdown and JSON reports AND in every robustness table (mean and minimum over seeds); tests for the zero-evaluable and the mixed case.
+5. F4+F5: one shared gap-based clustering helper used for rows, value-column right edges and (if applicable) indent steps; a synthetic test with row pitch about 1.3 word heights plus jitter; regression tests recreating the two measured failures (x-jitter 0.3 H seed 1: two columns with correct roles; y-jitter 0.2 H seed 11: the lease accumulated-depreciation row stays intact); all invariance tests pass; examples/ byte-identical to before P10.
+6. F7+F9: no_columns_detected warning, one-column warning, a correct empty-input hierarchy warning; tests for a one-column page, an empty page and a page with no body.
+7. Fault-injection oracle test: a hand-written tree (about four addends, a subtotal and one net row) with a brute-force detector written INSIDE the test, compared with the library's counts; plus an assertion that the number of injected digit faults on the real page equals the number derived from the digit counts of the printed numeric cells.
+8. F8: structured issues from read_table.
+9. Docs: README, notes/evaluation_design.md and notes/failure_analysis.md updated with a before/after table (baseline_P8 versus now) for the x and y sweeps (mean and worst cell accuracy, row F1, parent accuracy, accounting pass rate, evaluable_fraction), the ablations and the fault injection.
+10. Unchanged on page 4: GT metrics all 1.0, accounting 20/20, examples byte-identical, protected files unchanged (show the git diff --stat against commit 1b6d244 for data/ and examples/).
 
-I also added a small independent test: a brute-force check of the fault-injection detection logic on a toy tree. The review didn’t read faults.py, perturb.py or robustness.py, and those produce your headline detection numbers.
+## B. Close gaps
+For every PARTIAL or MISSING item that is small, close it: add the missing tests, add the missing report fields, fix the docs. If a requirement was met in a different but acceptable way, say so and do not rewrite it.
 
-The review also found two things to keep for your write-up: the loss-row misclassification (営業損失 becomes contra) and the missing coverage metric.
+## C. Diagnose the remaining degradation (diagnosis first, change only if principled)
+1. At y-jitter 0.2 H and 0.3 H: explain exactly which rows split or merge and why (consecutive-gap threshold versus the within-row spread of two independently jittered words).
+2. At x-jitter 0.3 H: attribute the remaining errors to value-column detection versus indent-step clustering versus label token merging (count rows affected per cause over the 20 seeds).
+3. If the diagnosis points to thresholds measured in word heights where the relevant separation is a pitch (row pitch for rows, indent pitch for indent steps, column separation for columns), you MAY implement a data-derived threshold (a fraction of the median pitch measured on the page, with a documented minimum and maximum). Keep the change ONLY if: all existing tests pass; page-4 outputs stay byte-identical; the sweeps improve and nothing regresses; and the principle is documented. Otherwise revert it and document the finding as a known limitation. Stop at the first problem. Re-run eval/run_robustness.py and update the before/after table.
 
-do the above work quickly and give a respinse
+## D. Records and finish
+- In workstamp.md record that the P10 fixes were applied in a different session and tool, and add P10b to the Prompt history.
+- Final commit "P10b: audit of P10 fixes and gap closing"; workstamp.md DONE with "Next action: write-up (P11) and final checks (P13)"; push is NOT required.
 
-## Plan for this prompt (P10)
+## Final message must show
+Orientation; the audit table (status per requirement); the gaps closed (with commits); the diagnosis for the y and x degradation; whether a pitch-based threshold was implemented and the before/after sweep numbers (or why not); confirmation of page-4 results and byte-identical examples; test and ruff output; known limitations; open questions.
 
-1. [x] F1: Fix structural contra fallback in classify.py (classify as line_item with possible_contra_or_loss warning when not matching contra_labels). Add tests.
-2. [x] F2: Fix accounting contribution in accounting.py when gross item has contra children but no net child. Add tests.
-3. [x] F3: Add evaluable_fraction to accounting_summary() and update markdown_report(). Add tests.
-4. [x] F4 + F5: Replace running-median clustering in rows.py with gap-based clustering for both rows and columns. Verify existing tests pass.
-5. [x] F8: Structured schema error handling in read_table() in data.py instead of raising ValueError. Add tests.
-6. [x] F9: Emit no_columns_detected warning when centres is empty in reconstruct_page(). Add tests.
-7. [x] Brute-force fault injection test on a toy tree (in test_perturbation.py and review_probes.py).
-8. [x] Re-run eval and robustness sweep, update eval/results/ and record impact.
-9. [x] Run full test suite and ruff checks (282 passed, ruff clean).
-10. [x] Final commit "P10: apply review fixes", update workstamp.md to DONE, push.
+## Additional notes (these override the sections above where they conflict)
+- Since the audit table was drafted, commit 7f5afbd added a seed=11 jitter regression test and the suite has 283 tests. Use the real state.
+- In audit item 4, check the robustness markdown and JSON tables specifically: a grep of eval/results/*.md finds evaluable_fraction only in page4_report.md. The tables in robustness_report.md (and its JSON) must show evaluable_fraction (mean and minimum over seeds) next to the accounting pass rate.
+- In audit item 5, also confirm there is a regression test for x-jitter 0.3 H seed 1 (two columns, correct roles), not only seed 11 for y.
+- Time-box Section C (the pitch-based threshold): if it is not clearly working after about 20 minutes of effort, revert it, keep the diagnosis, and document the limitation. Do not leave the repo in a half-changed state.
+
+## Plan for this prompt
+
+1. [x] Audit real P10 history, source, tests, reports and protected bytes before changes; baseline suite and initial audit table.
+2. [~] Close report/coverage gaps and add independent accounting, warnings, geometry and fault-oracle tests without weakening existing tests.
+3. [ ] Diagnose y=0.2/0.3H and x=0.3H over all seeds; time-box any pitch experiment, keep only with all acceptance conditions met.
+4. [ ] Regenerate parse/evaluation/robustness, document complete P8/P10/current comparisons and update design/README/audit.
+5. [ ] Full suite, ruff, determinism/protected checks, final commit and DONE handoff.
 
 ## Files created or modified
 
-- src/parser/classify.py — F1: all-negative fallback classifies as line_item with possible_contra_or_loss ParseWarning.
-- src/parser/evaluation/accounting.py — F2: gross with contra children and no net child contributes gross + contras; F3: evaluable_fraction in accounting_summary.
-- src/parser/evaluation/data.py — F8: read_table returns Table with issues on missing CSV fields instead of raising ValueError.
-- src/parser/evaluation/report.py — F3: display evaluable_fraction in markdown_report.
-- src/parser/export.py — forward layout.warnings into ParsedPage.warnings.
-- src/parser/layout_types.py — define ParseWarning and add warnings field to PageLayout.
-- src/parser/rows.py — F4/F5: gap-based clustering in _clusters(); F9: emit no_columns_detected warning when centres is empty.
-- eval/results/page4_report.json, eval/results/page4_report.md — regenerated with evaluable_fraction.
-- eval/results/robustness_report.json, eval/results/robustness_report.md — regenerated with gap-based clustering sweeps.
-- tests/test_accounting.py — tests for F2 contribution and F3 evaluable_fraction.
-- tests/test_evaluation.py — test for F8 read_table structured schema errors.
-- tests/test_hierarchy.py — tests for F1 loss-row classification and warning.
-- tests/test_perturbation.py — brute-force fault injection check on a toy tree.
-- tests/test_rows.py — test for F9 no_columns_detected warning.
-- notes/review_probes.py — added PROBE 9 (brute force toy tree fault injection).
-- workstamp.md — updated to DONE with P10 history.
+- notes/p10_audit.md — initial audit with before-change evidence and gap list.
+- workstamp.md — verbatim P10b request, overrides and plan.
 
 ## Last action and result
 
-P10 complete. All review fixes and user adjustments implemented and verified:
-1. F1: classify.py correctly classifies rows with all-negative cells and no contra label prefix as line_item with possible_contra_or_loss warning. Probe 1 confirmed 営業損失 -> line_item.
-2. F2: accounting.py calculates gross + contra children when no net child exists; subtotal receives expected net-of-contra sum; passes exact.
-3. F3: accounting_summary() returns evaluable_fraction and reports it in Markdown and JSON.
-4. F4 + F5: rows.py _clusters replaced running-median with gap-based clustering. Robustness sweep re-run:
-   - x-jitter cell accuracy at 0.3H improved from 0.3331 (worst 0.0000) to 0.9360 (worst 0.8488)!
-   - x-jitter cell accuracy at 0.4H improved from 0.0401 to 0.7750!
-   - y-jitter cell accuracy at 0.3H improved from 0.5994 to 0.8890!
-   - y-jitter cell accuracy at 0.4H improved from 0.2890 to 0.7221!
-   - Catastrophic cliffs eliminated; first tested degraded amplitude remains {'y': 0.2, 'x': 0.3}.
-5. F8: data.py read_table returns structured issues for missing columns.
-6. F9: rows.py reconstruct_page emits no_columns_detected warning on empty column detection.
-7. Brute-force fault injection test on a toy tree added to test_perturbation.py and notes/review_probes.py: confirms 78/84 faults detected, 100% of hundreds digit faults detected, units digit faults slip under tolerance as expected.
-8. Test suite: 282 passed (baseline 275 + 7 new tests). Full ruff check clean.
-9. Protected files (data/, data/raw/, data/gt/) unchanged. F10 (chat_logs) untouched per instruction.
+Clean tree at e40462b. Baseline: 283 passed in 13.23s. History proves baseline
+86a290f precedes P10 5565491; seed test added in 7f5afbd. Parser example bytes match;
+43 rows, 5 label-rule contras, zero warnings, GT all 1.0, accounting 20/20 and
+checks/residuals identical to P8. git diff --stat 1b6d244 -- data/ examples/: empty.
+13 protected-file hashes captured including GT/raw/examples/P8 reports/chat logs.
 
 ## Decisions and assumptions
 
-- F10: chat_logs/ not ignored; preserved as required deliverable.
-- Gap-based clustering used for both rows and columns in _clusters.
-- Loss-row misclassification and coverage metric documented for P11 write-up.
+P10 fixes were applied in a different session and tool (5565491, 7f5afbd), not by
+this auditor. This chat continues the original builder's Session 5. Audit actual
+code rather than trusting model attribution in the older log. No source redo.
+Keep all existing tests, including seed11's assertion documenting the remaining
+44-row failure. No threshold tuned to page4. Optional pitch change stops at first
+acceptance failure or about 20 minutes. No push or P11/P13 work in this prompt.
 
 ## Known issues / open questions
 
-- Document loss-row misclassification and coverage metric in P11 write-up.
+Initial audit: missing robustness coverage summaries, stale docs, insufficient
+edge/oracle tests, no one-column/empty warning handling. See notes/p10_audit.md.
 
 ## Next action
 
-P11 write-up
+Close the small verified gaps with tests and reports.
 
 ## Prompt history
 
