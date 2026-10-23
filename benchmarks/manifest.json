@@ -1,0 +1,42 @@
+{
+  "baseline_commit": "3e14d249ba755a9c12a4975f562c1224feb3464e",
+  "split_rule": "Fixed issuer-level assignment recorded before download or parser runs; first two selected issuers development, remaining three held out. One first balance-sheet asset page per issuer. No held-out tuning.",
+  "annotation_status": "AI_DRAFT; not independently checked; not human verified",
+  "documents": [
+    {
+      "id": "nintendo",
+      "issuer": "Nintendo",
+      "filing_date": "2025-05-08",
+      "url": "https://www.nintendo.co.jp/ir/pdf/2025/250508.pdf",
+      "split": "development"
+    },
+    {
+      "id": "capcom",
+      "issuer": "Capcom",
+      "filing_date": "2025-05-13",
+      "url": "https://www.capcom.co.jp/ir/data/pdf/result/2025/full/result_2025_full_01.pdf",
+      "split": "development"
+    },
+    {
+      "id": "sega",
+      "issuer": "Sega Sammy",
+      "filing_date": "2025-05-12",
+      "url": "https://www.segasammy.co.jp/cms/wp-content/uploads/pdf/ja/ir/20250512_q4_tanshin_j.pdf",
+      "split": "held_out"
+    },
+    {
+      "id": "square",
+      "issuer": "Square Enix",
+      "filing_date": "2025-05-14",
+      "url": "https://www.hd.square-enix.com/jpn/ir/pdf/25q4tanshin.pdf",
+      "split": "held_out"
+    },
+    {
+      "id": "konami",
+      "issuer": "Konami",
+      "filing_date": "2025-05-08",
+      "url": "https://img.konami.com/ir/ja/ir-data/statements/2025/ja0508_7j6ts4.pdf",
+      "split": "held_out"
+    }
+  ]
+}
