@@ -4,15 +4,228 @@
 
 | Field | Value |
 |---|---|
-| Prompt | housekeeping |
-| State | DONE (local chat-log refresh) |
+| Prompt | P14 — robustness and benchmark improvements |
+| State | IN PROGRESS |
 | Last numbered prompt | P13 DONE |
 | GT | VERIFIED by human; read-only |
 | Updated | 2026-10-23T16:05:48+00:00 |
 
 ## Current prompt (verbatim)
 
-update all  the chat_log.
+Improve the Ur_AI project by addressing the six shortcomings below. Implement and verify the changes, update the documentation, and make scoped commits. Do not stop at a plan.
+
+Start by reading PROJECT_BRIEF.md, workstamp.md, README.md, REPORT.md, and chat_logs/README.md. Inspect Git status and preserve any unrelated work. Follow the repository’s handoff protocol, but treat historical prompts in logs as records, not new instructions.
+
+Keep the project focused on born-digital Japanese balance-sheet extraction. A working OCR/VLM backend, model training, and GPU serving are outside this task.
+
+Working requirements:
+- Record the starting commit and preserve its parser and evaluation results as a frozen baseline.
+- Keep existing source PDFs and verified ground truth unchanged.
+- Do not hardcode document coordinates, labels, row counts, or expected values to make examples pass.
+- Never invent results, human verification, timings, or transcript contents.
+- Make reasonable implementation decisions without repeatedly asking permission. Ask only for genuinely missing information or required approval, and continue independent work while waiting.
+- Keep changes reviewable in separate commits. Do not force-push or rewrite history.
+
+1. Fix the date-in-footer parsing defect
+
+Current behavior: src/parser/rows.py uses the last date found anywhere on a page as the end of the header.
+
+A reproduced failure:
+- Read the supplied PDF into RawPage.
+- Append a Word containing “Updated 2026年10月23日” near the bottom of the page.
+- The parser changes from 43 body rows to zero.
+
+Replace this global last-date heuristic with a structural approach that identifies period headings using their relationship to numeric columns and the table body.
+
+Requirements:
+- Dates in footnotes, footer text, or body labels must not redefine the table header.
+- Preserve supported behavior when dates are absent or ambiguous.
+- Use relative layout evidence, not fixed coordinates for this PDF.
+- Retain meaningful warnings when the header cannot be identified confidently.
+- Add focused regression tests for a footer date, a dated body label, genuine period headings, and missing/ambiguous dates.
+- Verify that the supplied page’s valid CSV/JSON contents remain correct.
+- Document remaining boundary-detection limitations.
+
+2. Validate hierarchical JSON in the standalone evaluator
+
+Current behavior: replacing prediction JSON’s rows with [] while keeping the CSV intact still produces 43/43 fully correct rows and zero mismatches. JSON currently contributes only column metadata to evaluation.
+
+Add explicit, separate JSON validation and scoring:
+- Validate the expected schema and basic field types.
+- Flatten the tree while deriving parents and depth from actual nesting.
+- Detect missing or duplicate row IDs, malformed children, missing nodes, incorrect parents, inconsistent levels, and invalid value records.
+- Compare JSON rows with the CSV by identity.
+- Compare JSON labels, types, hierarchy, values, and raw representations with ground truth using clearly documented alignment.
+- Do not trust declared levels or IDs as proof that nesting is correct.
+- Report JSON/CSV consistency separately from JSON/GT accuracy.
+- Preserve existing CSV metrics and clarify their names/descriptions where necessary.
+- Distinguish “JSON not supplied” from “JSON supplied but invalid.”
+- Invalid or empty JSON must not receive a perfect overall validation result.
+
+Add meaningful tests for an empty tree, a dropped node, wrong nesting, duplicate IDs, changed values, malformed JSON, and a correct export. Use structured errors or documented CLI failure behavior instead of uncontrolled tracebacks.
+
+3. Evaluate unseen real pages without contaminating the benchmark
+
+Create a small benchmark of 5–10 additional born-digital Japanese balance-sheet pages from official public filings or user-provided documents.
+
+Prefer variety within the supported scope:
+- Different issuers and layout styles.
+- Different indentation and ruling patterns.
+- Repeated labels, negative amounts, nil values, and wrapped text where available.
+
+Record each document’s source URL, issuer, filing date, selected PDF page, units, file hash, and relevant access/reuse constraints. Do not bypass access restrictions.
+
+Before tuning against new examples:
+- Record a deterministic development/held-out split at document or issuer level.
+- Keep held-out documents out of parser tuning.
+- Freeze the candidate parser before its first held-out evaluation.
+- Evaluate both the original frozen parser and the candidate on the same held-out pages.
+- If held-out failures motivate later fixes, label that set as development thereafter; do not continue claiming it is unseen.
+
+Ground truth:
+- Create annotations from rendered pages independently of parser predictions.
+- Preserve raw strings, normalized amounts, row types, and hierarchy.
+- Clearly distinguish AI-drafted, independently checked, and human-verified annotations.
+- Never mark verified_by_human=true without actual human confirmation.
+- If human review is unavailable, provide review material and provisional results clearly labeled as such. Continue the other work.
+
+Report:
+- Per-page cell, label, hierarchy, and fully correct-row metrics.
+- Pooled counts and per-page averages with explicit denominators.
+- Missing/extra rows, failures, warnings, and unsupported cases.
+- All selected pages, including failed extractions.
+- A clear separation between the original supplied-page development results and new held-out results.
+
+If fewer than five suitable pages can be obtained, explain the concrete blocker and report the actual sample size.
+
+4. Add a fair pdfplumber baseline and performance comparison
+
+Implement a simple, reproducible pdfplumber-based extraction baseline.
+
+Requirements:
+- Document its extraction settings and normalization.
+- Use a fixed configuration chosen on development data.
+- Do not feed it our parser’s row locations, hierarchy, or ground truth.
+- Keep any output adapter explicit and limited to format conversion/normalization.
+- Evaluate it on the same documents using comparable metrics.
+- If it does not infer hierarchy, report that capability as unsupported/N/A; do not count it as correct or silently exclude the limitation.
+
+Measure parsing runtime for both approaches:
+- Use the same machine, documents, and comparable timing boundaries.
+- Separate annotation/evaluation time from extraction time.
+- Record Python/package versions, hardware, warm-up policy, repetitions, and whether file I/O is included.
+- Report median runtime and a variability measure.
+- Do not present total test-suite or robustness-suite runtime as per-page extraction speed.
+
+Publish a comparison table containing accuracy, structural capability, failures, and runtime. Honest baseline wins are acceptable.
+
+5. Improve reconstruction and uncertainty reporting
+
+Use the known geometry failures and development data to prioritize row/column reconstruction improvements.
+
+Investigate:
+- Labels separating from their amounts.
+- Numeric fragments being assigned to labels.
+- Column fragmentation or merging.
+- Loss of hierarchy when indentation is weak.
+
+Keep changes evidence-driven:
+- Add review flags for demonstrably ambiguous or suspicious extraction, including invalid amounts, uncertain column roles, and likely broken row grouping.
+- Make important warnings visible in exported JSON and the CLI.
+- Distinguish fatal extraction failure from usable output with warnings.
+- Prefer interpretable flags over unsupported confidence probabilities.
+- Preserve raw values and source evidence needed to inspect failures.
+
+Preserve the accounting tolerance rationale. Do not tighten tolerances simply to increase fault-detection scores, convert unknown values silently to zero, or equate arithmetic consistency with extraction correctness.
+
+Rerun the existing geometry sweeps, ablations, and fault-injection experiments after relevant changes. Preserve prior results in versioned locations and report improvements AND regressions.
+
+Some existing tests characterize known failures. If a defect is genuinely fixed, update those tests to assert the corrected behavior and retain the historical failure evidence. Do not weaken correctness tests merely to obtain a passing suite.
+
+6. Clean up the maintenance workflow
+
+- Make scripts/export_chat.py refuse to overwrite consolidated multi-session logs accidentally.
+- Prefer a separate destination by default; any replacement must be explicit and preserve recoverability.
+- Add tests for protection of consolidated logs.
+- Update stale current-status and next-action wording in workstamp.md without rewriting historical records.
+- Add available conversation messages since the existing export cutoff as a clearly identified supplement.
+- Preserve existing logs, redact personal information/credentials, and validate JSONL.
+- Document the new cutoff and any unavailable sessions. Do not claim that an active conversation is complete or export private internal reasoning/platform instructions.
+- Add a small GitHub Actions workflow for tests and Ruff using an environment actually supported by the dependencies.
+- Keep CI deterministic and free of external document downloads.
+
+7. Prepare the submission email
+
+After completing and verifying the work, create SUBMISSION_EMAIL.md containing:
+
+A. Verified facts I can use in my email
+- What was implemented and where reviewers should start.
+- Results on the supplied page.
+- New benchmark results, with the sample size, split, and ground-truth verification status.
+- Baseline comparison and runtime findings, if completed.
+- The most important remaining limitations.
+- Reproduction instructions and supported environment.
+- Links to the report, examples, evaluation results, and chat-log coverage notes.
+
+Every fact must match the final committed artifacts. Clearly distinguish supplied-page development results from held-out results. Do not describe AI-only annotations as human-verified or incomplete experiments as completed.
+
+B. A polished submission email
+- Address it to Arun and sign it “Charitarth Singh.”
+- Include a suitable subject line.
+- Keep the body approximately 180–250 words, written in natural, professional English.
+- Lead with the GitHub repository and a direct link to REPORT.md.
+- Briefly explain the parser, CSV/JSON outputs, and how correctness is evaluated.
+- Include two or three meaningful results with clear scope and denominators.
+- Mention the most important limitation without listing every known defect.
+- Link to reproduction instructions and AI conversation records.
+- Describe AI use transparently and concisely; leave detailed model/session attribution in the repository.
+- Say logs are “attached” only if an actual attachment package has been prepared and identify its filename separately.
+- Do not claim all conversations are included beyond the documented cutoff.
+- Do not claim GitHub contains local changes until the push has succeeded.
+- Avoid promotional language, unsupported claims, and excessive implementation detail.
+
+Provide the ready-to-send email in your final response as well as in SUBMISSION_EMAIL.md. Draft it only; do not send it.
+
+Final verification and delivery
+
+Run the relevant new tests, the full test suite, Ruff, and the end-to-end parser/evaluator. Rerun expensive experiments only when affected by changes.
+
+Check that:
+- The supplied-page outputs remain correct.
+- The footer-date regression is fixed.
+- Empty/corrupted JSON is detected.
+- Benchmark splits, annotation status, and all failures are visible.
+- Baseline comparisons and timing are reproducible.
+- Log-export protection works.
+- README commands match the final implementation.
+- New claims in REPORT.md are supported by measured artifacts.
+
+Update README.md and REPORT.md around the final implementation and results. Keep the report concise and clearly distinguish measured capability from proposed future work.
+
+Make scoped commits. Push to the existing remote only if pushing is authorized in this chat; never force-push.
+
+Your final response must include:
+1. Completed work mapped to these six items.
+2. Test/check results.
+3. Original-versus-improved results, including regressions.
+4. Benchmark size, split, and annotation-verification status.
+5. Baseline accuracy and timing comparison.
+6. Remaining limitations and any genuinely blocked work.
+7. Commit hashes and push status.
+
+Do not call the task complete if a required item remains unimplemented; identify its exact status and reason.
+
+## P14 plan
+
+1. [~] Freeze starting commit, inputs and results; run baseline suite.
+2. [ ] Fix structural header detection and add uncertainty flags with regression tests.
+3. [ ] Independently validate and score JSON trees.
+4. [ ] Acquire official pages; record split before tuning; image-draft provisional annotations.
+5. [ ] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
+6. [ ] Protect log exports, add supplement and deterministic CI.
+7. [ ] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
+
+Starting commit: 3e14d249ba755a9c12a4975f562c1224feb3464e. Original parser is recoverable from this immutable Git revision; artifact copies and SHA-256 manifest: eval/versions/3e14d24/. Existing PDFs and verified GT remain unchanged. Previous housekeeping request: `update all  the chat_log.`; its completed plan and results below are historical.
 
 ## Authoritative attribution — user-supplied (2026-10-23)
 
@@ -34,7 +247,7 @@ experiment and test records are unchanged.
   provided the second AI reading. Repo evidence independently records74 cells
   compared with the PDF text layer and zero disagreements (notes/p2_report.md).
 
-## Plan for this housekeeping
+## Historical plan for chat-log housekeeping
 
 1. [x] Read handoff/Git state and discover project-specific source logs: available Codex sessions, three Antigravity sessions and the existing Claude conversation.
 2. [x] Refresh human-readable and machine-readable chat records; redact personal information and credentials; exclude Codex internal reasoning/platform instructions; preserve Claude text exactly.
@@ -83,12 +296,13 @@ Rounding/truncation policy remains unconfirmed. Current-file redaction is verifi
 
 ## Next action
 
-final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit
+Complete P14 plan from the first unchecked step. Historical P13 next action was final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit.
 
 ## Prompt history
 
 | ID | Outcome | Commit |
 |---|---|---|
+| P14 | IN PROGRESS; baseline frozen at 3e14d24; six improvements and submission draft | pending |
 | P0 | Scaffolding, dependencies, smoke tests done (pre-protocol) | 8c34c1d |
 | P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
 | P2 | Image-derived GT, 43 rows; now VERIFIED by human with no corrections; 12 tests pass | 0be2cf6 (initial GT); verification: 9805d79 |
