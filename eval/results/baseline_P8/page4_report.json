@@ -1,0 +1,1324 @@
+{
+  "metrics": {
+    "label_exact": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "exact printed labels / all GT rows (missing rows wrong)"
+    },
+    "label_key": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "matching label_key / all GT rows"
+    },
+    "row_type": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "correct row types / all GT rows"
+    },
+    "level": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "correct ancestor-count levels / all GT rows"
+    },
+    "parent": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "parents mapped by row alignment (both roots correct) / all GT rows"
+    },
+    "parent_path": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "exact printed ancestor paths / all GT rows"
+    },
+    "ancestor_jaccard": {
+      "numerator": 43.0,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "sum of alignment-mapped ancestor-set Jaccards / all GT rows"
+    },
+    "fully_correct_rows": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "exact label, both/all values, type, mapped parent and level / all GT rows"
+    },
+    "cell_accuracy_all": {
+      "numerator": 86,
+      "denominator": 86,
+      "score": 1.0,
+      "meaning": "correct integer/null cells / all GT row-column cells"
+    },
+    "cell_accuracy_printed": {
+      "numerator": 74,
+      "denominator": 74,
+      "score": 1.0,
+      "meaning": "correct integer/null cells / GT cells with nonempty raw"
+    },
+    "raw_accuracy": {
+      "numerator": 86,
+      "denominator": 86,
+      "score": 1.0,
+      "meaning": "identical raw strings / all GT row-column cells"
+    },
+    "row_precision": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "aligned rows / predicted rows"
+    },
+    "row_recall": {
+      "numerator": 43,
+      "denominator": 43,
+      "score": 1.0,
+      "meaning": "aligned rows / GT rows"
+    },
+    "row_f1": {
+      "numerator": 86,
+      "denominator": 86,
+      "score": 1.0,
+      "meaning": "2 * aligned rows / (prediction rows + GT rows)"
+    },
+    "column_roles": {
+      "numerator": 2,
+      "denominator": 2,
+      "score": 1.0,
+      "meaning": "correct role at each unique expected column index / max(expected,predicted columns); optional JSON/meta"
+    },
+    "column_periods": {
+      "numerator": 2,
+      "denominator": 2,
+      "score": 1.0,
+      "meaning": "correct date at each unique expected column index / max(expected,predicted columns); optional JSON/meta"
+    }
+  },
+  "alignment": {
+    "threshold": 0.5,
+    "matched": 43,
+    "predicted_rows": 43,
+    "gt_rows": 43,
+    "pairs": [
+      {
+        "prediction": "1",
+        "gt": "r001",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "2",
+        "gt": "r002",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "3",
+        "gt": "r003",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "4",
+        "gt": "r004",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "5",
+        "gt": "r005",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "6",
+        "gt": "r006",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "7",
+        "gt": "r007",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "8",
+        "gt": "r008",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "9",
+        "gt": "r009",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "10",
+        "gt": "r010",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "11",
+        "gt": "r011",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "12",
+        "gt": "r012",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "13",
+        "gt": "r013",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "14",
+        "gt": "r014",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "15",
+        "gt": "r015",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "16",
+        "gt": "r016",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "17",
+        "gt": "r017",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "18",
+        "gt": "r018",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "19",
+        "gt": "r019",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "20",
+        "gt": "r020",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "21",
+        "gt": "r021",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "22",
+        "gt": "r022",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "23",
+        "gt": "r023",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "24",
+        "gt": "r024",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "25",
+        "gt": "r025",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "26",
+        "gt": "r026",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "27",
+        "gt": "r027",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "28",
+        "gt": "r028",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "29",
+        "gt": "r029",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "30",
+        "gt": "r030",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "31",
+        "gt": "r031",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "32",
+        "gt": "r032",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "33",
+        "gt": "r033",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "34",
+        "gt": "r034",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "35",
+        "gt": "r035",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "36",
+        "gt": "r036",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "37",
+        "gt": "r037",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "38",
+        "gt": "r038",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "39",
+        "gt": "r039",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "40",
+        "gt": "r040",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "41",
+        "gt": "r041",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "42",
+        "gt": "r042",
+        "similarity": 1.0
+      },
+      {
+        "prediction": "43",
+        "gt": "r043",
+        "similarity": 1.0
+      }
+    ],
+    "unmatched_prediction": [],
+    "unmatched_gt": []
+  },
+  "confusion_matrix": {
+    "contra": {
+      "contra": 5
+    },
+    "header": {
+      "header": 6
+    },
+    "line_item": {
+      "line_item": 22
+    },
+    "net": {
+      "net": 4
+    },
+    "subtotal": {
+      "subtotal": 5
+    },
+    "total": {
+      "total": 1
+    }
+  },
+  "mismatches": [],
+  "input_issues": [],
+  "schema_version": "1.0",
+  "inputs": {
+    "prediction": "balance_sheet_after_correction_p1.csv",
+    "gt": "page4.csv"
+  },
+  "accounting": {
+    "statuses": {
+      "exact": 7,
+      "within_tolerance": 13,
+      "fail": 0,
+      "not_evaluable": 0,
+      "not_applicable": 2
+    },
+    "passed": 20,
+    "evaluable": 20,
+    "pass_rate": 1.0,
+    "truncation_inside": 20,
+    "truncation_evaluable": 20,
+    "truncation_fraction": 1.0,
+    "truncation_note": "Hypothesis diagnostic only; never affects status/pass rate."
+  },
+  "accounting_checks": [
+    {
+      "check_id": "subtotal:13:previous_year",
+      "kind": "subtotal",
+      "row_id": "13",
+      "value_column": "previous_year",
+      "n": 10,
+      "expected": 5863681,
+      "printed": 5863684,
+      "residual": 3,
+      "tolerance": 10,
+      "status": "within_tolerance",
+      "truncation_lower": -1,
+      "truncation_upper": 8,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "3",
+          "previous_year"
+        ],
+        [
+          "4",
+          "previous_year"
+        ],
+        [
+          "5",
+          "previous_year"
+        ],
+        [
+          "6",
+          "previous_year"
+        ],
+        [
+          "7",
+          "previous_year"
+        ],
+        [
+          "8",
+          "previous_year"
+        ],
+        [
+          "9",
+          "previous_year"
+        ],
+        [
+          "10",
+          "previous_year"
+        ],
+        [
+          "11",
+          "previous_year"
+        ],
+        [
+          "12",
+          "previous_year"
+        ],
+        [
+          "13",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:13:current_year",
+      "kind": "subtotal",
+      "row_id": "13",
+      "value_column": "current_year",
+      "n": 10,
+      "expected": 3377405,
+      "printed": 3377407,
+      "residual": 2,
+      "tolerance": 10,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 8,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "3",
+          "current_year"
+        ],
+        [
+          "4",
+          "current_year"
+        ],
+        [
+          "5",
+          "current_year"
+        ],
+        [
+          "6",
+          "current_year"
+        ],
+        [
+          "7",
+          "current_year"
+        ],
+        [
+          "8",
+          "current_year"
+        ],
+        [
+          "9",
+          "current_year"
+        ],
+        [
+          "10",
+          "current_year"
+        ],
+        [
+          "11",
+          "current_year"
+        ],
+        [
+          "12",
+          "current_year"
+        ],
+        [
+          "13",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:18:previous_year",
+      "kind": "net",
+      "row_id": "18",
+      "value_column": "previous_year",
+      "n": 2,
+      "expected": 197775,
+      "printed": 197775,
+      "residual": 0,
+      "tolerance": 2,
+      "status": "exact",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "16",
+          "previous_year"
+        ],
+        [
+          "17",
+          "previous_year"
+        ],
+        [
+          "18",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:18:current_year",
+      "kind": "net",
+      "row_id": "18",
+      "value_column": "current_year",
+      "n": 2,
+      "expected": 239829,
+      "printed": 239828,
+      "residual": -1,
+      "tolerance": 2,
+      "status": "within_tolerance",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "16",
+          "current_year"
+        ],
+        [
+          "17",
+          "current_year"
+        ],
+        [
+          "18",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:21:previous_year",
+      "kind": "net",
+      "row_id": "21",
+      "value_column": "previous_year",
+      "n": 2,
+      "expected": 390757,
+      "printed": 390757,
+      "residual": 0,
+      "tolerance": 2,
+      "status": "exact",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "19",
+          "previous_year"
+        ],
+        [
+          "20",
+          "previous_year"
+        ],
+        [
+          "21",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:21:current_year",
+      "kind": "net",
+      "row_id": "21",
+      "value_column": "current_year",
+      "n": 2,
+      "expected": 336708,
+      "printed": 336708,
+      "residual": 0,
+      "tolerance": 2,
+      "status": "exact",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "19",
+          "current_year"
+        ],
+        [
+          "20",
+          "current_year"
+        ],
+        [
+          "21",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:25:previous_year",
+      "kind": "net",
+      "row_id": "25",
+      "value_column": "previous_year",
+      "n": 2,
+      "expected": 63147,
+      "printed": 63146,
+      "residual": -1,
+      "tolerance": 2,
+      "status": "within_tolerance",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "23",
+          "previous_year"
+        ],
+        [
+          "24",
+          "previous_year"
+        ],
+        [
+          "25",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:25:current_year",
+      "kind": "net",
+      "row_id": "25",
+      "value_column": "current_year",
+      "n": 2,
+      "expected": 41873,
+      "printed": 41872,
+      "residual": -1,
+      "tolerance": 2,
+      "status": "within_tolerance",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "23",
+          "current_year"
+        ],
+        [
+          "24",
+          "current_year"
+        ],
+        [
+          "25",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:29:previous_year",
+      "kind": "net",
+      "row_id": "29",
+      "value_column": "previous_year",
+      "n": 2,
+      "expected": 8439,
+      "printed": 8439,
+      "residual": 0,
+      "tolerance": 2,
+      "status": "exact",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "27",
+          "previous_year"
+        ],
+        [
+          "28",
+          "previous_year"
+        ],
+        [
+          "29",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "net:29:current_year",
+      "kind": "net",
+      "row_id": "29",
+      "value_column": "current_year",
+      "n": 2,
+      "expected": 24243,
+      "printed": 24243,
+      "residual": 0,
+      "tolerance": 2,
+      "status": "exact",
+      "truncation_lower": -1,
+      "truncation_upper": 0,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "27",
+          "current_year"
+        ],
+        [
+          "28",
+          "current_year"
+        ],
+        [
+          "29",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:30:previous_year",
+      "kind": "subtotal",
+      "row_id": "30",
+      "value_column": "previous_year",
+      "n": 6,
+      "expected": 1429093,
+      "printed": 1429094,
+      "residual": 1,
+      "tolerance": 6,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 4,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "18",
+          "previous_year"
+        ],
+        [
+          "21",
+          "previous_year"
+        ],
+        [
+          "22",
+          "previous_year"
+        ],
+        [
+          "25",
+          "previous_year"
+        ],
+        [
+          "26",
+          "previous_year"
+        ],
+        [
+          "29",
+          "previous_year"
+        ],
+        [
+          "30",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:30:current_year",
+      "kind": "subtotal",
+      "row_id": "30",
+      "value_column": "current_year",
+      "n": 6,
+      "expected": 1352607,
+      "printed": 1352610,
+      "residual": 3,
+      "tolerance": 6,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 5,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "18",
+          "current_year"
+        ],
+        [
+          "21",
+          "current_year"
+        ],
+        [
+          "22",
+          "current_year"
+        ],
+        [
+          "25",
+          "current_year"
+        ],
+        [
+          "26",
+          "current_year"
+        ],
+        [
+          "29",
+          "current_year"
+        ],
+        [
+          "30",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:34:previous_year",
+      "kind": "subtotal",
+      "row_id": "34",
+      "value_column": "previous_year",
+      "n": 2,
+      "expected": 44260,
+      "printed": 44261,
+      "residual": 1,
+      "tolerance": 2,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 1,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "32",
+          "previous_year"
+        ],
+        [
+          "33",
+          "previous_year"
+        ],
+        [
+          "34",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:34:current_year",
+      "kind": "subtotal",
+      "row_id": "34",
+      "value_column": "current_year",
+      "n": 2,
+      "expected": 35868,
+      "printed": 35869,
+      "residual": 1,
+      "tolerance": 2,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 1,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "32",
+          "current_year"
+        ],
+        [
+          "33",
+          "current_year"
+        ],
+        [
+          "34",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:41:previous_year",
+      "kind": "subtotal",
+      "row_id": "41",
+      "value_column": "previous_year",
+      "n": 5,
+      "expected": 197068,
+      "printed": 197069,
+      "residual": 1,
+      "tolerance": 5,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 3,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "36",
+          "previous_year"
+        ],
+        [
+          "37",
+          "previous_year"
+        ],
+        [
+          "38",
+          "previous_year"
+        ],
+        [
+          "39",
+          "previous_year"
+        ],
+        [
+          "40",
+          "previous_year"
+        ],
+        [
+          "41",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:41:current_year",
+      "kind": "subtotal",
+      "row_id": "41",
+      "value_column": "current_year",
+      "n": 5,
+      "expected": 369361,
+      "printed": 369362,
+      "residual": 1,
+      "tolerance": 5,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 4,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "36",
+          "current_year"
+        ],
+        [
+          "37",
+          "current_year"
+        ],
+        [
+          "38",
+          "current_year"
+        ],
+        [
+          "39",
+          "current_year"
+        ],
+        [
+          "40",
+          "current_year"
+        ],
+        [
+          "41",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:42:previous_year",
+      "kind": "subtotal",
+      "row_id": "42",
+      "value_column": "previous_year",
+      "n": 3,
+      "expected": 1670424,
+      "printed": 1670426,
+      "residual": 2,
+      "tolerance": 3,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 2,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "30",
+          "previous_year"
+        ],
+        [
+          "34",
+          "previous_year"
+        ],
+        [
+          "41",
+          "previous_year"
+        ],
+        [
+          "42",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "subtotal:42:current_year",
+      "kind": "subtotal",
+      "row_id": "42",
+      "value_column": "current_year",
+      "n": 3,
+      "expected": 1757841,
+      "printed": 1757841,
+      "residual": 0,
+      "tolerance": 3,
+      "status": "exact",
+      "truncation_lower": 0,
+      "truncation_upper": 2,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "30",
+          "current_year"
+        ],
+        [
+          "34",
+          "current_year"
+        ],
+        [
+          "41",
+          "current_year"
+        ],
+        [
+          "42",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "total:43:previous_year",
+      "kind": "total",
+      "row_id": "43",
+      "value_column": "previous_year",
+      "n": 2,
+      "expected": 7534110,
+      "printed": 7534110,
+      "residual": 0,
+      "tolerance": 2,
+      "status": "exact",
+      "truncation_lower": 0,
+      "truncation_upper": 1,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "13",
+          "previous_year"
+        ],
+        [
+          "42",
+          "previous_year"
+        ],
+        [
+          "43",
+          "previous_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "total:43:current_year",
+      "kind": "total",
+      "row_id": "43",
+      "value_column": "current_year",
+      "n": 2,
+      "expected": 5135248,
+      "printed": 5135249,
+      "residual": 1,
+      "tolerance": 2,
+      "status": "within_tolerance",
+      "truncation_lower": 0,
+      "truncation_upper": 1,
+      "truncation_consistent": true,
+      "dependencies": [
+        [
+          "13",
+          "current_year"
+        ],
+        [
+          "42",
+          "current_year"
+        ],
+        [
+          "43",
+          "current_year"
+        ]
+      ]
+    },
+    {
+      "check_id": "balance:page:previous_year",
+      "kind": "balance",
+      "row_id": null,
+      "value_column": "previous_year",
+      "n": 0,
+      "expected": null,
+      "printed": null,
+      "residual": null,
+      "tolerance": null,
+      "status": "not_applicable",
+      "truncation_lower": null,
+      "truncation_upper": null,
+      "truncation_consistent": null,
+      "dependencies": []
+    },
+    {
+      "check_id": "balance:page:current_year",
+      "kind": "balance",
+      "row_id": null,
+      "value_column": "current_year",
+      "n": 0,
+      "expected": null,
+      "printed": null,
+      "residual": null,
+      "tolerance": null,
+      "status": "not_applicable",
+      "truncation_lower": null,
+      "truncation_upper": null,
+      "truncation_consistent": null,
+      "dependencies": []
+    }
+  ],
+  "limitations": [
+    "Single page only; micro and macro averages coincide for this one page.",
+    "Parser rules were designed after seeing this page: development results, NOT a generalisation claim.",
+    "GT was drafted by an AI agent and verified by one human; the user also reported an independent second review.",
+    "The truncation hypothesis rests on one page and must be verified by the human; it does not set pass/fail.",
+    "Alignment can be ambiguous for identical repeated labels/values; earliest-pair ties do not prove identity.",
+    "Accounting tests consistency of predicted structure, not truth; absent or wrong checks can escape detection."
+  ],
+  "aggregation": {
+    "pages": 1,
+    "micro": {
+      "ancestor_jaccard": {
+        "numerator": 43.0,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "cell_accuracy_all": {
+        "numerator": 86,
+        "denominator": 86,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "cell_accuracy_printed": {
+        "numerator": 74,
+        "denominator": 74,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "column_periods": {
+        "numerator": 2,
+        "denominator": 2,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "column_roles": {
+        "numerator": 2,
+        "denominator": 2,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "fully_correct_rows": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "label_exact": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "label_key": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "level": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "parent": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "parent_path": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "raw_accuracy": {
+        "numerator": 86,
+        "denominator": 86,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "row_f1": {
+        "numerator": 86,
+        "denominator": 86,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "row_precision": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "row_recall": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "row_type": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "pooled counts across pages"
+      },
+      "accounting_pass_rate": {
+        "numerator": 20,
+        "denominator": 20,
+        "score": 1.0,
+        "meaning": "pooled accounting counts across pages"
+      },
+      "truncation_fraction": {
+        "numerator": 20,
+        "denominator": 20,
+        "score": 1.0,
+        "meaning": "pooled accounting counts across pages"
+      }
+    },
+    "macro": {
+      "ancestor_jaccard": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "cell_accuracy_all": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "cell_accuracy_printed": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "column_periods": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "column_roles": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "fully_correct_rows": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "label_exact": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "label_key": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "level": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "parent": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "parent_path": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "raw_accuracy": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "row_f1": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "row_precision": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "row_recall": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "row_type": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "accounting_pass_rate": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "truncation_fraction": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      }
+    },
+    "note": "With a single page, defined micro and macro scores coincide."
+  }
+}
