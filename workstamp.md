@@ -4,154 +4,101 @@
 
 | Field | Value |
 |---|---|
-| Prompt | P13 |
-| State | DONE |
+| Prompt | housekeeping |
+| State | IN PROGRESS |
+| Last numbered prompt | P13 DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T12:02:45+00:00 |
+| Updated | 2026-10-23T12:08:40+00:00 |
 
 ## Current prompt (verbatim)
 
-FIRST: Read PROJECT_BRIEF.md ("Agent working rules") and workstamp.md, then run git status, git log -5 and the full test suite (PYTHONIOENCODING=utf-8) and report the real state. Follow the handoff protocol: copy this prompt verbatim into workstamp.md, write a numbered plan, set P13 IN PROGRESS, update workstamp.md after every step, make small commits. Sessions table: only add a row (with your ACTUAL model name) if this is genuinely a new session. If workstamp.md shows an interrupted prompt, follow the resume procedure.
+Docs only. Do not touch code, tests, data, eval, examples or any threshold. Stage only the files you change (never "git add -A"). Set PYTHONIOENCODING=utf-8. Follow the handoff protocol (update workstamp.md, small commits); record this under "housekeeping" in the Prompt history, not as a new numbered prompt. If git status shows uncommitted changes you did not make, leave them alone and mention them.
 
-IMPORTANT: I may be editing REPORT.md by hand while you work. Do NOT modify, stage, stash, revert or commit REPORT.md. Stage only the specific files you changed (never "git add -A"). If git status shows uncommitted changes you did not make, leave them alone and mention them.
+The owner supplied this authoritative attribution (user-supplied, not verifiable from the repo):
+- Implementation plan and prompt drafting: Claude (web, separate account), later a Claude conversation that also gave a second AI reading of the GT transcription and reviewed prompts and results.
+- P0, P1: Claude Opus 4.6
+- P2 to P8 and P10b to P13: GPT 6.1 Sol (Codex)
+- P9 independent review: Claude Sonnet 4.6
+- P10a fixes (commits 5565491 and d51c47f): Gemini Flash 3.8
+- The P10b audit was done by GPT 6.1 Sol, which also built the original code.
 
-# P13: Clean-clone reproducibility check
+Tasks:
+1. workstamp.md: correct the Sessions table and handoff text to match this attribution, marking it "user-supplied". Remove any statement that the reviewer applied the fixes and any "GPT-6" naming that conflicts with "GPT 6.1 Sol". Leave the P13 "Next action" line unchanged.
+2. Add a dated note at the top of notes/p2_report.md saying the GT was later verified (see data/gt/README.md and workstamp.md). Do not rewrite the rest.
+3. Add a short dated note at the top of notes/review_P9.md saying the reviewer was Claude Sonnet 4.6 per the owner. Do not edit its findings.
+4. Correct conflicting attribution in notes/p13_clean_clone_check.md and the P13 entries in workstamp.md.
+5. REPORT.md: you may edit it now (I am no longer editing it). Fix section 7 so it matches the attribution above: the review model (Claude Sonnet 4.6) differs from the builder (GPT 6.1 Sol), the fixes were applied by a third model (Gemini Flash 3.8), and the fixes were then audited by the builder model, which is weaker independence than a human audit. Fill the placeholders as follows, and leave a visible [USER: ...] marker only for facts you cannot know:
+   - GT verification: transcribed by an AI agent (GPT 6.1 Sol) from the page image, checked row by row by the owner, second AI reading by Claude, cross-checked against the PDF text layer (74 of 74 cells agreed, per notes/p2_report.md or workstamp.md; verify the number in the repo).
+   - Rounding/truncation: keep it labelled as an unconfirmed hypothesis.
+   - Time spent and personal reflection: keep as [USER: ...] placeholders.
+   Verify every number in REPORT.md against its cited file and fix any mismatch; list each correction you made. Keep the honest points: one page only, rules written after seeing it, P10 regressions, the rejected pitch threshold, the remaining seed-11 split.
+6. Run the full test suite and git status.
 
-Goal: prove that a stranger can reproduce the results from a fresh clone using only the documented commands. Test the COMMITTED state, not my working directory.
+Commit as "docs: correct attribution and finalize report draft".
 
-## 1. Fresh clone
-- Create a temporary directory OUTSIDE the project folder (for example under %TEMP%) and run: git clone <path to this repo> <temp>\clean_clone. Work only inside the clone for steps 2 to 5. Do not copy any untracked or ignored file into it.
-- Record the cloned commit hash.
+Final message: files changed, commit hash, test count, git status, corrections made to REPORT.md numbers, remaining [USER: ...] placeholders, and any conflicting attributions found elsewhere (file:line).
 
-## 2. Environment from the documented commands only
-- In the clone, create a new virtual environment and install exactly as README.md says (pyproject install; also test installing from requirements.lock if the README mentions it). Use only the commands written in README.md. If a step is missing or wrong in the README, record it as a finding; fix the README afterwards (step 6), not by improvising silently.
-- Set PYTHONIOENCODING=utf-8 as the README says. Report the Python version.
+## Authoritative attribution — user-supplied (2026-10-23)
 
-## 3. Tests
-- Run the full test suite in the clone. Report the counts and compare with the main working copy (expected: the same number passing). Run ruff if the README documents it.
-- Report any test that depends on an ignored or untracked file (that would be a reproducibility bug).
+The owner supplied the following account. These model/tool identities and human
+roles are user-supplied and cannot be independently established from repo files.
+They supersede earlier conflicting model labels and role descriptions; numerical
+experiment and test records are unchanged.
 
-## 4. Regenerate outputs and compare
-- Run the documented commands that regenerate the page-4 CSV and JSON exports and the evaluation reports (page-4 report and, if documented, the robustness run).
-- Compare the regenerated CSV and JSON with examples/ BYTE FOR BYTE (hash comparison) and report.
-- Compare regenerated evaluation reports with the committed ones in eval/results/ and list differences. Distinguish timestamps/paths (acceptable) from numeric differences (a finding). If the robustness run is slow, report its runtime; run it only if the README documents it and it finishes in a reasonable time, otherwise say it was skipped and why.
-- Confirm data/raw/ PDF, data/gt/ files and data/derived/page4_200dpi.png are present in the clone (tracked), and that the GT CSV still starts with a UTF-8 BOM.
+- Implementation plan and prompt drafting: Claude on the web, separate account.
+  A later Claude conversation provided a second AI reading of GT transcription
+  and reviewed prompts and results.
+- P0–P1: Claude Opus 4.6.
+- P2–P8 and P10b–P13: GPT 6.1 Sol (Codex).
+- P9 review: Claude Sonnet 4.6, distinct from the builder model.
+- P10a fixes: Gemini Flash 3.8 (5565491 and d51c47f), a third model.
+- P10b audit: GPT 6.1 Sol, the original builder model. This is a builder-model
+  audit of another model's fixes, with weaker independence than a human audit.
+- GT: GPT 6.1 Sol transcribed the image; the owner checked every row; Claude
+  provided the second AI reading. Repo evidence independently records74 cells
+  compared with the PDF text layer and zero disagreements (notes/p2_report.md).
 
-## 5. Hygiene scan (report only, do not delete or edit anything for this step)
-- Search the clone for absolute local paths (for example "C:\\Users", the local username), email addresses, tokens or API-key-like strings, in all tracked files including chat_logs/ and workstamp.md. Report file and line numbers only; do NOT print secrets in full (mask them).
-- Check .gitignore covers .venv, __pycache__, .pytest_cache, .ruff_cache and outputs/, and that no such directory is tracked.
-- Check that README, PROJECT_BRIEF.md and workstamp.md describe the same phase list and the same final state; list contradictions.
+## Plan for this housekeeping
 
-## 6. Fix only documentation gaps
-- If the README commands were incomplete or wrong, fix README.md (and only docs). Do not change code, tests, data, eval, examples or any threshold. If the check revealed a CODE or DATA problem, do NOT fix it: report it with evidence and stop.
-- Commit as "docs(P13): fix reproduction instructions" only if you changed something. Delete the temporary clone and venv afterwards.
-
-## Finish
-- Write notes/p13_clean_clone_check.md with a PASS/FAIL table per check (clone, install, tests, exports byte-identical, reports match, protected files present, hygiene), the commands used, and the findings.
-- workstamp.md: P13 DONE with "Next action: final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit". Final commit "P13: clean-clone reproducibility check".
-
-Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clone versus the main copy, byte-identity result, differences in reports, hygiene findings (masked, with file:line), README fixes made, and anything unresolved.
-
-## Plan for this prompt
-
-1. [x] Read brief/handoff; Git status/log and full main-copy baseline; record user-edit boundary.
-2. [x] Fresh temporary clone outside project; record commit and test README environment/install paths independently.
-3. [x] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
-4. [x] Scan every tracked file for hygiene locations without printing values; verify ignore rules, protected assets and phase/state consistency.
-5. [x] Record PASS/FAIL evidence; fix documentation gaps only, if any; preserve REPORT.md and other user edits.
-6. [x] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
+1. [x] Read brief/handoff and Git state; record owner-supplied attribution and preserve P13 next action.
+2. [~] Correct only requested docs; prepend dated notes without rewriting historical P2/review bodies.
+3. [ ] Verify every report number against cited artifacts, list corrections and residual attribution wording elsewhere.
+4. [ ] Full suite, scope/status checks and final named documentation commit; mark housekeeping DONE.
 
 ## Files created or modified
 
-- notes/p13_clean_clone_check.md — commands, hashes, PASS/FAIL evidence and masked hygiene locations.
-- README.md — existing-command clarification, reproduction evidence and current status.
-- workstamp.md — verbatim P13 request, plan, baseline and boundaries.
+- workstamp.md — housekeeping request, plan, user-supplied attribution and corrected session/phase records.
 
 ## Last action and result
 
-P13 complete. Evidence/cleanup commit b178e09f3ce619c27527a4f67c1b19014db1b70d;
-README clarification commit9911ca7. Final completion commit is named
-P13: clean-clone reproducibility check. Both clones tested committed
-8e61adc3ad927bd3fed9d75cd69ed89864bbcd84, Python3.14.0; main298, editable298,
-pinned298 tests pass; both Ruff clean. All six artifact hashes/bytes identical;
-no report differences. Protected assets present/tracked, GT BOM retained.
-All required ignores work; no generated directories tracked. Hygiene remains
-FAIL for identifying text locations, with no secret-pattern candidates found.
-No code/data issue or change; only README, evidence note and workstamp committed.
-REPORT.md untouched and excluded from every staging/commit pathspec. No user
-uncommitted changes observed. Both temporary clones/venvs removed safely.
+Clean main at97cfb11; no pre-existing uncommitted changes. P13 DONE. Attribution
+comes from the owner, not a fresh forensic inference. Current chat continues;
+no new runtime-session row. Only the five requested documentation files may change.
 
-Cleanup complete: exact owned temp base and both clone roots resolved and verified
-under system temp, outside main; only the two expected clone directories were
-present. Both clones/venvs and owned temp base removed; absence confirmed.
-Reproduction evidence and README clarification complete; no uncommitted changes
-outside this task observed. REPORT.md was never modified or staged; commits use
-explicit pathspecs. git diff --check clean. Final DONE handoff commit remains.
+## P13 handoff record — attribution corrected, measurements retained
 
-Evidence note written with complete command list, per-route timings, six common
-artifact hashes, protected asset hashes and all masked hygiene line locations.
-README instructions already worked: only clarifications/consolidation and stale
-phase/status text changed. No executable or data repair required. Final cleanup
-pending exact temporary-target boundary checks; staged paths will be explicit.
-
-Both committed-state routes complete: editable298 passed in20.39s, pinned298
-passed in12.55s; main baseline298 in13.38s. Ruff clean in both. Robustness20.571s
-and18.831s, all360 runs retained. Six generated artifacts byte-identical to
-committed references in BOTH environments; no report content/numeric/path/time
-changes. Clone status clean. Required assets tracked/present, GT BOM retained.
-
-Reproduction passes; hygiene readiness FAIL (masked identifying text locations),
-phase/state agreement at cloned revision FAIL (stale README). No code/data
-reproduction problem found; no code/data fixes. README now clarifies existing
-working commands and updates stale state; original planned brief left intact.
-REPORT.md and all user edits remain excluded from staging/changes.
-
-Both README install routes succeeded in separate fresh .venv directories/clones
-at the same committed8e61adc revision. Pinned route tests/lint/regeneration now
-running; editable route complete and six artifact hashes identical. Phase scan:
-common P0–P13 plan, but README5–6 still saysP10b/nextP11 while committed
-workstamp saysP13 IN PROGRESS/P11 DONE; README phase rows85–89 stale and omit
-P10b. PROJECT_BRIEF is a static planned list, not a live completion record.
-These are documentation findings only. No code/data reproduction failure found.
-
-Fresh editable-install clone tested at8e61adc3ad927bd3fed9d75cd69ed89864bbcd84,
-Python3.14.0. README venv/activation/pip install -e ".[dev]" succeeds; fresh clone
-298 passed in20.39s and documented Ruff command clean. Documented parse/eval/
-robustness commands succeed; robustness20.571s. Both exports and all four reports
-SHA256/bytes match committed references exactly; clone git status clean afterward.
-Second independent clone of same revision is installing requirements.lock in a
-separate fresh .venv; no package reuse from main or editable environment.
-
-Tracked-file hygiene scan completed without printing matches:93 tracked files,
-seven binaries included; local paths/usernames and one email location found,
-no key/token/private-key or credential-assignment pattern found. All required
-ignore samples match; no cache/venv/output directory tracked. Protected PDF/GT/
-PNG tracked and present; GT BOM retained. Locations/details will be in check note.
-
-Main clean atf8e354d; ahead of origin/main by8 commits. Baseline298 passed in13.38s.
-P11 DONE; no interrupted prompt. Current chat continues Session5; no Sessions row.
-No uncommitted user changes at orientation; recheck throughout. REPORT.md must
-never be modified, staged, stashed, reverted or committed by this task.
+P13 was performed by GPT 6.1 Sol (Codex), per owner (user-supplied). Tested commit
+8e61adc3ad927bd3fed9d75cd69ed89864bbcd84 on Windows/Python3.14.0: main298 tests,
+editable clone298 in20.39s, locked clone298 in12.55s; both Ruff clean. Robustness
+runs20.571s/18.831s. Six generated artifacts were byte-identical in both clones;
+protected files tracked/present and GT BOM retained. Temporary clones/venvs removed.
+Hygiene redaction remains. P13 did not modify REPORT.md; this later housekeeping
+prompt now authorizes report edits. P13 final commit97cfb11; evidenceb178e09;
+README9911ca7. No numerical record or protected artifact changed here.
 
 ## Decisions and assumptions
 
-Clone committed HEAD after this handoff record, not the working directory.
-No untracked/ignored files copied. Separate clean venv for each README install
-route. Steps2–5 execute inside clone only. Hygiene scan outputs file:line/category,
-never full matching values. Only docs may change in main; code/data failures
-must be recorded without repair. Stage only named files this task changed.
+Owner-supplied historical attribution supersedes stale labels, without claiming
+independent verification from logs. P2/review original bodies must remain intact.
+Do not alter code/tests/data/eval/examples/thresholds or unrelated user changes.
+Retain one-page development caveats, regressions and known failures in the draft.
 
 ## Known issues / open questions
 
-Hygiene readiness FAIL: local paths/usernames in tracked logs, historical notes
-and export helper, plus an email location. See masked file:line list in
-notes/p13_clean_clone_check.md. No API-key/token/private-key/credential-assignment
-pattern detected; this is not proof of secret absence. Redaction was explicitly
-out of scope. Generic path examples, interpreter shebang and short binary matches
-are separately classified. README stale state corrected; PROJECT_BRIEF remains
-the original planned list. GT reviewer/model provenance, filing policy and human
-report reflection remain for the user. Existing parser limitations unchanged.
-Only Windows/Python3.14.0 was freshly tested, not other platforms or offline use.
+Rounding/truncation policy remains unconfirmed; time and personal reflection are
+owner-only facts. Existing identifying tracked text still needs redaction under
+P13's unchanged next action. Scan/report remaining historical attribution elsewhere;
+do not edit unrequested sources or conversation logs.
 
 ## Next action
 
@@ -169,23 +116,29 @@ final export_chat.py, redaction of chat_logs, add the Claude conversation log, s
 | P5-P6 | Typed rows, parent tree, metadata and deterministic exports; 223 tests pass; GT unchanged | 2f6fa06 |
 | P7-P8 | Independent file evaluator, label-free accounting, deterministic robustness/fault experiments, failure analysis; 275 tests pass; protected files unchanged | f3dcc47251642cb368bf5f69aab3c82df7ae9534 |
 | P9 | Independent review; 2 major + 3 minor + 5 nit findings; all 14 claims verified; 275 tests pass | 1b6d244 |
-| P10 | Apply review fixes with user adjustments; gap-based clustering; 283 tests pass | 7f5afbd |
+| P10a (formerly P10 fixes) | Gemini Flash 3.8 fixes (user-supplied); gap clustering; later suite283 at7f5afbd | 5565491; d51c47f; 7f5afbd (later test) |
 
-| P10b | Independent audit; coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | f535470cbf737c2db70ea81fa13132ea158be44d |
+| P10b | Builder-model audit by GPT 6.1 Sol (user-supplied); coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | f535470cbf737c2db70ea81fa13132ea158be44d |
 
 | P11 | Sourced draft REPORT.md;1156 words, three tables, five placeholders; README pointer; docs-only baseline298 tests pass | 2ee75d2 (draft content); final completion commit named docs(P11): draft write-up |
 
-| P13 | Fresh committed clones; both README install paths pass 298 tests/Ruff, exports and reports byte-identical; hygiene redaction pending; temporary envs removed | b178e09 (evidence); 9911ca7 (README); final completion commit named P13: clean-clone reproducibility check |
+| P13 | GPT 6.1 Sol (Codex), user-supplied; fresh committed clones; both README install paths pass 298 tests/Ruff, exports and reports byte-identical; hygiene redaction pending; temporary envs removed | b178e09 (evidence); 9911ca7 (README); final completion commit named P13: clean-clone reproducibility check |
+
+| housekeeping | Owner-supplied attribution correction and final report draft; IN PROGRESS | Pending |
 
 ## Sessions
 
-| # | Model | UTC start | Note |
+Model/phase attribution below is **user-supplied**. Historical UTC starts and
+usage-limit notes are retained as historical records, not newly verified facts.
+No new runtime session is asserted by this housekeeping update.
+
+| # | Model (user-supplied) | UTC start | Note |
 |---|---|---|---|
+| External | Claude (web, separate account) | unknown | Owner's planning/prompt drafting; later Claude conversation: second AI GT reading and prompt/result review |
 | 1 | Claude Opus 4.6 | unknown | P0 executed; no handoff protocol yet |
 | 2 | Claude Opus 4.6 | 2026-10-22T12:54Z | P1 started; cut off by usage limit after step 1 |
-| 3 | Claude Opus 4.6 | 2026-10-22T13:05Z | Ran inspect_pdf.py, generated outputs; cut off before updating workstamp |
-| 4 | Claude Sonnet 4.6 | 2026-10-22T14:19Z | Resumed after interruption (usage limit) |
-| 5 | GPT-6 (Codex) | 2026-10-22T18:00:38Z | Resumed in new session; previous agent hit usage limit |
-| 6 | Claude Sonnet 4.6 (Thinking) | 2026-10-23T10:00:00Z | P9 independent review; read-only for src/tests/eval/scripts/data |
-| 7 | Gemini 3.8 Flash | 2026-10-23T10:25:00Z | P10 apply review fixes with user adjustments |
-
+| 3 | Claude Opus 4.6 | 2026-10-22T13:05Z | P1 inspection outputs; cut off before updating workstamp |
+| 4 | Claude Opus 4.6 | 2026-10-22T14:19Z | Historical P1 continuation after usage-limit interruption; phase/model mapping corrected per owner |
+| 5 | GPT 6.1 Sol (Codex) | 2026-10-22T18:00:38Z | P2–P8 implementation; P10b builder-model audit; P11 draft and P13 clean-clone check |
+| 6 | Claude Sonnet 4.6 | 2026-10-23T10:00:00Z | P9 review, read-only for source/tests/eval/scripts/data |
+| 7 | Gemini Flash 3.8 | 2026-10-23T10:25:00Z | P10a fixes in5565491 and handoffd51c47f; not the review model |
