@@ -5,6 +5,11 @@ Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into
 > **Status**: P10b — P10 fixes independently audited; reporting, warnings and tests completed. GT is **VERIFIED**.
 > Next action: write-up (P11) and final checks (P13).
 
+## Results at a glance
+
+See [REPORT.md](REPORT.md) for the draft write-up, correctness definitions,
+measured results, remaining failures and facts awaiting human confirmation.
+
 ## Quick start
 
 ```bash

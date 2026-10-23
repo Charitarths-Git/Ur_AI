@@ -43,16 +43,31 @@ Final message: the word count, a list of every placeholder, every claim you coul
 ## Plan for this prompt
 
 1. [x] Read brief/handoff; inspect Git and full suite; report actual baseline.
-2. [~] Read committed permitted sources; map claims and flag contradictory provenance.
-3. [ ] Draft REPORT.md, prioritizing correctness definitions, measured failures and placeholders; add short README pointer.
-4. [ ] Check word count, tables, citations, exact README commands, placeholders and file scope.
-5. [ ] Commit draft and DONE handoff; next human rewrite then P13.
+2. [x] Read committed permitted sources; map claims and flag contradictory provenance.
+3. [x] Draft REPORT.md, prioritizing correctness definitions, measured failures and placeholders; add short README pointer.
+4. [x] Check word count, tables, citations, exact README commands, placeholders and file scope.
+5. [~] Commit draft and DONE handoff; next human rewrite then P13.
 
 ## Files created or modified
 
+- REPORT.md — sourced draft with eight requested sections and three small tables.
+- README.md — short Results at a glance pointer only.
 - workstamp.md — verbatim corrected P11 prompt, plan and baseline.
 
 ## Last action and result
+
+Draft validation: 992 prose words excluding tables/commands; 1156 total
+whitespace-delimited words; three small tables; five explicit USER placeholders.
+All three reproduction commands exactly match committed README. Every cited file
+exists in source snapshot6127601; every factual sentence/table row manually
+checked against those records. Only three allowed paths differ. git diff --check
+clean. No extra tests needed after baseline for docs-only changes.
+
+Committed source mapping complete at baseline6127601. Draft written with source
+parentheses, measured improvements/regressions, rejected pitch trial, independent
+accounting definitions and explicit provenance/personal placeholders. Five
+placeholders; exact count/length and citation checks in progress. README adds
+only requested pointer. No new session row.
 
 Clean main at6127601; ahead of origin/main by5 commits. No interrupted prompt:
 P10b DONE. Full baseline:298 passed in12.51s. This is a continuation of Session5;
