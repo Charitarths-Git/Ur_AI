@@ -55,9 +55,9 @@ Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clo
 ## Plan for this prompt
 
 1. [x] Read brief/handoff; Git status/log and full main-copy baseline; record user-edit boundary.
-2. [~] Fresh temporary clone outside project; record commit and test README environment/install paths independently.
-3. [ ] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
-4. [ ] Scan every tracked file for hygiene locations without printing values; verify ignore rules, protected assets and phase/state consistency.
+2. [x] Fresh temporary clone outside project; record commit and test README environment/install paths independently.
+3. [~] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
+4. [x] Scan every tracked file for hygiene locations without printing values; verify ignore rules, protected assets and phase/state consistency.
 5. [ ] Record PASS/FAIL evidence; fix documentation gaps only, if any; preserve REPORT.md and other user edits.
 6. [ ] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
 
@@ -66,6 +66,28 @@ Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clo
 - workstamp.md — verbatim P13 request, plan, baseline and boundaries.
 
 ## Last action and result
+
+Both README install routes succeeded in separate fresh .venv directories/clones
+at the same committed8e61adc revision. Pinned route tests/lint/regeneration now
+running; editable route complete and six artifact hashes identical. Phase scan:
+common P0–P13 plan, but README5–6 still saysP10b/nextP11 while committed
+workstamp saysP13 IN PROGRESS/P11 DONE; README phase rows85–89 stale and omit
+P10b. PROJECT_BRIEF is a static planned list, not a live completion record.
+These are documentation findings only. No code/data reproduction failure found.
+
+Fresh editable-install clone tested at8e61adc3ad927bd3fed9d75cd69ed89864bbcd84,
+Python3.14.0. README venv/activation/pip install -e ".[dev]" succeeds; fresh clone
+298 passed in20.39s and documented Ruff command clean. Documented parse/eval/
+robustness commands succeed; robustness20.571s. Both exports and all four reports
+SHA256/bytes match committed references exactly; clone git status clean afterward.
+Second independent clone of same revision is installing requirements.lock in a
+separate fresh .venv; no package reuse from main or editable environment.
+
+Tracked-file hygiene scan completed without printing matches:93 tracked files,
+seven binaries included; local paths/usernames and one email location found,
+no key/token/private-key or credential-assignment pattern found. All required
+ignore samples match; no cache/venv/output directory tracked. Protected PDF/GT/
+PNG tracked and present; GT BOM retained. Locations/details will be in check note.
 
 Main clean atf8e354d; ahead of origin/main by8 commits. Baseline298 passed in13.38s.
 P11 DONE; no interrupted prompt. Current chat continues Session5; no Sessions row.
