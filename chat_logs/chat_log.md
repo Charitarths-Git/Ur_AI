@@ -941,11 +941,11 @@ For this conversation, the complete logs are saved at:
 
 - **Full untruncated transcript (JSONL):**
   ```text
-  C:\Users\gagan\.gemini\antigravity-ide\brain\04dc995e-54b1-483e-8d66-964372b8491e\.system_generated\logs\transcript_full.jsonl
+  <path>
   ```
 - **Token-compact transcript (JSONL):**
   ```text
-  C:\Users\gagan\.gemini\antigravity-ide\brain\04dc995e-54b1-483e-8d66-964372b8491e\.system_generated\logs\transcript.jsonl
+  <path>
   ```
 
 ---
@@ -960,7 +960,7 @@ You can run this quick Python script from your project virtual environment to ex
 .venv\Scripts\python.exe -c "
 import json, pathlib
 
-log_path = pathlib.Path(r'C:\Users\gagan\.gemini\antigravity-ide\brain\04dc995e-54b1-483e-8d66-964372b8491e\.system_generated\logs\transcript_full.jsonl')
+log_path = pathlib.Path(r'<path>')
 out_path = pathlib.Path('chat_log.md')
 
 with open(log_path, 'r', encoding='utf-8') as f_in, open(out_path, 'w', encoding='utf-8') as f_out:
@@ -1020,14 +1020,14 @@ Save it outside the code folders or in a clearly named chat_logs/ folder
 
 ### 🤖 Assistant Response (2026-10-22T17:55:40Z)
 
-I have created a dedicated [chat_logs/](file:///c:/Users/gagan/Downloads/New%20folder/project/Ur_AI/chat_logs) directory outside the source code folders with both the raw audit trail and a formatted document:
+I have created a dedicated [chat_logs/](file:///<path>/chat_logs) directory outside the source code folders with both the raw audit trail and a formatted document:
 
-1. **[chat_logs/chat_log.md](file:///c:/Users/gagan/Downloads/New%20folder/project/Ur_AI/chat_logs/chat_log.md)**
+1. **[chat_logs/chat_log.md](file:///<path>/chat_logs/chat_log.md)**
    - Clean, human-readable Markdown transcript.
    - Cleans up internal XML tags, separates user prompts and assistant responses, and displays timestamps and tool summaries.
-2. **[chat_logs/transcript_full.jsonl](file:///c:/Users/gagan/Downloads/New%20folder/project/Ur_AI/chat_logs/transcript_full.jsonl)**
+2. **[chat_logs/transcript_full.jsonl](file:///<path>/chat_logs/transcript_full.jsonl)**
    - Complete, untruncated raw JSONL event stream for full audit verification.
-3. **[scripts/export_chat.py](file:///c:/Users/gagan/Downloads/New%20folder/project/Ur_AI/scripts/export_chat.py)**
+3. **[scripts/export_chat.py](file:///<path>/scripts/export_chat.py)**
    - An export script you can re-run at any time (e.g., after completing future phases) to refresh the log:
      ```powershell
      .venv\Scripts\python.exe scripts\export_chat.py

@@ -389,7 +389,7 @@ These are **development results on one page**, whose rules were designed after
 seeing it. They do not establish generalisation. The AI-drafted GT was verified
 by one human, who also reported an independent second review. Accounting pass
 rates must be read alongside not-evaluable counts: severe geometry damage can
-remove checks without producing failures. P10 fixes have now been independently audited in P10b. Remaining geometry
+remove checks without producing failures. P10 fixes have now had an audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit (P10b). Remaining geometry
 limitations are recorded with current measurements.
 
 See [evaluation_design.md](notes/evaluation_design.md) for formulas, denominator
@@ -402,7 +402,7 @@ python -m pytest
 python -m ruff check src scripts tests eval
 ```
 
-## P10b independent audit
+## P10b audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit
 
 The audited starting state was283 tests at e40462b, including the seed11 failure
 regression from7f5afbd. [p10_audit.md](notes/p10_audit.md) records initial/final

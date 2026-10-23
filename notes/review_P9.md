@@ -39,7 +39,7 @@ output on a one-column page, and the committed AI session transcript.
 | Accounting: 7 exact + 13 within-tolerance, 0 fail, 2 N/A | Re-ran `run_eval.py` | PASS: confirmed |
 | Residuals in -1..+3 |  Re-ran eval | PASS: confirmed in report |
 | Truncation hypothesis: 20/20 inside interval | Re-ran eval | PASS: 20/20 |
-| No absolute local paths in production source | grep_search on C:\Users, /home/, secrets | PASS: none found |
+| No absolute local paths in production source | grep_search on <path>, <path>, secrets | PASS: none found |
 | CSV quoting of comma/quote/newline | Probe 3 round-trip | PASS: round-trip OK |
 
 ---

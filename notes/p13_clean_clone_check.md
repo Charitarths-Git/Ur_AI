@@ -1,3 +1,50 @@
+> **2026-10-23 housekeeping redaction:** The scan below describes the historical
+> cloned commit. Current-file redaction has since been completed; measurements
+> and protected artifacts are unchanged. The pre-existing Claude conversation
+> was included, redacted and added with the owner's authorization.
+
+## Current-file redaction verification (2026-10-23)
+
+Scanned 94 tracked files plus the existing Claude conversation (95 files total).
+JSONL values were scanned after decoding, including nested JSON strings, so code
+newlines/decorators are not mistaken for drive paths/email addresses. Standard
+portable interpreter shebangs are not personal local paths. Token/private-key,
+credential-assignment and student/roll-identifier patterns found no confirmed
+candidates. This pattern check cannot establish absence of every possible secret.
+
+| File | Username | Absolute local path | Email | Key/token/credential |
+|---|---:|---:|---:|---:|
+| README.md | 0 | 0 | 0 | 0 |
+| REPORT.md | 0 | 0 | 0 | 0 |
+| chat_logs/chat_log.md | 0 | 0 | 0 | 0 |
+| chat_logs/transcript_full.jsonl | 0 | 0 | 0 | 0 |
+| chat_logs/claude_conversation.md | 0 | 0 | 0 | 0 |
+| notes/evaluation_design.md | 0 | 0 | 0 | 0 |
+| notes/p10_audit.md | 0 | 0 | 0 | 0 |
+| notes/p2_report.md | 0 | 0 | 0 | 0 |
+| notes/p13_clean_clone_check.md | 0 | 0 | 0 | 0 |
+| notes/review_P9.md | 0 | 0 | 0 | 0 |
+| scripts/export_chat.py | 0 | 0 | 0 | 0 |
+| workstamp.md | 0 | 0 | 0 | 0 |
+
+All other non-protected tracked files also have zero identifying-text matches.
+Remaining protected binary candidates are masked/unconfirmed path-like compressed
+bytes: data/derived/crops/body_3_300dpi.png:2262,3040;
+data/derived/page4_200dpi.png:4594,5737;
+data/raw/balance_sheet_after_correction.pdf:266,2317,5951. They were left unchanged.
+The portable shebang in scripts/inspect_pdf.py remains unchanged.
+
+Kept transcript_full.jsonl: all 258 lines parse and their structured values equal
+redacted originals. Export helper now sanitizes both JSONL and Markdown output;
+default input location and selection/formatting behavior are retained. A synthetic
+end-to-end export passed without re-exporting the real source log. Public GitHub
+and example.com references remain. No REPORT.md USER placeholders remain. Full
+suite: 298 passed in 11.41s; Ruff on the export helper and git diff --check pass.
+Hashes for 55 files under data/, eval/, examples/, tests/ and src/ are unchanged.
+This redacts the current files; it does not rewrite historical Git revisions.
+
+---
+
 > **2026-10-23 attribution correction (user-supplied):** The owner attributes
 > P13 and the original P2–P8 implementation to GPT 6.1 Sol (Codex), P9 review to
 > Claude Sonnet 4.6, P10a fixes (5565491, d51c47f) to Gemini Flash 3.8, and the

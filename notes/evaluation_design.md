@@ -21,7 +21,7 @@ The PDF is read once per robustness run; only RawPage objects are perturbed.
 All output ordering, seeds and tie rules are fixed. Reports contain no timestamps;
 source names are basenames. Generated report text is UTF-8. P7–P8 left existing parser code,
 GT, raw PDF, examples and dependency manifests unchanged. P10 later fixed the
-reviewed parser behavior; P10b independently audited it. Protected GT/raw/examples
+reviewed parser behavior; P10b provided an audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit. Protected GT/raw/examples
 remain unchanged. Existing test
 transform helpers were moved into evaluation.perturb without weakening assertions.
 
@@ -265,7 +265,7 @@ GT CSV, raw PDF, examples, original parser modules and dependency manifests.
 
 ## P10b audit and measured geometry limits
 
-P10 was applied in a different session/tool, then independently audited against
+P10 was applied in a different session/tool, then checked in an audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit, against
 commit e40462b (283 tests). Existing successful fixes were preserved. The new
 oracle independently generates digit/sign/nil mutations and directly computes
 two arithmetic residuals (a four-addend subtotal and a gross/contra/net check),

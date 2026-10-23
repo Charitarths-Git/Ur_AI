@@ -5,10 +5,10 @@
 | Field | Value |
 |---|---|
 | Prompt | housekeeping |
-| State | IN PROGRESS |
+| State | DONE (local work; delivery checked after commit) |
 | Last numbered prompt | P13 DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T12:14:23+00:00 |
+| Updated | 2026-10-23T13:42:56+00:00 |
 
 ## Current prompt (verbatim except personal-path redaction)
 
@@ -63,18 +63,25 @@ experiment and test records are unchanged.
 
 1. [x] Read handoff and Git state; record this housekeeping request. Existing untracked Claude conversation is authorized for scanning/redaction; no other changes found.
 2. [x] Complete report placeholders and exact audit wording; scan all tracked files plus Claude log, redact identifying text, add export-output redaction, validate JSONL and rescan.
-3. [~] Run full tests; verify protected hashes and scope; inspect README/report previews; commit only changed files.
-4. [ ] Push main once as requested; stop on failure; otherwise compare local/remote HEAD and report final status.
+3. [x] Run full tests; verify protected hashes and scope; inspect README/report previews; commit only changed files.
+4. [x] Prepare final named commit and exact push/post-push commands. Local work complete; delivery is executed after this commit and its outcome is recorded in the final chat (stop immediately on push failure).
 
 ## Files created or modified
 
-Pending scope verification. Only documentation, conversation logs and the explicitly requested export-output sanitizer may change.
+- REPORT.md: exact time estimate, five factual reflection sentences and required HTML marker; zero USER placeholders.
+- README.md, notes/evaluation_design.md, notes/p10_audit.md: only five requested audit wording replacements.
+- chat_logs/chat_log.md, chat_logs/transcript_full.jsonl: personal path/account/email redaction; JSONL retained and valid.
+- chat_logs/claude_conversation.md: pre-existing untracked owner log, redacted and included as authorized; incidental trailing whitespace removed for clean diff check.
+- notes/p2_report.md, notes/review_P9.md: identifying/example path redaction only; historical attribution and review findings retained.
+- notes/p13_clean_clone_check.md: dated current-file scan counts and validation; historical clone evidence retained.
+- scripts/export_chat.py: automatic output redaction only, home-relative equivalent default source, both output formats retained.
+- workstamp.md: housekeeping prompt, plan and results; P13 next-action line unchanged.
 
 ## Last action and result
 
-Step 2: exact owner time estimate inserted, five factual first-person reflection sentences added with required HTML marker, no REPORT.md USER placeholders remain. Five targeted audit-wording replacements made; historical attribution labels retained. Scanned all tracked files plus existing Claude conversation. Redacted JSON string values recursively, preserving JSONL syntax; public GitHub references retained. Added export-output sanitization and removed literal personal default path (same home-relative source). Initial token/private-key/credential patterns: none. Rescan: 95 files, zero identifying text/key/credential matches outside protected files. Remaining seven compressed-binary path-pattern candidates are unchanged. JSONL retained (258 valid lines). Ruff on export helper passed; synthetic export/full-suite verification follows with normal temp access.
+Local housekeeping is complete and ready for the exact requested final commit. README.md and REPORT.md first15 lines reviewed; headings, table syntax and fenced blocks are coherent. Their previews are reported in chat. Only the twelve listed authorized files changed; no unrelated user changes or ignored files will be staged. Final rescan still has zero identifying-text matches outside protected files. Push has not yet run at this commit: execute git push -u origin main once, then on success git status -sb, git log --oneline -3 and git ls-remote origin main; compare hashes. Report delivery outcome in final chat. On any push error stop without workaround. P13 Next action remains unchanged.
 
-Clean tracked main at7185d4c; existing untracked chat_logs/claude_conversation.md will be inspected under this request. P13 remains DONE; no new numbered prompt or session row. Current request overrides earlier restrictions on redacting historical paths. Protected data/eval/examples/tests/parser logic remain read-only.
+Step 3 complete: 298 tests passed in11.41s with PYTHONIOENCODING=utf-8. Ruff export-helper check and synthetic end-to-end export passed. JSONL has258 valid lines; values match redacted original structures. Report has zero USER markers. Scan of95 files found zero username, email, local-path, key/token or credential candidates outside protected files. Seven unchanged compressed-binary path-pattern candidates remain, with masked file/line evidence in notes/p13_clean_clone_check.md; no confirmed secret candidates. Protected55-file hashes unchanged (data/eval/examples/tests/src). Historical P2 model label and JSONL review wording retained. Existing Claude log is included under explicit request; no other user changes found. Small handoff commitcadbedf completed; final named commit and push follow. No remote configuration or history rewrite, no force-push, no ignored files staged.
 
 ## P13 handoff record — attribution corrected, measurements retained
 
@@ -96,10 +103,7 @@ Retain one-page development caveats, regressions and known failures in the draft
 
 ## Known issues / open questions
 
-Rounding/truncation policy remains unconfirmed; time and personal reflection are
-owner-only facts. Existing identifying tracked text still needs redaction under
-P13's unchanged next action. Scan/report remaining historical attribution elsewhere;
-do not edit unrequested sources or conversation logs.
+Rounding/truncation policy remains unconfirmed. Current-file redaction is verified; historical Git revisions were not rewritten. Seven unconfirmed protected binary path-pattern hits remain unchanged. Requested push and remote-HEAD check follow the final local commit; any delivery failure must be reported without workaround.
 
 ## Next action
 
@@ -127,7 +131,7 @@ final export_chat.py, redaction of chat_logs, add the Claude conversation log, s
 
 | housekeeping | User-supplied attribution corrected in five docs; report numbers verified,74/74 text agreement added; two placeholders remain;298 tests pass | f8b54d3 (plan); final commit named docs: correct attribution and finalize report draft |
 
-| housekeeping | Final report text and personal-information redaction IN PROGRESS; existing Claude conversation included in authorized scan | pending |
+| housekeeping | Report placeholders resolved; audit wording corrected; 95-file scan, JSONL258 valid, tests298, protected hashes unchanged; local work DONE; post-commit push result recorded in final chat | cadbedf (progress); final commit named chore: finalize report text and redact personal info |
 
 ## Sessions
 

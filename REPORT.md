@@ -100,9 +100,14 @@ The P9 reviewer, Claude Sonnet 4.6, differed from the builder model; P10a fixes 
 GPT 6.1 Sol then audited the fixes in P10b, reusing the original builder model. This has weaker independence than a human audit; it is not a claim of full independence. (workstamp.md, user-supplied attribution)
 The handoff file records plans, commits, decisions and usage-limit cutoffs across sessions. (workstamp.md)
 
-[USER: total time spent, including human verification]
+Time spent: about two days of elapsed time (Wed 21 to Fri 23 Oct 2026), mostly agent runtime plus my own planning, prompt drafting and manual verification of the ground truth. I did not keep a precise log, so this is an estimate.
 
-[USER: one-paragraph personal reflection]
+<!-- drafted by agent from repo facts; owner may edit -->
+I used accounting checks to expose small rounding-sized differences between printed totals and component sums that exact agreement with transcribed cells alone cannot explain. (eval/results/page4_report.md; notes/evaluation_design.md)
+I used jitter sweeps to expose real failures, including the P10 fixes' regressions in row F1 and parent accuracy at higher noise. (notes/failure_analysis.md)
+I retained the documented rejection of the pitch-threshold attempt and the remaining seed-11 row split as limitations. (notes/p10_audit.md; notes/failure_analysis.md)
+I measured everything on one page, with rules written after seeing it, so these results do not establish generalisation. (REPORT.md, sections 1 and 5)
+My next step would be held-out pages and an OCR/VLM backend, evaluated as new work rather than assumed capability. (notes/failure_analysis.md; PROJECT_BRIEF.md)
 
 ## 8. Reproduce
 

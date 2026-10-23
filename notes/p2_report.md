@@ -80,7 +80,7 @@ Human adjudication against the rendered image remains required.
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.14.0, pytest-9.1.1, pluggy-1.7.0
-rootdir: C:\Users\gagan\Downloads\New folder\project\Ur_AI
+rootdir: <path>/
 configfile: pyproject.toml
 testpaths: tests
 collected 12 items

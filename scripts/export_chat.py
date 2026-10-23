@@ -1,22 +1,55 @@
 """Export conversation transcripts from Antigravity IDE into chat_logs/.
 
 Produces:
-1. chat_logs/transcript_full.jsonl - raw machine-readable JSONL transcript
+1. chat_logs/transcript_full.jsonl - redacted machine-readable JSONL transcript
 2. chat_logs/chat_log.md           - clean, human-readable Markdown transcript
 """
 
 import json
 import pathlib
 import re
-import shutil
 import sys
 
 from _console import configure_utf8
 
-DEFAULT_LOG_PATH = pathlib.Path(
-    r"C:\Users\gagan\.gemini\antigravity-ide\brain\04dc995e-54b1-483e-8d66-964372b8491e\.system_generated\logs\transcript_full.jsonl"
+DEFAULT_LOG_PATH = pathlib.Path.home() / (
+    ".gemini/antigravity-ide/brain/04dc995e-54b1-483e-8d66-964372b8491e/"
+    ".system_generated/logs/transcript_full.jsonl"
 )
 OUTPUT_DIR = pathlib.Path("chat_logs")
+
+
+def redact_text(text: str) -> str:
+    """Remove local identities while retaining repository-relative path tails."""
+    root = (
+        r"(?<![A-Za-z0-9])[a-z]:[\\/]+(?:[^\\/\r\n\"'<>`|]*[\\/]+)*"
+        + re.escape(pathlib.Path(__file__).resolve().parents[1].name)
+        + r"(?:[\\/]+|(?=$|[\s\"'<>`|),;]))"
+    )
+    text = re.sub(root, "<path>/", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"(?i)(?<![A-Za-z0-9])[a-z]:[\\/]+[^\s\"'<>`|;,()\[\]{}]*",
+        "<path>", text,
+    )
+    text = re.sub(
+        r"(?<![\w/:])/(?:home|Users|tmp|var/tmp|mnt|private)/[^\s\"'<>`|;,()\[\]{}]*",
+        "<path>", text,
+    )
+    text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "<email>", text)
+    username = pathlib.Path.home().name
+    if username:
+        text = re.sub(re.escape(username), "<user>", text, flags=re.IGNORECASE)
+    return text
+
+
+def redact_value(value):
+    if isinstance(value, str):
+        return redact_text(value)
+    if isinstance(value, list):
+        return [redact_value(item) for item in value]
+    if isinstance(value, dict):
+        return {redact_text(key): redact_value(item) for key, item in value.items()}
+    return value
 
 
 def clean_user_text(text: str) -> str:
@@ -32,20 +65,27 @@ def clean_user_text(text: str) -> str:
 
 def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OUTPUT_DIR) -> None:
     if not log_path.exists():
-        print(f"Error: transcript file not found at {log_path}", file=sys.stderr)
+        print(redact_text(f"Error: transcript file not found at {log_path}"), file=sys.stderr)
         sys.exit(1)
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Copy raw JSONL
+    # 1. Redact JSON values before serializing, preserving valid JSON escapes.
     raw_dest = out_dir / "transcript_full.jsonl"
-    shutil.copy2(log_path, raw_dest)
-    print(f"Copied raw JSONL to {raw_dest}")
+    with log_path.open("r", encoding="utf-8") as source, raw_dest.open(
+        "w", encoding="utf-8"
+    ) as dest:
+        for line in source:
+            try:
+                dest.write(json.dumps(redact_value(json.loads(line)), ensure_ascii=False) + "\n")
+            except json.JSONDecodeError:
+                dest.write(redact_text(line))
+    print(redact_text(f"Copied raw JSONL to {raw_dest}"))
 
     # 2. Parse and format Markdown
     md_dest = out_dir / "chat_log.md"
     with (
-        open(log_path, "r", encoding="utf-8") as f_in,
+        open(raw_dest, "r", encoding="utf-8") as f_in,
         open(md_dest, "w", encoding="utf-8") as f_out,
     ):
         f_out.write("# Ur AI Internship Project — AI Interaction Log\n\n")
@@ -101,7 +141,7 @@ def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OU
                     if call_summaries:
                         f_out.write(f"*Tool Actions Executed: {', '.join(call_summaries)}*\n\n")
 
-    print(f"Generated Markdown log at {md_dest}")
+    print(redact_text(f"Generated Markdown log at {md_dest}"))
 
 
 if __name__ == "__main__":

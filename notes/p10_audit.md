@@ -1,4 +1,4 @@
-# P10b independent audit
+# P10b audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit
 
 ## Before-change evidence (e40462b)
 
