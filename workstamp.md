@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P9 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T10:03:00Z |
+| Updated | 2026-10-23T10:11:00Z |
 
 ## Current prompt (verbatim)
 
@@ -217,6 +217,45 @@ identical GT paths. Pytest fixtures need unsandboxed temp access in this environ
 ## Next action
 
 independent review (P9)
+## Plan for this prompt (P9)
+
+1. [x] Read PROJECT_BRIEF.md and workstamp.md; verify no interrupted IN PROGRESS.
+2. [x] Update workstamp.md to IN PROGRESS; copy prompt verbatim; write plan.
+3. [x] Run existing test suite (275 passed); check git log.
+4. [x] Read required source files: rows.py, classify.py, hierarchy.py, rules.py, export.py, accounting.py, alignment.py, metrics.py.
+5. [x] Read README.md, failure_analysis.md, evaluation_design.md, hierarchy_and_export.md.
+6. [x] Verify A1: Fresh-clone reproducibility (cloned to temp, 275 passed).
+7. [x] Verify A2: Determinism (parse_page + run_eval byte-identical).
+8. [x] Verify A3: Protected files unchanged (git diff empty).
+9. [x] Verify A4: GT-leak audit (grep, clean).
+10. [x] Verify A5: Test-weakening audit (git diff, no assertion removed).
+11. [x] Write and run review_probes.py (8 probes).
+12. [x] Write notes/review_P9.md (verdict, claims, findings, overclaims, hygiene, P10 list, probes).
+13. [x] Update workstamp.md to DONE; add Sessions row; add P9 to Prompt history; final commit.
+
+## Files created or modified
+
+- notes/review_P9.md — full independent review deliverable.
+- notes/review_probes.py — 8 synthetic/independent probes.
+- workstamp.md — P9 state, plan, sessions, prompt history.
+
+## Last action and result
+
+P9 complete. All 14 builder claims verified. Found 2 major defects (F1 structural contra fallback, F2 gross-without-net accounting contribution), 3 minor issues (F3 evaluable_fraction, F4 cluster median, F5 column detection), and 5 nit/hygiene items. 8 probes ran successfully. Report written to notes/review_P9.md. 275 tests still pass. Fresh clone verified.
+
+## Decisions and assumptions
+
+- Read-only for src/, tests/, eval/, scripts/, data/. Only allowed writes: notes/review_P9.md, notes/review_probes.py, workstamp.md.
+- Fresh clone tested at %TEMP%\ur_ai_clone_test using local git clone (not GitHub remote) — equivalent for reproducibility verification.
+- Probe 2 setup was root-level (no parent header): `not_evaluable` is correct for that setup; the real defect (F2) is the gross-without-net contribution to a parent subtotal, separately documented.
+
+## Known issues / open questions
+
+See notes/review_P9.md for full findings. Key open questions for P10: whether F1 fix regresses any case on this page (it should not, since all 5 contra rows match the prefix list); whether F4 cluster fix changes any robustness sweep numbers.
+
+## Next action
+
+P10 apply review fixes
 
 ## Prompt history
 
@@ -229,6 +268,7 @@ independent review (P9)
 | P4 | Pure relative row/column/indent reconstruction, GT matched; 166 tests pass | 2582b5d |
 | P5-P6 | Typed rows, parent tree, metadata and deterministic exports; 223 tests pass; GT unchanged | 2f6fa06 |
 | P7-P8 | Independent file evaluator, label-free accounting, deterministic robustness/fault experiments, failure analysis; 275 tests pass; protected files unchanged | f3dcc47251642cb368bf5f69aab3c82df7ae9534 |
+| P9 | Independent review; 2 major + 3 minor + 5 nit findings; all 14 claims verified; 275 tests pass | TBD (filled after commit) |
 
 ## Sessions
 
@@ -239,3 +279,5 @@ independent review (P9)
 | 3 | Claude Opus 4.6 | 2026-10-22T13:05Z | Ran inspect_pdf.py, generated outputs; cut off before updating workstamp |
 | 4 | Claude Sonnet 4.6 | 2026-10-22T14:19Z | Resumed after interruption (usage limit) |
 | 5 | GPT-6 (Codex) | 2026-10-22T18:00:38Z | Resumed in new session; previous agent hit usage limit |
+| 6 | Claude Sonnet 4.6 (Thinking) | 2026-10-23T10:00:00Z | P9 independent review; read-only for src/tests/eval/scripts/data |
+
