@@ -1,4 +1,4 @@
-# jp-balance-sheet-parser
+# Ur_AI
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
@@ -14,7 +14,7 @@ measured results, remaining failures and facts awaiting human confirmation.
 
 ```bash
 # 1. Clone and enter the repo
-git clone <repo-url> && cd jp-balance-sheet-parser
+git clone https://github.com/Charitarths-Git/Ur_AI.git && cd Ur_AI
 
 # 2. Create a virtual environment
 python -m venv .venv
