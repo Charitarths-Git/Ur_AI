@@ -72,7 +72,8 @@ Orientation; the audit table (status per requirement); the gaps closed (with com
 
 ## Last action and result
 
-P10b complete: audit a46ba5c, validated gap fixes/tests1441dcd, complete diagnosis/
+P10b complete. Final commit f535470cbf737c2db70ea81fa13132ea158be44d.
+Audit a46ba5c, validated gap fixes/tests1441dcd, complete diagnosis/
 comparison documentation4a03795. No existing fix rewritten or test weakened.
 Final audit9 PASS; item5 PARTIAL is an explicitly recorded remaining row split.
 P11/P13 not started; no push performed.
@@ -151,7 +152,7 @@ write-up (P11) and final checks (P13)
 | P9 | Independent review; 2 major + 3 minor + 5 nit findings; all 14 claims verified; 275 tests pass | 1b6d244 |
 | P10 | Apply review fixes with user adjustments; gap-based clustering; 283 tests pass | 7f5afbd |
 
-| P10b | Independent audit; coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | Final hash recorded by metadata handoff commit |
+| P10b | Independent audit; coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | f535470cbf737c2db70ea81fa13132ea158be44d |
 
 ## Sessions
 
