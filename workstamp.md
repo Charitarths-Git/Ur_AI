@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P13 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T11:43:56+00:00 |
+| Updated | 2026-10-23T12:02:45+00:00 |
 
 ## Current prompt (verbatim)
 
@@ -68,6 +68,18 @@ Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clo
 - workstamp.md — verbatim P13 request, plan, baseline and boundaries.
 
 ## Last action and result
+
+P13 complete. Evidence/cleanup commit b178e09f3ce619c27527a4f67c1b19014db1b70d;
+README clarification commit9911ca7. Final completion commit is named
+P13: clean-clone reproducibility check. Both clones tested committed
+8e61adc3ad927bd3fed9d75cd69ed89864bbcd84, Python3.14.0; main298, editable298,
+pinned298 tests pass; both Ruff clean. All six artifact hashes/bytes identical;
+no report differences. Protected assets present/tracked, GT BOM retained.
+All required ignores work; no generated directories tracked. Hygiene remains
+FAIL for identifying text locations, with no secret-pattern candidates found.
+No code/data issue or change; only README, evidence note and workstamp committed.
+REPORT.md untouched and excluded from every staging/commit pathspec. No user
+uncommitted changes observed. Both temporary clones/venvs removed safely.
 
 Cleanup complete: exact owned temp base and both clone roots resolved and verified
 under system temp, outside main; only the two expected clone directories were
@@ -131,12 +143,19 @@ must be recorded without repair. Stage only named files this task changed.
 
 ## Known issues / open questions
 
-Pending clean-clone evidence. Existing report/model provenance contradictions
-and the historical GT draft note remain; do not resolve facts by inventing them.
+Hygiene readiness FAIL: local paths/usernames in tracked logs, historical notes
+and export helper, plus an email location. See masked file:line list in
+notes/p13_clean_clone_check.md. No API-key/token/private-key/credential-assignment
+pattern detected; this is not proof of secret absence. Redaction was explicitly
+out of scope. Generic path examples, interpreter shebang and short binary matches
+are separately classified. README stale state corrected; PROJECT_BRIEF remains
+the original planned list. GT reviewer/model provenance, filing policy and human
+report reflection remain for the user. Existing parser limitations unchanged.
+Only Windows/Python3.14.0 was freshly tested, not other platforms or offline use.
 
 ## Next action
 
-Create temporary clone, record its revision, test README commands verbatim.
+final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit
 
 ## Prompt history
 
@@ -155,6 +174,8 @@ Create temporary clone, record its revision, test README commands verbatim.
 | P10b | Independent audit; coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | f535470cbf737c2db70ea81fa13132ea158be44d |
 
 | P11 | Sourced draft REPORT.md;1156 words, three tables, five placeholders; README pointer; docs-only baseline298 tests pass | 2ee75d2 (draft content); final completion commit named docs(P11): draft write-up |
+
+| P13 | Fresh committed clones; both README install paths pass 298 tests/Ruff, exports and reports byte-identical; hygiene redaction pending; temporary envs removed | b178e09 (evidence); 9911ca7 (README); final completion commit named P13: clean-clone reproducibility check |
 
 ## Sessions
 
