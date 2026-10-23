@@ -30,10 +30,36 @@ Antigravity logs retain their native event schema. Historical IDE/event labels d
 
 ## Re-export caution
 
-scripts/export_chat.py still reads only its configured initial Antigravity session. Running it alone would replace the consolidated Antigravity/Markdown files with an older single-session view; it does not refresh Codex or Claude. No code was changed for this log-only refresh.
+scripts/export_chat.py exports one legacy session to outputs/chat_export by default.
+Existing products are refused unless --replace is supplied; explicit replacement
+first retains byte-identical originals in a backup-UUID directory. Consolidated
+logs are never replaced by default. This tool does not collect Codex sessions.
+Malformed JSONL input is rejected before any output replacement.
 
 Unchanged Claude SHA-256: `546edf6567976220b88765fc4888a9a04830069f3acb835425b8a83dd983446f`.
 
 ## Pasted phase-prompt attachments
 
 Seven source text attachments containing the original phase prompts are included beside their corresponding Codex user messages in chat_log.md and in the attachments fields of codex_transcript.jsonl. Their text is retained without summarization, apart from personal-information/credential redaction. Original attachment files outside the repo were read only. PDF/image attachments are not copied into the conversation log.
+
+
+## P14 supplement
+
+[supplement_p14.md](supplement_p14.md) and supplement_p14.jsonl append available visible messages without rewriting the existing exports. Source cutoffs:
+
+[
+  {
+    "session_id": "01a164c4-bb0b-78c1-9838-3200db561076",
+    "after": "2026-10-23T15:47:30.145Z",
+    "through": "2026-10-23T16:46:36.034Z",
+    "messages": 19
+  },
+  {
+    "session_id": "01a16976-34c2-7c52-afcf-4459f42ddade",
+    "after": "2026-10-23T16:00:55.827Z",
+    "through": "2026-10-23T16:24:39.319Z",
+    "messages": 10
+  }
+]
+
+Messages after these cutoffs, including completion of P14, are outside this frozen supplement. No new Claude web export or later Antigravity source was available in this task; existing supplied records are retained. No completeness claim for active conversations.

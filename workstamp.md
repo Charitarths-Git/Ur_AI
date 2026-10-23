@@ -221,9 +221,9 @@ Do not call the task complete if a required item remains unimplemented; identify
 2. [x] Fix structural header detection and add uncertainty flags with regression tests.
 3. [x] Independently validate and score JSON trees.
 4. [x] Acquire official pages; record split before tuning; image-draft provisional annotations.
-5. [~] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
-6. [ ] Protect log exports, add supplement and deterministic CI.
-7. [ ] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
+5. [x] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
+6. [x] Protect log exports, add supplement and deterministic CI.
+7. [~] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
 
 Starting commit: 3e14d249ba755a9c12a4975f562c1224feb3464e. Original parser is recoverable from this immutable Git revision; artifact copies and SHA-256 manifest: eval/versions/3e14d24/. Existing PDFs and verified GT remain unchanged. Previous housekeeping request: `update all  the chat_log.`; its completed plan and results below are historical.
 
@@ -349,3 +349,11 @@ Baseline suite: 298 passed after sandbox temp errors resolved. New tests: 15 pas
 ## P14 progress: benchmark protocol
 
 Candidate parser frozen at33025ad before held-out predictions. Five issuer-level split documents acquired; image-derived AI drafts completed with no parser predictions consulted. They are not independent/human verification; nil glyph and typography decisions remain reviewable. Fixed pdfplumber text-grid configuration: library text strategies, 3-point tolerances, largest extracted grid, format-only adapter with left/right chronology assumption and unsupported hierarchy/types. Settings fixed before held-out runs and not tuned on them. One warmup and five timed repetitions, same machine and PDF-open through serialization boundaries, excluding evaluation. Next: run all three engines on every selected page.
+
+## P14 progress: measured outcomes and annotation adjudication
+
+All five pages evaluated by frozen original/candidate and pdfplumber. Four image transcription errors were confirmed in enlarged source images after first predictions: Nintendo software spelling, two Capcom labels, Konami 10,615. Initial reports/annotation commit preserved; revised scoring does not tune parser. Annotation status remains provisional AI-only. Candidate and original held-out cells262/262, parents131/131; row types retain disagreements. Numeric recovery improves x=.3H cells to1.0; higher y noise regresses slightly in cells and more in parents. Full comparison and all experiments retained.317 tests passed before extra schema/CLI/recovery tests. Safe log exporter defaults to separate ignored destination; replacement requires backups. Supplement contains29 visible messages through documented per-session cutoffs; all JSONL parses. CI configured for Windows/Python3.14, remote execution not yet confirmed.
+
+## P14 progress: maintenance verified
+
+Exporter refuses existing products, writes separately by default, rejects malformed source, and explicit replacement backs up originals. Four new protection tests passed in317-test run. Workflow uses pinned dependency install on Windows/Python3.14 and has no document downloads. Supplemental29 visible messages and all JSONL validated; original consolidated logs unchanged. Next: finish report/submission draft, final suite and remote delivery.

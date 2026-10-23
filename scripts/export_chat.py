@@ -1,14 +1,18 @@
-"""Export conversation transcripts from Antigravity IDE into chat_logs/.
+"""Export one legacy Antigravity transcript to a separate destination by default.
 
 Produces:
-1. chat_logs/transcript_full.jsonl - redacted machine-readable JSONL transcript
-2. chat_logs/chat_log.md           - clean, human-readable Markdown transcript
+1. outputs/chat_export/transcript_full.jsonl - redacted machine-readable JSONL transcript
+2. outputs/chat_export/chat_log.md           - clean, human-readable Markdown transcript
 """
 
+import argparse
 import json
 import pathlib
 import re
+import shutil
 import sys
+import tempfile
+import uuid
 
 from _console import configure_utf8
 
@@ -16,7 +20,7 @@ DEFAULT_LOG_PATH = pathlib.Path.home() / (
     ".gemini/antigravity-ide/brain/04dc995e-54b1-483e-8d66-964372b8491e/"
     ".system_generated/logs/transcript_full.jsonl"
 )
-OUTPUT_DIR = pathlib.Path("chat_logs")
+OUTPUT_DIR = pathlib.Path("outputs/chat_export")
 
 
 def redact_text(text: str) -> str:
@@ -29,16 +33,23 @@ def redact_text(text: str) -> str:
     text = re.sub(root, "<path>/", text, flags=re.IGNORECASE)
     text = re.sub(
         r"(?i)(?<![A-Za-z0-9])[a-z]:[\\/]+[^\s\"'<>`|;,()\[\]{}]*",
-        "<path>", text,
+        "<path>",
+        text,
     )
     text = re.sub(
         r"(?<![\w/:])/(?:home|Users|tmp|var/tmp|mnt|private)/[^\s\"'<>`|;,()\[\]{}]*",
-        "<path>", text,
+        "<path>",
+        text,
     )
     text = re.sub(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", "<email>", text)
     username = pathlib.Path.home().name
     if username:
         text = re.sub(re.escape(username), "<user>", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"(?i)(?:sk-[A-Za-z0-9_-]{16,}|ghp_[A-Za-z0-9]{20,}|AIza[A-Za-z0-9_-]{20,}|Bearer\s+[A-Za-z0-9._~-]{16,})",
+        "<credential>",
+        text,
+    )
     return text
 
 
@@ -63,7 +74,7 @@ def clean_user_text(text: str) -> str:
     return text.strip()
 
 
-def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OUTPUT_DIR) -> None:
+def _export_unchecked(log_path, out_dir):
     if not log_path.exists():
         print(redact_text(f"Error: transcript file not found at {log_path}"), file=sys.stderr)
         sys.exit(1)
@@ -72,9 +83,10 @@ def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OU
 
     # 1. Redact JSON values before serializing, preserving valid JSON escapes.
     raw_dest = out_dir / "transcript_full.jsonl"
-    with log_path.open("r", encoding="utf-8") as source, raw_dest.open(
-        "w", encoding="utf-8"
-    ) as dest:
+    with (
+        log_path.open("r", encoding="utf-8") as source,
+        raw_dest.open("w", encoding="utf-8") as dest,
+    ):
         for line in source:
             try:
                 dest.write(json.dumps(redact_value(json.loads(line)), ensure_ascii=False) + "\n")
@@ -144,6 +156,50 @@ def export(log_path: pathlib.Path = DEFAULT_LOG_PATH, out_dir: pathlib.Path = OU
     print(redact_text(f"Generated Markdown log at {md_dest}"))
 
 
+def export(log_path=DEFAULT_LOG_PATH, out_dir=OUTPUT_DIR, *, replace=False):
+    """Default to a separate ignored destination; replacement requires a byte backup.
+
+    Validate all input JSON before touching outputs. Stage both products before
+    replacing either. A successful explicit replacement retains a UUID backup
+    of both original products, including a consolidated multi-session export.
+    """
+    log_path, out_dir = pathlib.Path(log_path), pathlib.Path(out_dir)
+    names = ("transcript_full.jsonl", "chat_log.md")
+    existing = [out_dir / name for name in names if (out_dir / name).exists()]
+    if existing and not replace:
+        raise FileExistsError(
+            "Refusing to overwrite existing logs; use a separate --out-dir "
+            "or explicit --replace (creates recoverable backups)"
+        )
+    # Fail closed: malformed source cannot silently create an invalid JSONL export.
+    with log_path.open(encoding="utf-8-sig") as source:
+        for line in source:
+            json.loads(line)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="export-stage-", dir=out_dir) as temporary:
+        stage = pathlib.Path(temporary)
+        _export_unchecked(log_path, stage)
+        if existing:
+            backup = out_dir / ("backup-" + uuid.uuid4().hex)
+            backup.mkdir()
+            for path in existing:
+                shutil.copy2(path, backup / path.name)
+        for name in names:
+            (stage / name).replace(out_dir / name)
+    return tuple(out_dir / name for name in names)
+
+
 if __name__ == "__main__":
     configure_utf8()
-    export()
+    cli = argparse.ArgumentParser(
+        description="Export one legacy session safely; not a consolidation tool"
+    )
+    cli.add_argument("--source", type=pathlib.Path, default=DEFAULT_LOG_PATH)
+    cli.add_argument("--out-dir", type=pathlib.Path, default=OUTPUT_DIR)
+    cli.add_argument("--replace", action="store_true", help="replace with recoverable backups")
+    args = cli.parse_args()
+    try:
+        export(args.source, args.out_dir, replace=args.replace)
+    except (OSError, ValueError) as exc:
+        print(redact_text(str(exc)), file=sys.stderr)
+        sys.exit(2)
