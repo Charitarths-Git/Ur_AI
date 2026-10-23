@@ -2150,6 +2150,64 @@ Pasted text contains the user's request.
 
 
 
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+This is a continuation of an existing project. My previous AI agent hit its usage limit, and you are a different agent in a new session with NO memory of earlier chats. Rely only on the repository. P0 (setup) and P1 (PDF inspection) are complete. I am now giving you P2.
+
+## Orientation (do this first, before anything else)
+1. Read PROJECT_BRIEF.md (especially "Agent working rules") and workstamp.md. Follow the handoff protocol and resume procedure written there for every step of this prompt.
+2. Run git status, git log -5, and the full test suite (activate .venv first, or use .venv\Scripts\python.exe on Windows; set PYTHONIOENCODING=utf-8 so Japanese text prints correctly). Report the real state. P1 should show DONE in workstamp.md with all tests passing; if reality disagrees, tell me and fix inconsistencies before starting P2.
+3. Add a row to the "Sessions" table in workstamp.md: next session number, YOUR actual model name, UTC start time (or "unknown"), note "Resumed in new session; previous agent hit usage limit". Never write emails, account names or credentials anywhere.
+4. Do not rely on anything you may infer about earlier chats. Treat the repo files as the only source of truth.
+
+## P2: Ground truth (draft for human verification)
+Copy this whole P2 section verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P2 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P2) commits.
+
+Goal: create a hand-verifiable ground-truth table for page 4, created from the RENDERED PAGE IMAGE, independent of any parser. A human (me) will verify it against the page afterwards. Do not write any parsing, normalization or evaluation code for the package.
+
+### Rules for independence (important)
+- Transcribe ONLY from the image data/derived/page4_200dpi.png. If your tooling cannot view images, STOP and tell me; do not fall back to the text layer.
+- If digits are hard to read at 200 DPI, render zoomed crops of the PDF with PyMuPDF (e.g. 300 DPI, horizontal strips of about 12 rows with overlap) into data/derived/crops/ and read those. Rendering crops is allowed; reading text from the PDF is NOT allowed during transcription.
+- During transcription do NOT open or use: the PDF text layer, get_text, pdfplumber, notes/words_*.json, notes/inspection.md. Do not copy numbers from earlier chat output or from any file other than the images.
+- If any character or digit is unclear, do not guess: write the best reading and list it under "uncertain cells" in your report.
+
+### Step 0 (before transcription): verify one P1 claim
+notes/inspection.md Q6 reports 39 rows with numbers and 11 without. I suspect 2 of the "numeric" rows are the date heading and the "- 4 -" footer, which contain digits but are not data rows. Check this from the P1 notes only (not for GT purposes), and if Q6 is wrong or misleading, correct that paragraph of notes/inspection.md with evidence and commit it as a separate "fix(P1): ..." commit. This does not count as using the text layer for GT.
+
+### Step 1: define the ground-truth conventions
+Write data/gt/README.md documenting these conventions exactly:
+- File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
+- Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
+- label: exactly as printed (keep full-width parentheses （純額）, no normalization).
+- parent_path: ancestors' labels joined by " > ", root first; empty for the root. parent: the immediate parent label. level = number of ancestors (so the root 資産の部 has level 0).
+- Hierarchy convention (semantic, not just indentation):
+  * 流動資産 and 固定資産 are children of 資産の部. 有形固定資産, 無形固定資産 and 投資その他の資産 are children of 固定資産.
+  * Plain line items are children of their section header.
+  * Where a gross item is followed by a 減価償却累計額 row and a （純額） row, those two rows are CHILDREN OF THE GROSS ITEM (e.g. parent of 減価償却累計額 is 建物及び構築物). The gross item itself is a child of the section.
+  * A 合計 row is a child of the section it closes and has row_type subtotal; 資産合計 is a child of 資産の部 with row_type total.
+- row_type values (exactly these): header (no numbers), line_item, contra (減価償却累計額 and 貸倒引当金), net (（純額） rows), subtotal, total.
+- Values: integers in 千円 exactly as printed (do NOT multiply by 1000). △ means negative. A printed nil mark (－) is stored as an EMPTY value (null, not 0) and prev_raw/curr_raw keep the printed string. △0 is stored as 0 with raw "△0". prev_raw/curr_raw hold the string exactly as printed (including △, commas); empty for header rows. Use previous = 前連結会計年度 column, current = 当連結会計年度 column.
+- If you believe a convention above is ambiguous or wrong for this page, say so in the report rather than silently deviating.
+
+### Step 2: transcribe
+Create data/gt/page4.csv and data/gt/page4_meta.json (page_number, correction_marker "訂正後", title, unit "千円", period headings as printed, period end dates as printed, "verified_by_human": false). Number of rows: report what you count; do not pad.
+
+### Step 3: verification aids (not part of the package)
+a) Write notes/gt_verification.md: a checklist table with one line per GT row (row_id, label, previous raw, current raw, a "[ ] verified" box) so I can tick rows against the page.
+b) Write a throwaway script scripts/gt_selfcheck.py that (1) validates the CSV schema, enums, level == number of path elements, and that nil cells are empty; and (2) prints, for each subtotal/net/total row, the components' sum vs the printed value and the difference, as INFORMATION ONLY (no pass/fail, no tolerance logic; that is P7).
+c) ONLY AFTER the CSV is finished and committed: write scripts/gt_crosscheck.py that compares GT numbers against the numeric tokens in the text layer and prints disagreements. It must never modify the GT. Report disagreements; do not fix them by yourself, because I adjudicate against the page.
+
+### Constraints
+- Do not use the text layer for GT values; do not invent data; do not touch the original PDF; do not add anything under src/.
+- Add one pytest test that only checks schema (columns present, allowed row_type values, level consistent with parent_path). Assert NO financial values and no row counts.
+- Run the full test suite. Update README (data/gt description, how to run the two scripts).
+- Final commit "P2: draft ground truth (pending human verification)"; workstamp.md set to DONE with "Next action: human verification of GT, then P3". Mark in workstamp.md that the GT is a DRAFT until I confirm.
+
+### Final message must show
+Orientation results (repo state, tests, session row added); row count and row-type counts; the list of uncertain cells; the self-check output; the cross-check disagreements (if any); convention questions; files created; test output; commit hashes.
+````
+
 #### Assistant — commentary (2026-10-22T17:59:43.539Z)
 
 I’ll read the pasted request and project instructions, then pick up the work from there.
@@ -2315,6 +2373,51 @@ Pasted text contains the user's request.
 
 
 
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+P3: Normalization utilities with unit tests. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P3 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P3) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. Set PYTHONIOENCODING=utf-8 for all commands. Add a Sessions row only if this is a new session.
+
+Goal: small, pure, well-tested normalization functions in src/parser/normalize.py. No PDF access, no row reconstruction, no hierarchy or row-type inference, no evaluation logic, no label-rule config (that is P5), no indent clustering (that is P4). Explain each design decision as you go.
+
+## 1. Number parsing: parse_amount(raw) -> AmountResult
+Return a small frozen dataclass with: raw (the input exactly as given), value (int or None), status (one of "ok", "nil", "invalid", "empty"), negative (bool), note (short string, empty if nothing notable). Never return a float, never raise for bad input, and never turn invalid input into 0. Units stay as printed (千円): do NOT multiply by 1000 and do not add a scale parameter.
+Required behaviour:
+- Strip surrounding whitespace (including full-width space U+3000 and NBSP). Empty or whitespace-only input -> status "empty", value None.
+- Apply NFKC for digits, commas and parentheses, so full-width digits "２，００２，４２９" and half-width digits both work. Accept thousands separators "," and full-width "，". Do not validate comma grouping strictly, but note it in "note" if a group is not 3 digits (informational only).
+- Negative markers: leading △ (U+25B3), ▲ (U+25B2), ASCII hyphen-minus, U+2212 minus, and U+FF0D (the full-width hyphen-minus). Also parentheses "(123)" or "（123）" meaning negative. "△0" and "▲0" must give value 0 with negative True and note "negative zero printed" (value is the integer 0, status "ok").
+- Nil markers: a standalone dash and nothing else: U+FF0D "－", U+2015 "―", U+2014 "—", U+2013 "–", U+2212 "−", U+2010 "‐", U+30FC "ー", ASCII "-", or a run of them, possibly with whitespace -> status "nil", value None. A dash FOLLOWED by digits is a negative number, not nil. Also treat "…" / "･･･" is NOT supported: mark those "invalid".
+- Anything else (letters, two numbers, "1.5", "12-3", stray symbols, a double sign "△-5") -> status "invalid", value None, with a short note naming the reason. Decide explicitly how to treat a decimal point and document it (my default: invalid, because this page is in whole 千円).
+- Never silently accept a trailing unit such as "千円" or "円"; mark invalid.
+
+## 2. Label helpers (matching only, never for output)
+- label_key(label) -> str: NFKC, then remove ALL whitespace (including U+3000), keeping the characters otherwise unchanged. So "建物及び構築物 （純額）" and "建物及び構築物（純額）" give the same key. Document clearly that label_key is for COMPARISON ONLY and that output labels stay exactly as printed, because ground truth keeps the printed form, e.g. full-width （純額）.
+- labels_equal(a, b) -> bool: compares label_key values.
+- label_key must be idempotent; test that.
+- Do NOT add any rule about 合計, （純額）, 減価償却累計額 or any other accounting word. That is P5.
+
+## 3. Period heading helper
+- parse_period_end(text) -> tuple[int, int, int] | None: extracts (year, month, day) from strings such as "(2025 年３月 31 日)" or "（２０２６年３月３１日）", handling full-width digits and arbitrary spaces. Return None if it cannot find all three parts. No Japanese-era (和暦) support; mention that as a documented limitation.
+
+## 4. Tests (tests/test_normalize.py)
+- Table-driven cases for parse_amount covering at least: plain, comma, full-width digits, full-width comma, △ and ▲, hyphen and U+2212 and U+FF0D negatives, parenthesised negatives (half and full width), △0, ▲0, each nil marker above, runs of dashes, dash with spaces, empty, whitespace-only, "1.5", "12-3", "△-5", "12千円", "abc", and a very long number string. Assert status, value and negative for each.
+- label_key and labels_equal cases (space variants, half/full-width parentheses, idempotence) and 3 or 4 parse_period_end cases including a failing one.
+- GT round trip (read-only): for every row in data/gt/page4.csv, parse_amount(prev_raw) and parse_amount(curr_raw) must reproduce previous_year_value and current_year_value exactly, with nil raws giving value None and empty header cells giving "empty". Read the CSV with encoding utf-8-sig. NEVER write to data/gt/. This test must not use the PDF.
+- Run the complete suite, then ruff (if configured) on the new files.
+
+## 5. Docs
+- Update README with a short "normalization" section (what the functions do, the nil vs zero rule, "label_key is for matching only").
+- Add a short "Decisions" list to the docstring or to notes/normalization.md (decimal handling, dash handling, negative zero, parentheses).
+
+## Constraints
+- Do not touch data/gt/, data/raw/, or the original PDF. Do not add dependencies (stdlib only, unicodedata and re are fine). Do not write extraction, hierarchy or evaluation code.
+- Do not weaken a test to make it pass; if a GT row fails, report it instead of editing the GT.
+- Final commit "P3: normalization utilities and tests"; workstamp.md set to DONE with "Next action: P4 row reconstruction"; append P3 to the Prompt history with the commit hash.
+
+## Final message must show
+Orientation (repo state, test count before P3); the public function signatures; the list of decisions made (especially anything ambiguous); test output with counts; the GT round-trip result; ruff result; files created or modified; commit hashes; open questions.
+````
+
 #### Assistant — commentary (2026-10-22T18:47:49.467Z)
 
 I’ll read the P3 request and current handoff state, then implement and test the normalization utilities within the requested scope.
@@ -2432,6 +2535,53 @@ Pasted text contains the user's request.
 ## My request:
 
 
+
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+P4: Row reconstruction and indent clustering. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P4 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P4) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (you have no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
+
+## Goal
+Turn the words and drawings of a PDF page into clean visual rows, separating label text from the value columns, plus raw layout evidence for later phases. Hard scope limits: NO hierarchy (no parent, no level), NO row_type, NO accounting words or label rules (that is P5), NO CSV/JSON export (P6), NO evaluation module (P7). Use parse_amount, label_key and parse_period_end from src/parser/normalize.py (P3); change that file only to fix a real bug, and report it if you do.
+
+## Design requirements
+1. Separate the PDF backend from the logic. Only one module (src/parser/pdf_backend.py) may import pymupdf. It returns a plain RawPage: page width/height, a list of Word (text, x0, y0, x1, y1, size or None), and a list of Rule (thin horizontal drawn rectangles or line segments with coordinates; also keep their height). Define the backend as a small interface so an OCR or VLM backend can be added later (do not implement one).
+2. All reconstruction logic is PURE functions on RawPage, so it can be tested without a PDF: reconstruct_page(raw_page, config) -> PageLayout. It must depend only on RELATIVE geometry: every threshold is a multiple of the median word height (or a fraction of the page size), collected in a documented LayoutConfig dataclass. No hard-coded point coordinates, no page-4-specific numbers (no row counts, no y limits like "skip y < 145"). A later phase will perturb word lists (shift, scale, jitter, shuffle) and re-run this, and your tests below check this property.
+3. Output structures (frozen dataclasses; names may vary if you justify them):
+   - Column: index, x1 centre, heading text, period_end (from parse_period_end, or None).
+   - Cell: column index, raw string exactly as printed, AmountResult from parse_amount.
+   - Row: index, zone ("header", "body", "footer"), y top/bottom, label (as printed, see 5), label_x0, indent_step (body rows with a label, else None), cells, rule_above (bool), source words.
+   - PageLayout: rows, columns, indent step centres, the thresholds actually used.
+
+## Algorithm guidance (you may improve it; document your choices)
+1. Row clustering: sort words by vertical centre (PyMuPDF returns stream order, not visual order; the footer comes first), group words whose centre is within a tolerance of the group, sort each row by x0. Tolerance = factor x median word height. Report the value used on the real page.
+2. Value columns: candidate tokens are those parse_amount accepts as "ok" or "nil". A token is a VALUE only if its RIGHT edge lines up with a detected column; a parseable token elsewhere (a digit inside a title, the page number, a date) is not. Detect columns by clustering the right edges (x1) of candidates, with a minimum number of supporting rows (configurable), robust to stray tokens. Numbers are right-aligned and nil dashes share the same right edge. A numeric token with an invalid status that sits in a column is kept as a cell (status "invalid"), never dropped.
+3. Fused or split signs: the text layer fuses the minus marker with digits ("△2,979"). Also handle a lone sign token directly left of its digits by merging them (tested with synthetic words).
+4. Zones, structurally and not by coordinates: the header zone ends after the last row containing a period heading (parse_period_end finds a date) or, failing that, the last row above the first row with a value cell; document the fallback. The footer is every row after the last row with a value cell. State these limitations in the notes (e.g. a page that ends with a label-only row).
+5. Labels: label = body row tokens that are not values, joined in x order, inserting a space only where the gap is larger than a configurable fraction of the word height. Labels must be exactly as printed (no normalization). Report how many labels contain internal spaces.
+6. Column headings: for each column, collect the header-zone text above it; set period_end per column. Do not hard-code "previous" or "current"; leave the mapping to a later phase.
+7. Indent clustering: take the label_x0 of body rows, cluster them in 1D (gap-based, tolerance relative to word height) and assign indent_step 0..k-1 from left to right, keeping the raw x0 too. Do NOT turn indent steps into levels or parents.
+8. Rule evidence: rule_above is True when a thin horizontal Rule lies between the previous row and this row and overlaps a value column horizontally. Wide shaded backgrounds are not rules (use the Rule height limit as a config value). This is evidence only; do not interpret it.
+9. Add scripts/dump_rows.py PDF_PATH [--page N]: prints zone, y, indent_step, label, raw cells, rule_above for every row, plus the columns and thresholds. It must work WITHOUT PYTHONIOENCODING set (reconfigure stdout and stderr to UTF-8 at start). Apply the same fix to scripts/inspect_pdf.py and the other scripts.
+
+## Tests
+- tests/test_rows.py with SYNTHETIC RawPage inputs (no PDF): jittered y values; shuffled word order (footer first); a label that contains a digit but is not right-aligned (must stay in the label); fused and split signs; nil tokens; invalid tokens in a column; a page with no body; empty input; a page with three value columns; different font sizes.
+- Invariance tests on a synthetic page and on the real page: shuffling the words, translating all coordinates by (dx, dy), and scaling all coordinates by a factor must give the same labels, cells, zones and indent steps. Small coordinate jitter (below your tolerance) must also leave results unchanged.
+- Integration test on data/raw/balance_sheet_after_correction.pdf compared READ-ONLY with data/gt/page4.csv and data/gt/page4_meta.json (utf-8-sig): body row count equals the GT row count; for every row in order, label_key equals the GT label_key, the raw strings equal GT prev_raw and curr_raw exactly (header rows have no cells), and parsed values equal the GT values; the number of columns equals 2; each column's period_end equals parse_period_end of the matching period heading in the meta file. Report (do not assert) how many labels match GT exactly, not only by label_key.
+- Informational report, not an assertion: a cross-tab of rule_above against the GT row_type, and the indent_step against the GT level. Put it in notes/row_reconstruction.md. Use the GT ONLY in tests and this report, never inside the algorithm.
+- A subprocess test that runs scripts/dump_rows.py and scripts/inspect_pdf.py with PYTHONIOENCODING and PYTHONUTF8 removed from the environment and checks that they exit successfully.
+- Run the complete suite, then ruff.
+
+## Docs
+Update README (new modules, how to run dump_rows.py). Write notes/row_reconstruction.md: the algorithm, every threshold with its default and why, the observed values on the real page, the cross-tab report, and a "Known limitations" list (wrapped labels, multi-line headings, tables spanning pages, label-only last rows, sub-column headings, rotated or scanned pages, multiple tables on one page).
+
+## Constraints
+- Do not modify data/gt/, data/raw/ or the PDF. Dependencies: stdlib and the already installed pymupdf only. Do not weaken a test to make it pass; if the GT comparison fails, report it and investigate the algorithm. Do not edit the GT.
+- Final commit "P4: row reconstruction and indent clustering"; set workstamp.md to DONE with "Next action: P5 hierarchy and parent paths"; append P4 to the Prompt history with the commit hash.
+
+## Final message must show
+Orientation (repo state, test count before P4); the public API; the thresholds used and the values observed on the real page (row tolerance, column x1 centres, indent step centres, number of rows per zone); the GT comparison result; the rule_above and indent cross-tab; test and ruff output; invariance test results; files created or modified; commit hashes; known limitations; open questions.
+````
 
 #### Assistant — commentary (2026-10-22T22:09:34.631Z)
 
@@ -2576,6 +2726,73 @@ Pasted text contains the user's request.
 ## My request:
 
 
+
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+P5-P6: Row types, hierarchy and parent paths, page metadata, and CSV/JSON export. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P5-P6 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P5-P6) commits (at least one per numbered section below). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (you have no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
+
+## Goal
+Turn the PageLayout from P4 into the two deliverables I promised: a flat CSV and a hierarchical JSON. Pipeline: PDF -> RawPage (P4 backend) -> PageLayout (P4) -> typed rows and tree (P5) -> files (P6). The algorithm must be general: language-specific words live in a replaceable RuleSet, not in the logic, and the logic must not use data/gt/ or any page-4-specific numbers. Scope limits: NO evaluation metrics module (that is P7), no OCR/VLM backend.
+
+## 1. Small fixes first (separate commits)
+a) notes/inspection.md Q5 says there are 4 indent levels; P4 found 5 indent steps (centres about 62.3, 75.2, 88.2, 101.3, 114.2 pt), the first being the root label. Correct that paragraph with evidence.
+b) P4 attached the unit line "（単位：千円）" to the heading of the right-hand column. Handle this where you judge cleanest (a minimal fix in rows.py with a regression test, or in the new metadata step) so that column headings no longer contain unit lines. Keep all P4 tests passing and do not weaken any.
+
+## 2. RuleSet (src/parser/rules.py)
+A frozen dataclass of language-specific patterns, plus one default instance for Japanese financial statements, e.g. JA_FINANCIAL_STATEMENT. All matching uses label_key from normalize.py; output labels stay exactly as printed.
+- total_labels (exact label_key matches or suffix patterns): 資産合計, 負債純資産合計, 負債及び純資産合計, 負債・純資産合計.
+- subtotal_suffixes: 合計.
+- net_suffixes: （純額） and (純額), compared after label_key normalisation.
+- contra_labels (prefix or exact): 減価償却累計額, 貸倒引当金, 自己株式.
+- unit patterns: a regex for lines such as （単位：千円）, with a map {千円: 1000, 百万円: 1000000, 円: 1}.
+- correction markers: （訂正後）, （訂正前）.
+- page number pattern for "- 4 -".
+Document in notes/hierarchy_and_export.md that ONLY page 4 has been validated; every other pattern (liabilities, equity, 自己株式, other units) is an untested heuristic. Do not claim more.
+
+## 3. Row types (src/parser/classify.py)
+Row types (exactly these, matching the GT convention in data/gt/README.md): header, line_item, contra, net, subtotal, total.
+- Decide in this order: no value cells -> header; label matches total_labels -> total; matches net_suffixes -> net; matches subtotal_suffixes -> subtotal; matches contra_labels -> contra; otherwise structural fallback: all numeric cells printed negative (AmountResult.negative, which includes the printed negative zero) -> contra; else line_item.
+- Compute structural evidence for every row regardless of the label rule: rule_above, all-negative-cells, no-cells. Emit a typed warning (not an override) when the label-rule type and the evidence disagree: a subtotal, net or total row without a rule above; a contra row without negative cells; a header row with a rule above is NOT a warning (the real page has 4 such headers), but report the counts in the notes.
+- Each row records "type_source": "label_rule" or "structural", and the warnings list.
+
+## 4. Hierarchy (src/parser/hierarchy.py)
+- Primary method: a parent stack on indent_step. parent = the nearest preceding body row with a strictly smaller indent_step; level = number of ancestors in the resulting tree (do NOT copy the indent step into level). Emit warnings for the first row not being the least indented, and for a jump of more than one indent step.
+- Indentation is informative only if the body rows have at least 2 distinct indent steps. Otherwise use a documented, deliberately partial fallback and set hierarchy_source = "rules_fallback" with a warning: header rows attach to the root (their nesting is unknown, say so), line_item and subtotal rows attach to the most recent header, contra and net rows attach to the nearest preceding line_item, total rows attach to the root. Keep this small and clearly labelled partial.
+- Output: for each body row: row_id (1-based among body rows, reading order), parent_row_id, parent label, parent_path (ancestor labels joined by " > ", root first), level, children. Build an explicit tree.
+- Never read data/gt/ here.
+
+## 5. Page metadata and column roles (src/parser/metadata.py)
+- From the header and footer zones, using the RuleSet: title lines, correction marker, unit string and multiplier, printed page number; each None when not found, never guessed.
+- Column roles: if there are exactly two columns with distinct period_end values, the earlier is "previous_year" and the later "current_year". Otherwise roles are "value_1".."value_N" (left to right) with a warning. Headings are the cleaned heading text per column.
+- Do not multiply values: they stay in the printed unit (千円), as in the GT. Record unit and unit_multiplier as metadata only.
+
+## 6. Export (src/parser/export.py) and CLI
+- parse_page(path, page_number=1, layout_config=LayoutConfig(), rules=JA_FINANCIAL_STATEMENT) -> ParsedPage (frozen dataclasses holding rows, tree, metadata, warnings, hierarchy_source). Pure functions below it; the only PDF access is the P4 backend.
+- Flat CSV, UTF-8 with BOM, header exactly in this order: label, parent, level, row_type, previous_year_value, current_year_value, row_id, parent_row_id, parent_path, prev_raw, curr_raw. (The first six are the columns I promised; the rest match the GT file names.) Nil cells and header rows have empty values; raw strings are exactly as printed. If the roles are not previous/current, name the value columns value_1..value_N and the raw columns raw_1..raw_N.
+- Hierarchical JSON, UTF-8, ensure_ascii=False, indent=2: {"schema_version": "1.0", "source": {file name only, page, backend}, "page": {title, correction_marker, unit, unit_multiplier, printed_page_number}, "columns": [{index, role, heading, period_end as ISO date or null}], "hierarchy_source", "warnings": [...], "rows": [tree nodes]} where a node is {row_id, label, row_type, level, values: {role: {raw, value, status}}, children: [...]}. The tree follows the same convention as the GT: subtotal rows are children of the section they close; contra and net rows are children of their gross item. Deterministic output (stable key order, no timestamps, no absolute paths).
+- scripts/parse_page.py PDF [--page N] [--out-dir DIR]: writes <stem>_p<N>.csv and .json; prints a short summary (rows per type, hierarchy source, warnings). Must run without PYTHONIOENCODING set.
+- Commit the generated sample outputs for the real page to examples/ (balance_sheet_after_correction_p1.csv and .json); keep outputs/ git-ignored.
+
+## 7. Tests
+- Unit tests on synthetic PageLayouts (no PDF): stack parents (siblings, deeper, shallower, first row), skipped-indent warning, flat-indent fallback, each row-type rule and the structural fallback, evidence-conflict warnings, an unlabeled value row, empty body, column roles (two columns, one column, three columns, missing dates), unit parsing for 千円, 百万円 and missing.
+- Integration test on data/raw/balance_sheet_after_correction.pdf compared READ-ONLY with data/gt/page4.csv and page4_meta.json (utf-8-sig): for all 43 rows in order, exact label, parent label, parent_row_id, parent_path, level, row_type, previous and current values and raw strings; metadata unit, correction marker, printed page number and the column periods equal the GT meta; hierarchy_source == "indentation"; and report whether the warnings list is empty (my expectation: empty; if not, show it and explain, do not hide it).
+- Pipeline invariance: shuffling words, translating, scaling, and small jitter of the real page (reuse the P4 helpers) must give byte-identical CSV and JSON.
+- Ablation (not an accuracy claim): flatten the indentation of the real page by moving each row's label tokens to the same x0, then run the pipeline. Assert only: no crash, hierarchy_source == "rules_fallback", a warning is present, row types and values equal the GT. REPORT in the notes how many of the 43 parents the fallback gets right and which kinds of rows it gets wrong.
+- Export tests: the CSV column order and BOM; the JSON tree flattened equals the CSV rows; nil gives empty in the CSV and null in the JSON; an invalid cell keeps its status; the output is deterministic.
+- CLI subprocess test with PYTHONIOENCODING and PYTHONUTF8 removed from the environment; test that the committed examples/ files equal a fresh generation.
+- Run the full suite and ruff.
+
+## 8. Docs
+Update README (pipeline overview, how to run parse_page.py, the CSV and JSON schema). Write notes/hierarchy_and_export.md: algorithm, the RuleSet table with each pattern's validation status (validated on page 4 or untested heuristic), the evidence cross-tab (rule_above and negative cells against row types) as counts, the ablation result, design decisions, and a "Known limitations" list (hierarchy without indentation, subtotals without keywords, tables spanning pages, label-less rows, pages with several tables, non-Japanese statements, scanned pages).
+
+## Constraints
+- Do not modify data/gt/, data/raw/ or the PDF. Stdlib and pymupdf only. Do not weaken a test to make it pass; if a GT comparison fails, report it and investigate the algorithm; never edit the GT.
+- Final commit "P5-P6: row types, hierarchy, metadata, CSV/JSON export"; set workstamp.md to DONE with "Next action: P7-P8 evaluation framework"; append P5-P6 to the Prompt history with the commit hash.
+
+## Final message must show
+Orientation (repo state, test count before this prompt); the public API; the RuleSet; the GT comparison result for the real page (how many of 43 rows match on each field); the warnings on the real page; the evidence counts; the ablation result; invariance results; the first 12 lines of the generated CSV; test and ruff output; files created or modified; commit hashes; known limitations; open questions.
+````
 
 #### Assistant — commentary (2026-10-22T22:33:56.778Z)
 
@@ -2722,6 +2939,75 @@ Pasted text contains the user's request.
 ## My request:
 
 
+
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+P7-P8: Evaluation framework, robustness experiments and failure analysis. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P7-P8 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P7-P8) commits (at least one per numbered section). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
+
+## Goal
+Define and measure "correct" for table extraction, as I promised in my email: (a) cell-level accuracy against hand-labeled ground truth, (b) structural accuracy (hierarchy and row/column alignment), (c) label-free accounting checks (subtotals, net rows, totals) with a rounding tolerance for 千円 units. Then stress the pipeline with perturbations and write an honest failure analysis. No new dependencies (stdlib and the installed packages only). Do not modify data/gt/, data/raw/ or the PDF. Never use GT inside the parser or inside the accounting checks.
+
+## 1. Evaluator design rules
+- The evaluator scores FILES, not internal objects: it reads a predicted flat CSV (schema from P6, utf-8-sig) and a GT CSV (data/gt/page4.csv), optionally the predicted JSON and data/gt/page4_meta.json. So any other system that writes the same CSV schema can be scored.
+- Library in src/parser/evaluation/ (alignment.py, metrics.py, accounting.py, perturb.py, report.py or similar); run scripts in eval/ (eval/run_eval.py, eval/run_robustness.py). Deterministic: no timestamps, fixed seeds, stable ordering.
+- The report must say what each metric means and its denominator.
+
+## 2. Row alignment
+Predicted and GT rows must be aligned before comparing, because a parser can drop, add or merge rows, and labels repeat (その他 appears three times, リース資産 twice, 減価償却累計額 four times). Implement an order-preserving sequence alignment (dynamic programming) with a similarity per pair: 0.5 x label similarity (1.0 if label_key equal, else a character-level ratio) + 0.5 x value similarity (fraction of value columns that are equal). A pair is aligned only if similarity >= a configurable threshold (default 0.5); gaps are free. Deterministic tie-breaking. Tests must prove that duplicates are aligned correctly when a row is missing or extra.
+
+## 3. GT-based metrics (aligned rows)
+- Cell accuracy: over all (GT row, value column) cells of aligned rows, exact match of the integer value; unaligned GT rows count as wrong. Nil (None) and 0 are DIFFERENT. Report two denominators: all cells (43 x 2) and printed-value cells only (cells whose GT raw string is not empty).
+- Raw-string accuracy: exact match of prev_raw and curr_raw.
+- Label accuracy: exact (as printed) and by label_key.
+- Row-level: precision, recall, F1 of aligned rows, and the fraction of fully correct rows (label, both values, type, parent, level all correct).
+- Structure: row_type accuracy plus a confusion matrix; level accuracy; parent accuracy, where a predicted parent is correct if it aligns to the GT parent (both root counts as correct; an unaligned parent is wrong), so duplicate labels cannot be confused; parent_path accuracy; mean ancestor-chain Jaccard against the GT chain, mapped through the alignment.
+- Column assignment: if the JSON and meta are given, check column roles and period_end dates against the GT meta.
+- Aggregation: a function that combines several page reports (micro-average of counts and a macro-average per page), tested by combining the same page twice. State in the report that with a single page the micro and macro averages coincide.
+
+## 4. Label-free accounting checks (src/parser/evaluation/accounting.py)
+Input: only the predicted rows (row_id, parent_row_id, row_type, value columns and their raw strings). No GT, no label text. Rebuild the tree from parent_row_id.
+- contribution(node): if the node has a child of type net, the net child's value; else if the node has values, its own value; else (a header) the value of its subtotal child, or not evaluable if it has none.
+- Sum check for every subtotal and total row S: the expected value is the sum of contribution(c) over the siblings that precede S under the same parent. (Example in plain words: a tangible-assets subtotal adds the net rows and the lines that have no net row, not the gross or accumulated-depreciation rows; the fixed-assets subtotal adds the subtotals of its sub-sections; total assets adds current-assets and fixed-assets subtotals.)
+- Net check for every net row N under gross item G: expected = G value + the contra child value (contra values are printed negative).
+- Balance identity: if exactly two rows have type total, check that they agree; otherwise status not_applicable (on page 4 there is only one).
+- Nil handling: a None value counts as 0 in a sum only if its raw string is a nil marker; a None from an invalid or unparseable raw makes the check not_evaluable.
+- Each check outputs: check id, kind, row_id, value column, number of addends n, expected, printed, residual (printed minus expected), tolerance, status in {exact, within_tolerance, fail, not_evaluable, not_applicable}.
+- Tolerance policy (document the derivation in notes/evaluation_design.md): figures are rounded or truncated to the printed unit individually, so printed sums need not match exactly. Default tolerance = n (the number of addends, at least 1); this covers both per-figure truncation and per-figure rounding to nearest. Make the tolerance function replaceable (a ToleranceModel).
+- Extra diagnostic, reported but NOT used for pass/fail: truncation consistency. If every printed figure is truncated toward zero, a residual must lie in the integer interval [-(number of negative addends), (number of positive addends) - 1]. Report for each check whether it lies inside, and the fraction of checks that do. Present this as a hypothesis (Japanese filings commonly truncate each figure) that I verify, not as a fact. My hand-check of page 4 found residuals between -1 and +3 thousand yen; check my claim and report what you actually find.
+- Summary: counts per status and an accounting pass rate = (exact + within_tolerance) / evaluable checks.
+
+## 5. Reports
+- eval/run_eval.py --pred CSV [--pred-json JSON] --gt CSV [--gt-meta JSON] [--out-dir DIR] writes eval/results/page4_report.json and page4_report.md: metric tables with denominators, the confusion matrix, every mismatch listed with row_id, label and field, the full accounting check table, and a "Limitations of this evaluation" section stating honestly: single page; the parser rules were designed after seeing this page, so these numbers are a development result and NOT a generalisation claim; the GT was drafted by an AI agent and verified by one human; the truncation hypothesis rests on one page.
+- Commit the results.
+
+## 6. Perturbation framework (src/parser/evaluation/perturb.py, eval/run_robustness.py)
+Perturb the RawPage (read the PDF once with the P4 backend), never the PDF. Reuse or move the helpers that the P4/P5-P6 tests already use (translate, scale, shuffle, jitter), keep all existing tests passing, and add: flatten_indentation (each row's label tokens moved to the same x0), drop_rules (remove all rule rectangles), and separate x-jitter and y-jitter. For each perturbed page, run the full pipeline and the evaluator.
+a) Geometry sweep: jitter amplitude in units of the median word height, 0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1.0, separately for the y axis and the x axis, 20 seeds (0..19) each; per amplitude report the mean and the worst case of cell accuracy, row F1, parent accuracy and accounting pass rate, and the number of crashes. Find and state where it breaks and which threshold in the layout config is responsible.
+b) Structural ablations: flattened indentation; dropped rules; translate; scale (two factors); shuffled word order. Report the full metric set for each.
+c) Fault injection on the PARSED values (label-free detector quality, no GT needed for detection): for every printed numeric cell, exhaustively (no randomness): every single-digit substitution (each digit position, each different digit, skipping substitutions that create a leading zero), a sign flip, and blanking the cell to nil. Re-run the accounting checks and record whether at least one check that passed before now fails ("detected"). Report: the fraction of cells that take part in at least one check (coverage); the detection rate by fault type; for digit substitutions the detection rate by digit position (units digit versus higher digits); and which undetected faults hide inside the tolerance (state the number of addends involved). Explain in plain words that a last-digit error in a sum with many addends can slip under the tolerance.
+Everything deterministic. Keep the sweep runtime reasonable (well under a couple of minutes); if it is not, reduce the seeds and say so.
+
+## 7. Failure analysis (notes/failure_analysis.md)
+Based only on the experiments you actually ran: a table of failure modes (what breaks, the trigger, how it shows up in the metrics and in the accounting checks, which rows are affected with examples, the root cause in the code or the rules, and a recommended next step), including the flattened-indentation errors found earlier (3 sub-section headers, the fixed-assets subtotal, the allowance contra row). Separate "observed in experiments" from "expected but not tested" (scanned pages, tables spanning pages, wrapped labels, multiple tables, other statements, other languages). Do not claim robustness that you did not measure.
+
+## 8. Tests (the evaluator must itself be tested)
+- Synthetic cases: perfect prediction gives 1.0 everywhere; one wrong cell; swapped columns; None versus 0; a missing row; an extra row; duplicate labels with one missing; wrong parent; wrong type; label OCR-style typo with correct values (still aligned); empty prediction; empty GT.
+- Accounting: synthetic trees with nested header and subtotal, net rows, nil handling, an invalid cell (not_evaluable), tolerance boundary (residual exactly n and n+1), truncation-interval boundaries, balance identity with two totals and with one, a header without a subtotal child.
+- Real page: the parser output scored against GT must give 1.0 on all GT metrics (as P5-P6 showed), and the accounting checks must all be exact or within tolerance (report the numbers, including the truncation-consistency fraction).
+- Perturbation helpers are deterministic (same seed, same output); fault injection is deterministic and covers the cells you expect (assert on counts you computed from the data, not hard-coded financial values).
+- Evaluator CLI works without PYTHONIOENCODING set. Run the full suite and ruff.
+
+## 9. Docs
+Update README (how to run evaluation and robustness). Write notes/evaluation_design.md: what "correct" means here, every metric with formula and denominator, the alignment algorithm, the accounting rules, the tolerance derivation and the truncation hypothesis, the perturbation and fault-injection design, and the limitations. Keep it readable: it feeds my write-up.
+
+## Constraints
+- Do not weaken a test to make it pass. If an experiment exposes a real parser bug, do NOT fix it silently in this prompt: record it in notes/failure_analysis.md with evidence (a later prompt applies fixes after an independent review), unless it is a crash in the new evaluation code itself.
+- Final commit "P7-P8: evaluation framework, robustness experiments, failure analysis"; set workstamp.md to DONE with "Next action: independent review (P9)"; append P7-P8 to the Prompt history with the commit hash.
+
+## Final message must show
+Orientation (repo state, test count before this prompt); the public API and the CLI commands; the GT metric table for the real page; the accounting check table (n, expected, printed, residual, status) and the truncation-consistency fraction; the geometry sweep summary (where it breaks); the ablation table; the fault-injection results (coverage, detection by fault type and digit position); the top failure modes; test and ruff output; files created or modified; commit hashes; known limitations; open questions.
+````
 
 #### Assistant — commentary (2026-10-22T23:08:19.823Z)
 
@@ -2972,6 +3258,39 @@ Pasted text contains the user's request.
 
 
 
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+P10: Apply the independent review's fixes. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P10 IN PROGRESS, mark steps [~]/[x] as you go, and make one commit per numbered fix below (messages "fix(P10-n): ..."). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session: first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8. Explain each design decision as you go.
+
+## Source of truth
+Read notes/review_P9.md first (findings F1-F10 with evidence and acceptance tests). Where this prompt differs from the review, THIS PROMPT WINS. Do not modify data/gt/, data/raw/ or the PDF. Do not weaken or delete any existing test. Do not tune any threshold to the page-4 numbers: thresholds stay multiples of the median word height, and any change of a default needs a stated principle.
+BEFORE changing anything: copy the current eval/results/ files into eval/results/baseline_P8/ and commit ("chore(P10): preserve P8 baseline results") so before/after comparisons are possible.
+
+## Required fixes (in this order; full test suite and ruff green after each commit)
+1. F2, accounting contribution. In src/parser/evaluation/accounting.py: contribution(node) = the net child's value if the node has a child of type net; otherwise its own value PLUS the sum of the values of its children of type contra (nil counts as 0 only when the raw is a nil marker; an invalid cell makes the check not_evaluable); a header still contributes its subtotal child's value. Tests: gross + contra child with no net row inside a subtotal gives an exact check; with a net row nothing changes; nil and invalid cases; nested case. Page-4 accounting results must be unchanged (20/20, same residuals).
+2. F1, classify.py. Remove the structural rule "all numeric cells printed negative => contra" as a CLASSIFICATION. Keep it as evidence only. A row that matches no label rule becomes line_item; if all its numeric cells are printed negative, add the warning code possible_contra_or_loss to that row and to the page warnings. Tests: a loss row with a non-listed label gives line_item plus the warning; a row whose label is in the contra list stays contra; page 4 still has 5 contra rows by label rule and ZERO warnings. Update notes/hierarchy_and_export.md (the RuleSet validation table and the evidence section) to match.
+3. F3, coverage. Add evaluable_fraction to accounting_summary(): evaluable checks (exact + within_tolerance + fail) divided by all applicable checks (everything except not_applicable). The pass rate must be reported as N/A when there are no evaluable checks. Show both in the headline of the markdown and JSON reports and in every robustness table (mean and minimum over seeds). Tests for the zero-evaluable case and the mixed case.
+4. F4 + F5, clustering. Replace running-median clustering with gap-based clustering (sort the values and split where the gap exceeds a threshold that is a multiple of the median word height; single linkage), in one shared helper used for (a) grouping words into rows by vertical centre, (b) clustering value-column right edges, (c) indent-step clustering IF the sweep shows it needs it. Rationale to document: the two value columns are about 14 word heights apart, so a tolerance on the cluster spread is the wrong control; the split should happen at the gaps. Guard against chaining two genuinely separate rows: add a synthetic test with a row pitch of about 1.3 word heights and jitter, and keep a documented maximum cluster extent if you need one. Regression tests that recreate the two measured failures with the perturbation helpers: x-jitter 0.3 H seed 1 must again give two columns with correct roles; y-jitter 0.2 H seed 11 must keep the lease accumulated-depreciation row intact. All existing invariance tests must pass, and examples/ outputs for page 4 must stay BYTE-IDENTICAL. Then re-run eval/run_robustness.py and report before/after per amplitude. If an amplitude gets worse or nothing improves, say so plainly; do not claim success you did not measure.
+5. F9 + F7, warnings. Emit a no_columns_detected warning (and a clear one-column warning) when no or too few value columns are found, show it in the CLI summary and in the JSON warnings, and fix the misleading hierarchy warning for empty input. Tests for a one-column page, an empty page and a page with no body.
+6. Independent oracle test for fault injection. In tests, build a small hand-written tree (for example four addends and a subtotal, plus one net row) and compute, with a straightforward brute-force implementation written inside the test (not importing the library's fault code), which single-digit substitutions, sign flips and blankings change any check from passing to failing under tolerance n. Assert that the library's detection counts equal your brute-force counts. Also assert that for the real page the number of injected digit faults equals the number you derive from the digit counts of the printed numeric cells.
+
+## Optional (ONLY after fixes 1-6 are committed and green; one commit each; stop at the first problem)
+7. Add a second ToleranceModel, TruncationIntervalModel, that flags a residual outside the interval [-(number of negative addends), (number of positive addends) - 1]. Re-run fault injection under both models and report detection by digit position for each. Label it clearly as dependent on the hypothesis that the filing truncates every printed figure; the default stays tolerance = n.
+8. F8: make read_table report schema problems as structured issues instead of raising ValueError (keep the clear message).
+
+## NOT in scope
+F10 (chat_logs/) is handled by me manually: do not touch it, do not edit .gitignore for it. No OCR, no new statement types, no new dependencies.
+
+## Re-run and document
+- Re-run scripts/parse_page.py, eval/run_eval.py and eval/run_robustness.py. Page-4 results must be unchanged apart from the new coverage fields: GT metrics all 1.0, accounting 20/20, examples byte-identical.
+- Update notes/failure_analysis.md: keep the P8 baseline table and add a before/after table for the x and y sweeps (mean and worst cell accuracy, row F1, parent accuracy, accounting pass rate, evaluable_fraction), the ablations and the fault injection. Mark which failure modes are fixed, improved, unchanged or still untested. Update README and notes/evaluation_design.md for the new metric and warnings.
+- Final commit "P10: apply independent-review fixes"; set workstamp.md to DONE with "Next action: write-up (P11) and final checks (P13)"; append P10 to the Prompt history with the commit hash.
+
+## Final message must show
+Orientation (repo state, test count before and after); one line per fix (done / not done and why) with its commit hash; the before/after sweep table for x and y; confirmation that examples/ are byte-identical and that GT metrics and accounting are unchanged; fault-injection results (and the optional model if done); protected-file hash check; test and ruff output; known limitations; open questions.
+````
+
 #### Assistant — commentary (2026-10-23T10:18:57.644Z)
 
 I’ll read the P10 request, the handoff log and the independent review, then apply the fixes and run the required checks.
@@ -3006,6 +3325,43 @@ I’ll apply the six required fixes in order, with a full test and lint run befo
 - In audit item 5, also confirm there is a regression test for x-jitter 0.3 H seed 1 (two columns, correct roles), not only seed 11 for y.
 - Time-box Section C (the pitch-based threshold): if it is not clearly working after about 20 minutes of effort, revert it, keep the diagnosis, and document the limitation. Do not leave the repo in a half-changed state.
 
+
+##### Pasted prompt attachment: Pasted text.txt
+
+````text
+P10b: Audit the P10 fixes and close the small gaps. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P10b IN PROGRESS, mark steps [~]/[x] as you go, and make small commits ("fix(P10b): ...", "test(P10b): ...", "docs(P10b): ..."). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure. If this is a new session: first run git status, git log -8 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8. Explain decisions as you go.
+
+## Context
+The fixes from the independent review (notes/review_P9.md) were NOT applied by you: they were applied in a different tool and session (commits 5565491 and d51c47f, tests 275 -> 282), by the same agent that wrote the review. You are now the independent auditor, and you built the original code. Do not redo the fixes. Verify them. Do not modify data/gt/, data/raw/ or the PDF. Do not weaken or delete any test. Do not tune any threshold to page-4 numbers.
+
+## A. Audit table (first, before any change)
+For each requirement below, report PASS / PARTIAL / MISSING with evidence (file:line, a test name, or command output). Put the table in notes/p10_audit.md.
+1. eval/results/baseline_P8/ holds the P8 results and was committed BEFORE the code changes (check git history order).
+2. F2: contribution = net child, else own value plus contra children values; tests for gross+contra with no net row, with a net row, nil and invalid cases, nested case; page-4 accounting still 20/20 with the same residuals.
+3. F1: no structural contra classification; a non-listed label with all-negative cells gives line_item plus the warning code possible_contra_or_loss (on the row and the page); page 4 has 5 contra rows by label rule and ZERO warnings; notes/hierarchy_and_export.md updated.
+4. F3: evaluable_fraction in accounting_summary(); pass rate N/A when nothing is evaluable; both shown in the headline of the markdown and JSON reports AND in every robustness table (mean and minimum over seeds); tests for the zero-evaluable and the mixed case.
+5. F4+F5: one shared gap-based clustering helper used for rows, value-column right edges and (if applicable) indent steps; a synthetic test with row pitch about 1.3 word heights plus jitter; regression tests recreating the two measured failures (x-jitter 0.3 H seed 1: two columns with correct roles; y-jitter 0.2 H seed 11: the lease accumulated-depreciation row stays intact); all invariance tests pass; examples/ byte-identical to before P10.
+6. F7+F9: no_columns_detected warning, one-column warning, a correct empty-input hierarchy warning; tests for a one-column page, an empty page and a page with no body.
+7. Fault-injection oracle test: a hand-written tree (about four addends, a subtotal and one net row) with a brute-force detector written INSIDE the test, compared with the library's counts; plus an assertion that the number of injected digit faults on the real page equals the number derived from the digit counts of the printed numeric cells.
+8. F8: structured issues from read_table.
+9. Docs: README, notes/evaluation_design.md and notes/failure_analysis.md updated with a before/after table (baseline_P8 versus now) for the x and y sweeps (mean and worst cell accuracy, row F1, parent accuracy, accounting pass rate, evaluable_fraction), the ablations and the fault injection.
+10. Unchanged on page 4: GT metrics all 1.0, accounting 20/20, examples byte-identical, protected files unchanged (show the git diff --stat against commit 1b6d244 for data/ and examples/).
+
+## B. Close gaps
+For every PARTIAL or MISSING item that is small, close it: add the missing tests, add the missing report fields, fix the docs. If a requirement was met in a different but acceptable way, say so and do not rewrite it.
+
+## C. Diagnose the remaining degradation (diagnosis first, change only if principled)
+1. At y-jitter 0.2 H and 0.3 H: explain exactly which rows split or merge and why (consecutive-gap threshold versus the within-row spread of two independently jittered words).
+2. At x-jitter 0.3 H: attribute the remaining errors to value-column detection versus indent-step clustering versus label token merging (count rows affected per cause over the 20 seeds).
+3. If the diagnosis points to thresholds measured in word heights where the relevant separation is a pitch (row pitch for rows, indent pitch for indent steps, column separation for columns), you MAY implement a data-derived threshold (a fraction of the median pitch measured on the page, with a documented minimum and maximum). Keep the change ONLY if: all existing tests pass; page-4 outputs stay byte-identical; the sweeps improve and nothing regresses; and the principle is documented. Otherwise revert it and document the finding as a known limitation. Stop at the first problem. Re-run eval/run_robustness.py and update the before/after table.
+
+## D. Records and finish
+- In workstamp.md record that the P10 fixes were applied in a different session and tool, and add P10b to the Prompt history.
+- Final commit "P10b: audit of P10 fixes and gap closing"; workstamp.md DONE with "Next action: write-up (P11) and final checks (P13)"; push is NOT required.
+
+## Final message must show
+Orientation; the audit table (status per requirement); the gaps closed (with commits); the diagnosis for the y and x degradation; whether a pitch-based threshold was implemented and the before/after sweep numbers (or why not); confirmation of page-4 results and byte-identical examples; test and ruff output; known limitations; open questions.
+````
 
 #### Assistant — commentary (2026-10-23T10:58:32.335Z)
 

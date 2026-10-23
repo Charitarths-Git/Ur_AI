@@ -43,13 +43,15 @@ experiment and test records are unchanged.
 
 ## Files created or modified
 
-- chat_logs/chat_log.md: consolidated available project conversations, 5992 lines.
+- chat_logs/chat_log.md: consolidated available project conversations, 6348 lines, including seven full pasted phase-prompt attachments.
 - chat_logs/transcript_full.jsonl: 771 redacted native events across three Antigravity sources.
 - chat_logs/codex_transcript.jsonl: 555 records across two Codex project chats, including22 user and93 assistant messages plus tool metadata/interruption markers.
 - chat_logs/README.md: source counts, cutoffs, privacy exclusions and legacy-exporter warning.
 - workstamp.md: housekeeping request, plan, verification and outcome.
 
 ## Last action and result
+
+Follow-up completeness check: seven original pasted-text phase prompts were available outside the repo and are now embedded, after redaction, beside their corresponding Codex messages and in JSONL attachment fields. Source files were read only; message/tool record counts remain555. Markdown now has6348 lines. The authoritative Claude file and its full embedded bytes remain unchanged. Follow-up local commit named chore: include pasted prompt text in chat logs; no push requested.
 
 Housekeeping locally DONE. The main Codex snapshot reaches the exact user request update all  the chat_log. at2026-10-23T15:47:30.145Z. The separate project conversation is frozen at2026-10-23T16:00:55.827Z; later messages are not claimed included. Subsequent actions and final response for this export are outside the main snapshot, avoiding recursive self-export.
 
@@ -107,7 +109,7 @@ final export_chat.py, redaction of chat_logs, add the Claude conversation log, s
 
 | housekeeping | Report placeholders resolved; audit wording corrected; 95-file scan, JSONL258 valid, tests298, protected hashes unchanged; local work DONE; post-commit push result recorded in final chat | cadbedf (progress); final commit named chore: finalize report text and redact personal info |
 
-| housekeeping | Available project chat records refreshed locally; 771 Antigravity +555 Codex records; privacy/JSON/coverage verified; Claude unchanged; external README/REPORT changes left alone | df405c5 (plan); final commit named chore: refresh complete project chat logs |
+| housekeeping | Available project chat records refreshed locally; 771 Antigravity +555 Codex records and seven pasted prompts; privacy/JSON/coverage verified; Claude unchanged; external README/REPORT changes left alone | df405c5 (plan); final commit named chore: refresh complete project chat logs |
 
 ## Sessions
 

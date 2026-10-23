@@ -33,3 +33,7 @@ Antigravity logs retain their native event schema. Historical IDE/event labels d
 scripts/export_chat.py still reads only its configured initial Antigravity session. Running it alone would replace the consolidated Antigravity/Markdown files with an older single-session view; it does not refresh Codex or Claude. No code was changed for this log-only refresh.
 
 Unchanged Claude SHA-256: `546edf6567976220b88765fc4888a9a04830069f3acb835425b8a83dd983446f`.
+
+## Pasted phase-prompt attachments
+
+Seven source text attachments containing the original phase prompts are included beside their corresponding Codex user messages in chat_log.md and in the attachments fields of codex_transcript.jsonl. Their text is retained without summarization, apart from personal-information/credential redaction. Original attachment files outside the repo were read only. PDF/image attachments are not copied into the conversation log.
