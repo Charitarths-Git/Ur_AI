@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P10b |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T11:00:40+00:00 |
+| Updated | 2026-10-23T11:15:12Z |
 
 ## Current prompt (verbatim)
 
@@ -56,7 +56,7 @@ Orientation; the audit table (status per requirement); the gaps closed (with com
 2. [x] Close report/coverage gaps and add independent accounting, warnings, geometry and fault-oracle tests without weakening existing tests.
 3. [x] Diagnose y=0.2/0.3H and x=0.3H over all seeds; time-box any pitch experiment, keep only with all acceptance conditions met.
 4. [x] Regenerate parse/evaluation/robustness, document complete P8/P10/current comparisons and update design/README/audit.
-5. [~] Full suite, ruff, determinism/protected checks, final commit and DONE handoff.
+5. [x] Full suite, ruff, determinism/protected checks, final commit and DONE handoff.
 
 ## Files created or modified
 
@@ -71,6 +71,11 @@ Orientation; the audit table (status per requirement); the gaps closed (with com
 - workstamp.md — verbatim P10b request, overrides and plan.
 
 ## Last action and result
+
+P10b complete: audit a46ba5c, validated gap fixes/tests1441dcd, complete diagnosis/
+comparison documentation4a03795. No existing fix rewritten or test weakened.
+Final audit9 PASS; item5 PARTIAL is an explicitly recorded remaining row split.
+P11/P13 not started; no push performed.
 
 Final validation: 298 passed in9.38s (baseline283); ruff check src scripts tests
  eval plus both new diagnostic scripts: All checks passed! git diff --check clean.
@@ -120,12 +125,17 @@ acceptance failure or about 20 minutes. No push or P11/P13 work in this prompt.
 
 ## Known issues / open questions
 
-Initial audit: missing robustness coverage summaries, stale docs, insufficient
-edge/oracle tests, no one-column/empty warning handling. See notes/p10_audit.md.
+Seed11 existing test records44 rows rather than requiring intact43-row output.
+An in-memory pitch candidate that fixed it failed that gate and was rejected
+at the first problem, within the20-minute budget; production thresholds unchanged.
+Later authorization is needed to replace the failure-recording assertion before
+pursuing a row-split correction. x=.3 cell-assignment/indent limits remain; high
+noise P10 tradeoffs are explicitly tabulated. Held-out pages, truncation policy,
+and signed/zero diagnostic interval limitations remain open.
 
 ## Next action
 
-Close the small verified gaps with tests and reports.
+write-up (P11) and final checks (P13)
 
 ## Prompt history
 
@@ -140,6 +150,8 @@ Close the small verified gaps with tests and reports.
 | P7-P8 | Independent file evaluator, label-free accounting, deterministic robustness/fault experiments, failure analysis; 275 tests pass; protected files unchanged | f3dcc47251642cb368bf5f69aab3c82df7ae9534 |
 | P9 | Independent review; 2 major + 3 minor + 5 nit findings; all 14 claims verified; 275 tests pass | 1b6d244 |
 | P10 | Apply review fixes with user adjustments; gap-based clustering; 283 tests pass | 7f5afbd |
+
+| P10b | Independent audit; coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | Final hash recorded by metadata handoff commit |
 
 ## Sessions
 
