@@ -115,7 +115,16 @@ def _cells(tokens, centres, thresholds):
         if not centres:
             continue
         column = min(range(len(centres)), key=lambda i: abs(token[-1].x1 - centres[i]))
-        if abs(token[-1].x1 - centres[column]) <= thresholds.column_tolerance:
+        distance = abs(token[-1].x1 - centres[column])
+        # Gap clustering can produce a supported band wider than its joining gap.
+        # Only recognized amounts get this bounded recovery; other text keeps the
+        # strict gate. Never recover across a neighbouring column's midpoint.
+        neighbours = [
+            abs(centre - centres[column]) / 2 for i, centre in enumerate(centres) if i != column
+        ]
+        recovery = min([2 * thresholds.column_tolerance, *neighbours])
+        numeric = parse_amount("".join(w.text for w in token)).status in {"ok", "nil"}
+        if distance <= thresholds.column_tolerance or (numeric and distance < recovery):
             assigned.setdefault(column, []).extend(token)
             used.update(token)
     cells = []
@@ -175,10 +184,50 @@ def _has_rule(page, previous_bottom, row_top, value_spans, thresholds):
     return False
 
 
+def _header_boundary(row_words, token_rows, centres, valid_rows, thresholds):
+    """Period headings must precede values and occupy distinct value-column bands.
+
+    A date elsewhere is ordinary text. A complete unique heading band is stronger
+    evidence than a lone date; ambiguity keeps the established value-row fallback.
+    """
+    fallback = valid_rows[0] - 1 if valid_rows else len(row_words) - 1
+    if not centres or not valid_rows:
+        return fallback, "header_unidentified"
+    found = {i: [] for i in range(len(centres))}
+    for row_index, words in enumerate(row_words[: valid_rows[0]]):
+        for i, centre in enumerate(centres):
+            left = (
+                centres[i - 1]
+                if i
+                else (
+                    centre - (centres[1] - centre)
+                    if len(centres) > 1
+                    else min(
+                        t[0].x0
+                        for ts in token_rows
+                        for t in ts
+                        if abs(t[-1].x1 - centre) <= thresholds.column_tolerance
+                    )
+                    - thresholds.single_column_heading_pad
+                )
+            )
+            band = [
+                w.text
+                for w in words
+                if left < (w.x0 + w.x1) / 2 <= centre + thresholds.column_tolerance
+            ]
+            period = parse_period_end(" ".join(band))
+            if period:
+                found[i].append((row_index, period))
+    if all(len(hits) == 1 for hits in found.values()):
+        return max(hits[0][0] for hits in found.values()), None
+    return fallback, "header_dates_ambiguous" if any(found.values()) else "header_dates_missing"
+
+
 def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -> PageLayout:
     """Reconstruct visual rows using relative geometry only; never mutate input.
 
-    Last complete date row ends the header. Without dates, the first supported
+    A complete period-heading band before supported values ends the header. Without dates,
     valid value row begins the body (preceding label-only rows stay header).
     All rows after the last aligned cell are footer; without supported values,
     all nonempty rows are header. Blank words/zero-height boxes are ignored.
@@ -197,12 +246,9 @@ def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -
         for i, (cells, _) in enumerate(provisional)
         if any(c.amount.status in {"ok", "nil"} for c in cells)
     ]
-    dates = [
-        i
-        for i, row in enumerate(row_words)
-        if parse_period_end(" ".join(w.text for w in row)) is not None
-    ]
-    header_end = dates[-1] if dates else (valid_rows[0] - 1 if valid_rows else len(groups) - 1)
+    header_end, header_warning = _header_boundary(
+        row_words, token_rows, centres, valid_rows, thresholds
+    )
     body_cells = [i for i, (cells, _) in enumerate(provisional) if i > header_end and cells]
     last_body = body_cells[-1] if body_cells else header_end
     if not body_cells:
@@ -246,6 +292,49 @@ def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -
     assignments = {r.index: step for step, group in enumerate(indent_groups) for r in group}
     rows = [replace(r, indent_step=assignments.get(r.index)) for r in rows]
     warnings = []
+    if header_warning:
+        warnings.append(
+            ParseWarning(
+                header_warning,
+                "Period heading band not unique/complete; first supported value row used",
+            )
+        )
+    for row in rows:
+        if row.zone != "body":
+            continue
+        if row.cells and not row.label:
+            warnings.append(
+                ParseWarning(
+                    "orphan_amount_row",
+                    "Amounts have no label; inspect possible split row",
+                    row.index,
+                )
+            )
+        if any(c.amount.status == "invalid" for c in row.cells):
+            warnings.append(
+                ParseWarning(
+                    "invalid_amount",
+                    "Invalid raw amount retained; not converted to zero",
+                    row.index,
+                )
+            )
+        if row.cells and len(row.cells) != len(centres):
+            warnings.append(
+                ParseWarning(
+                    "incomplete_value_row",
+                    "Row has fewer value cells than detected columns",
+                    row.index,
+                )
+            )
+        assigned = provisional[row.index][1]
+        if any(parse_amount(w.text).status == "ok" and w not in assigned for w in row.source_words):
+            warnings.append(
+                ParseWarning(
+                    "unassigned_numeric_token",
+                    "Numeric token remains in label; inspect cell assignment",
+                    row.index,
+                )
+            )
     if not centres:
         warnings.append(
             ParseWarning("no_columns_detected", "no supported numeric columns detected")

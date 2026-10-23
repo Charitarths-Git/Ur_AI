@@ -217,10 +217,10 @@ Do not call the task complete if a required item remains unimplemented; identify
 
 ## P14 plan
 
-1. [~] Freeze starting commit, inputs and results; run baseline suite.
-2. [ ] Fix structural header detection and add uncertainty flags with regression tests.
-3. [ ] Independently validate and score JSON trees.
-4. [ ] Acquire official pages; record split before tuning; image-draft provisional annotations.
+1. [x] Freeze starting commit, inputs and results; run baseline suite.
+2. [x] Fix structural header detection and add uncertainty flags with regression tests.
+3. [x] Independently validate and score JSON trees.
+4. [~] Acquire official pages; record split before tuning; image-draft provisional annotations.
 5. [ ] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
 6. [ ] Protect log exports, add supplement and deterministic CI.
 7. [ ] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
@@ -341,3 +341,7 @@ No new runtime session is asserted by this housekeeping update.
 | 5 | GPT 6.1 Sol (Codex) | 2026-10-22T18:00:38Z | P2–P8 implementation; P10b builder-model audit; P11 draft and P13 clean-clone check |
 | 6 | Claude Sonnet 4.6 | 2026-10-23T10:00:00Z | P9 review, read-only for source/tests/eval/scripts/data |
 | 7 | Gemini Flash 3.8 | 2026-10-23T10:25:00Z | P10a fixes in5565491 and handoffd51c47f; not the review model |
+
+## P14 progress: reconstruction and JSON
+
+Baseline suite: 298 passed after sandbox temp errors resolved. New tests: 15 pass. Full candidate suite: 312 pass, one stale committed-report comparison; regenerate reports before final verification. Footer/body dates cannot move boundary past supported values; missing/ambiguous bands warn. Numeric-only recovery bounded by twice cluster tolerance and neighbouring midpoints. Seed-11 split not claimed fixed. JSON validation derives nesting, compares identities to CSV and independently aligns to GT. Five official filings acquired with TLS verification; issuer split committed before downloads. Development image annotations drafted before predictions; no human verification.

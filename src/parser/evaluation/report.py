@@ -6,6 +6,7 @@ from pathlib import Path
 
 from parser.evaluation.accounting import AccountRow, accounting_checks, accounting_summary
 from parser.evaluation.data import read_table
+from parser.evaluation.json_tree import validate_tree
 from parser.evaluation.metrics import aggregate_reports, score_tables
 
 LIMITATIONS = (
@@ -35,11 +36,24 @@ def evaluate_files(pred_csv, gt_csv, pred_json=None, gt_meta=None, *, threshold=
     def load(path):
         return json.loads(Path(path).read_text(encoding="utf-8-sig")) if path else None
 
+    json_error = None
+    try:
+        document = load(pred_json)
+    except (ValueError, OSError, RecursionError):
+        document = None
+        json_error = "unreadable_or_malformed_json"
+    validation = (
+        validate_tree(document, prediction, truth, threshold=threshold)
+        if pred_json
+        else {"status": "not_supplied", "passes": None}
+    )
+    if json_error:
+        validation["errors"].insert(0, {"path": "$", "code": json_error})
     report = score_tables(
         prediction,
         truth,
         threshold=threshold,
-        predicted_json=load(pred_json),
+        predicted_json=document if validation["status"] == "valid" else None,
         gt_meta=load(gt_meta),
     )
     checks = accounting_checks(account_rows(prediction), prediction.columns)
@@ -50,7 +64,12 @@ def evaluate_files(pred_csv, gt_csv, pred_json=None, gt_meta=None, *, threshold=
         serialized_checks.append(item)
     report.update(
         {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
+            "csv_metrics_note": "metrics and mismatches score CSV; JSON is separate",
+            "json_validation": validation,
+            "validation_passes": not report["mismatches"]
+            and not report["input_issues"]
+            and (validation["passes"] if pred_json else True),
             "inputs": {"prediction": Path(pred_csv).name, "gt": Path(gt_csv).name},
             "accounting": accounting_summary(checks),
             "accounting_checks": serialized_checks,
@@ -63,7 +82,7 @@ def evaluate_files(pred_csv, gt_csv, pred_json=None, gt_meta=None, *, threshold=
 
 def _display(value):
     if value is None:
-        return "—"
+        return "â€”"
     return str(value).replace("|", "\\|").replace("\n", " ")
 
 
@@ -183,6 +202,28 @@ def markdown_report(report: dict) -> str:
         "",
         *(f"- {s}" for s in report["limitations"]),
     ]
+    validation = report.get("json_validation", {})
+    lines += [
+        "",
+        "## Hierarchical JSON (separate from CSV)",
+        "",
+        f"Status: {validation.get('status', 'not_supplied')}.",
+    ]
+    if "gt_accuracy" in validation:
+        lines += [
+            f"JSON/CSV consistent: {validation['csv_consistency']['consistent']}; "
+            f"validation passes: {validation['passes']}.",
+            "",
+            "| JSON/GT metric | Correct / denominator |",
+            "|---|---:|",
+        ]
+        for name, metric in validation["gt_accuracy"]["metrics"].items():
+            lines.append(f"| {name} | {metric['numerator']} / {metric['denominator']} |")
+        lines += [
+            "",
+            "Structured schema errors: " + json.dumps(validation["errors"]),
+            "CSV differences: " + json.dumps(validation["csv_consistency"]["differences"]),
+        ]
     return "\n".join(lines) + "\n"
 
 

@@ -27,7 +27,12 @@ def main():
         print(f"  {warning.code} row={warning.row_id}: {warning.message}")
     for path in paths:
         print(f"Wrote {path}")
+    if not page.rows or not page.columns:
+        print("Extraction failed: no body rows or value columns", file=sys.stderr)
+        return 2
+    print("Extraction usable with warnings" if page.warnings else "Extraction usable")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

@@ -8,35 +8,64 @@
       "issuer": "Nintendo",
       "filing_date": "2025-05-08",
       "url": "https://www.nintendo.co.jp/ir/pdf/2025/250508.pdf",
-      "split": "development"
+      "split": "development",
+      "sha256": "4029ad22ff16107d0f05627bbfbeab913da68a8d7d05a8eb28bf92066fd353d4",
+      "access": "Public HTTPS download; no login or access restriction bypassed.",
+      "reuse": "Issuer copyright; no redistribution license established. Source PDF is not committed; retrieve from official URL and verify hash.",
+      "page": 7,
+      "units": "Ã§â„¢Â¾Ã¤Â¸â€¡Ã¥â€ â€ ",
+      "text_layer_characters": 662
     },
     {
       "id": "capcom",
       "issuer": "Capcom",
       "filing_date": "2025-05-13",
       "url": "https://www.capcom.co.jp/ir/data/pdf/result/2025/full/result_2025_full_01.pdf",
-      "split": "development"
+      "split": "development",
+      "sha256": "c0aa061333fef50dc45ed9e48f6b9e5d95f556116e75b19ece5dbbd8f0278a19",
+      "access": "Public HTTPS download; no login or access restriction bypassed.",
+      "reuse": "Issuer copyright; no redistribution license established. Source PDF is not committed; retrieve from official URL and verify hash.",
+      "page": 12,
+      "units": "Ã§â„¢Â¾Ã¤Â¸â€¡Ã¥â€ â€ ",
+      "text_layer_characters": 644
     },
     {
       "id": "sega",
       "issuer": "Sega Sammy",
       "filing_date": "2025-05-12",
       "url": "https://www.segasammy.co.jp/cms/wp-content/uploads/pdf/ja/ir/20250512_q4_tanshin_j.pdf",
-      "split": "held_out"
+      "split": "held_out",
+      "sha256": "28fe82585b6afcefc2444d24efb9cb5eae8edaae57948a08822c8069a0122afa",
+      "page": 10,
+      "units": "百万円",
+      "access": "Public HTTPS using OS certificate store; TLS verified; no access restriction bypassed.",
+      "reuse": "Issuer copyright; no redistribution license established. PDF not committed; fetch official URL."
     },
     {
       "id": "square",
       "issuer": "Square Enix",
       "filing_date": "2025-05-14",
       "url": "https://www.hd.square-enix.com/jpn/ir/pdf/25q4tanshin.pdf",
-      "split": "held_out"
+      "split": "held_out",
+      "sha256": "3690d3d63a7f547a3c40898a6fff0bf1a886c5306e1beb39ac206887a5e0874d",
+      "access": "Public HTTPS download; no login or access restriction bypassed.",
+      "reuse": "Issuer copyright; no redistribution license established. Source PDF is not committed; retrieve from official URL and verify hash.",
+      "page": 11,
+      "units": "Ã§â„¢Â¾Ã¤Â¸â€¡Ã¥â€ â€ ",
+      "text_layer_characters": 878
     },
     {
       "id": "konami",
       "issuer": "Konami",
       "filing_date": "2025-05-08",
       "url": "https://img.konami.com/ir/ja/ir-data/statements/2025/ja0508_7j6ts4.pdf",
-      "split": "held_out"
+      "split": "held_out",
+      "sha256": "49ab96bf7aeefa2f2c6ef73b9b0d20e7bb0a1f9da4cb6651c5910ac05072e41b",
+      "access": "Public HTTPS download; no login or access restriction bypassed.",
+      "reuse": "Issuer copyright; no redistribution license established. Source PDF is not committed; retrieve from official URL and verify hash.",
+      "page": 11,
+      "units": "Ã§â„¢Â¾Ã¤Â¸â€¡Ã¥â€ â€ ",
+      "text_layer_characters": 984
     }
   ]
 }

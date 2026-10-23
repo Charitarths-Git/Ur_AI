@@ -1,4 +1,4 @@
-"""Score an exported prediction CSV against GT, optionally checking JSON metadata."""
+"""Score an exported prediction CSV against GT, separately validating optional hierarchical JSON."""
 
 import argparse
 import sys
@@ -29,7 +29,9 @@ def main():
         print(f"Wrote {path}")
     print("GT cell accuracy:", report["metrics"]["cell_accuracy_all"])
     print("Accounting:", report["accounting"])
+    print("JSON validation:", report["json_validation"]["status"])
+    return 2 if report["json_validation"]["status"] == "invalid" else 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

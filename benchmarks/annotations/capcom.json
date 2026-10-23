@@ -1,0 +1,278 @@
+{
+  "status": "AI_DRAFT",
+  "verified_by_human": false,
+  "independently_checked": false,
+  "method": "Manually transcribed by the coding agent from the rendered PDF page before viewing parser predictions. Whitespace between Japanese glyphs is typographic, not retained; printed punctuation is retained. Hierarchy follows visual indentation; subtotals remain siblings at printed indentation. Net-qualified standalone amounts are line_item, not a gross/contra net child.",
+  "rows": [
+    {
+      "depth": 0,
+      "row_type": "header",
+      "label": "資産の部",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "流動資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "現金及び預金",
+      "raws": [
+        "125,191",
+        "166,783"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "売掛金",
+      "raws": [
+        "25,383",
+        "33,341"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "商品及び製品",
+      "raws": [
+        "1,692",
+        "2,798"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "仕掛品",
+      "raws": [
+        "1,222",
+        "917"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "原材料及び貯蔵品",
+      "raws": [
+        "847",
+        "1,115"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "ゲームソフト仕掛品",
+      "raws": [
+        "39,035",
+        "49,209"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他",
+      "raws": [
+        "4,456",
+        "7,917"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "contra",
+      "label": "貸倒引当金",
+      "raws": [
+        "△2",
+        "△0"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "流動資産合計",
+      "raws": [
+        "197,826",
+        "262,082"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "固定資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "有形固定資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "建物及び構築物（純額）",
+      "raws": [
+        "10,938",
+        "10,745"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "機械装置及び運搬具（純額）",
+      "raws": [
+        "14",
+        "41"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "工具、器具及び備品（純額）",
+      "raws": [
+        "2,198",
+        "2,090"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "アミューズメント施設機器（純額）",
+      "raws": [
+        "3,375",
+        "3,556"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "土地",
+      "raws": [
+        "8,996",
+        "10,028"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "リース資産（純額）",
+      "raws": [
+        "2,142",
+        "2,773"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "建設仮勘定",
+      "raws": [
+        "647",
+        "2,598"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他（純額）",
+      "raws": [
+        "2,154",
+        "1,720"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "有形固定資産合計",
+      "raws": [
+        "30,468",
+        "33,554"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "無形固定資産",
+      "raws": [
+        "1,444",
+        "1,436"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "投資その他の資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "投資有価証券",
+      "raws": [
+        "7,893",
+        "8,962"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "繰延税金資産",
+      "raws": [
+        "5,867",
+        "6,968"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "contra",
+      "label": "貸倒引当金",
+      "raws": [
+        "△23",
+        "△23"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "投資その他の資産合計",
+      "raws": [
+        "13,737",
+        "15,907"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "固定資産合計",
+      "raws": [
+        "45,650",
+        "50,899"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "total",
+      "label": "資産合計",
+      "raws": [
+        "243,476",
+        "312,982"
+      ]
+    }
+  ]
+}
