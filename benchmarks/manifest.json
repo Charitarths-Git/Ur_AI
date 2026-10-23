@@ -67,5 +67,8 @@
       "units": "Ã§â„¢Â¾Ã¤Â¸â€¡Ã¥â€ â€ ",
       "text_layer_characters": 984
     }
-  ]
+  ],
+  "candidate_commit": "33025adb0f158d221d8a8d5b549674a9952f91a6",
+  "candidate_frozen_before_first_held_out_run": true,
+  "held_out_policy": "No parser changes after candidate freeze. Any future tuning on these outcomes reclassifies the set as development."
 }

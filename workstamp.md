@@ -220,8 +220,8 @@ Do not call the task complete if a required item remains unimplemented; identify
 1. [x] Freeze starting commit, inputs and results; run baseline suite.
 2. [x] Fix structural header detection and add uncertainty flags with regression tests.
 3. [x] Independently validate and score JSON trees.
-4. [~] Acquire official pages; record split before tuning; image-draft provisional annotations.
-5. [ ] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
+4. [x] Acquire official pages; record split before tuning; image-draft provisional annotations.
+5. [~] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
 6. [ ] Protect log exports, add supplement and deterministic CI.
 7. [ ] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
 
@@ -345,3 +345,7 @@ No new runtime session is asserted by this housekeeping update.
 ## P14 progress: reconstruction and JSON
 
 Baseline suite: 298 passed after sandbox temp errors resolved. New tests: 15 pass. Full candidate suite: 312 pass, one stale committed-report comparison; regenerate reports before final verification. Footer/body dates cannot move boundary past supported values; missing/ambiguous bands warn. Numeric-only recovery bounded by twice cluster tolerance and neighbouring midpoints. Seed-11 split not claimed fixed. JSON validation derives nesting, compares identities to CSV and independently aligns to GT. Five official filings acquired with TLS verification; issuer split committed before downloads. Development image annotations drafted before predictions; no human verification.
+
+## P14 progress: benchmark protocol
+
+Candidate parser frozen at33025ad before held-out predictions. Five issuer-level split documents acquired; image-derived AI drafts completed with no parser predictions consulted. They are not independent/human verification; nil glyph and typography decisions remain reviewable. Fixed pdfplumber text-grid configuration: library text strategies, 3-point tolerances, largest extracted grid, format-only adapter with left/right chronology assumption and unsupported hierarchy/types. Settings fixed before held-out runs and not tuned on them. One warmup and five timed repetitions, same machine and PDF-open through serialization boundaries, excluding evaluation. Next: run all three engines on every selected page.

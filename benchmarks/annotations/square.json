@@ -1,0 +1,368 @@
+{
+  "status": "AI_DRAFT",
+  "verified_by_human": false,
+  "independently_checked": false,
+  "method": "Manually transcribed by coding agent from rendered page before parser predictions. Typographic spaces between Japanese glyphs removed; full-width parentheses retained. Visual depth determines parent, subtotals remain at printed indentation. Nil glyph standardized to full-width dash for review: exact raw glyph ambiguous in image. No human or independent check.",
+  "rows": [
+    {
+      "depth": 0,
+      "row_type": "header",
+      "label": "資産の部",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "流動資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "現金及び預金",
+      "raws": [
+        "225,901",
+        "247,760"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "受取手形及び売掛金",
+      "raws": [
+        "44,683",
+        "33,175"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "商品及び製品",
+      "raws": [
+        "4,684",
+        "4,840"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "原材料及び貯蔵品",
+      "raws": [
+        "1,033",
+        "856"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "コンテンツ制作勘定",
+      "raws": [
+        "48,577",
+        "46,936"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他",
+      "raws": [
+        "14,561",
+        "11,101"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "contra",
+      "label": "貸倒引当金",
+      "raws": [
+        "△221",
+        "△155"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "流動資産合計",
+      "raws": [
+        "339,219",
+        "344,515"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "固定資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "有形固定資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "建物及び構築物",
+      "raws": [
+        "19,598",
+        "29,756"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "contra",
+      "label": "減価償却累計額",
+      "raws": [
+        "△15,135",
+        "△16,308"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "net",
+      "label": "建物及び構築物（純額）",
+      "raws": [
+        "4,462",
+        "13,447"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "工具、器具及び備品",
+      "raws": [
+        "20,263",
+        "21,213"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "contra",
+      "label": "減価償却累計額",
+      "raws": [
+        "△14,164",
+        "△15,066"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "net",
+      "label": "工具、器具及び備品（純額）",
+      "raws": [
+        "6,099",
+        "6,147"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "アミューズメント機器",
+      "raws": [
+        "18,116",
+        "18,706"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "contra",
+      "label": "減価償却累計額",
+      "raws": [
+        "△15,949",
+        "△16,412"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "net",
+      "label": "アミューズメント機器（純額）",
+      "raws": [
+        "2,166",
+        "2,294"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他",
+      "raws": [
+        "3,858",
+        "3,813"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "contra",
+      "label": "減価償却累計額",
+      "raws": [
+        "△1,988",
+        "△2,432"
+      ]
+    },
+    {
+      "depth": 4,
+      "row_type": "net",
+      "label": "その他（純額）",
+      "raws": [
+        "1,869",
+        "1,380"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "土地",
+      "raws": [
+        "3,782",
+        "3,782"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "建設仮勘定",
+      "raws": [
+        "4,695",
+        "777"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "有形固定資産合計",
+      "raws": [
+        "23,075",
+        "27,829"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "無形固定資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他",
+      "raws": [
+        "5,881",
+        "4,895"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "無形固定資産合計",
+      "raws": [
+        "5,881",
+        "4,895"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "投資その他の資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "投資有価証券",
+      "raws": [
+        "4,731",
+        "5,553"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "差入保証金",
+      "raws": [
+        "13,168",
+        "13,286"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "退職給付に係る資産",
+      "raws": [
+        "1,573",
+        "1,877"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "繰延税金資産",
+      "raws": [
+        "18,687",
+        "12,647"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他",
+      "raws": [
+        "4,568",
+        "5,586"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "contra",
+      "label": "貸倒引当金",
+      "raws": [
+        "△30",
+        "△32"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "投資その他の資産合計",
+      "raws": [
+        "42,698",
+        "38,919"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "固定資産合計",
+      "raws": [
+        "71,656",
+        "71,644"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "total",
+      "label": "資産合計",
+      "raws": [
+        "410,876",
+        "416,160"
+      ]
+    }
+  ]
+}

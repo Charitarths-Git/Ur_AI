@@ -1,0 +1,422 @@
+{
+  "status": "AI_DRAFT",
+  "verified_by_human": false,
+  "independently_checked": false,
+  "method": "Manually transcribed by coding agent from rendered page before parser predictions. Typographic spaces between Japanese glyphs removed; full-width parentheses retained. Visual depth determines parent, subtotals remain at printed indentation. Nil glyph standardized to full-width dash for review: exact raw glyph ambiguous in image. No human or independent check.",
+  "rows": [
+    {
+      "depth": 0,
+      "row_type": "header",
+      "label": "資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "流動資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "現金及び現金同等物",
+      "raws": [
+        "273,747",
+        "294,216"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "営業債権及びその他の債権",
+      "raws": [
+        "43,887",
+        "47,220"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "棚卸資産",
+      "raws": [
+        "13,764",
+        "12,108"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "未収法人所得税",
+      "raws": [
+        "603",
+        "337"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他の流動資産",
+      "raws": [
+        "11,859",
+        "12,955"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "流動資産合計",
+      "raws": [
+        "343,860",
+        "366,836"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "非流動資産",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "有形固定資産",
+      "raws": [
+        "154,454",
+        "163,617"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "のれん及び無形資産",
+      "raws": [
+        "57,226",
+        "60,702"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "投資不動産",
+      "raws": [
+        "－",
+        "17,588"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "持分法で会計処理されている投資",
+      "raws": [
+        "3,456",
+        "4,484"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他の投資",
+      "raws": [
+        "1,768",
+        "1,671"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他の金融資産",
+      "raws": [
+        "15,300",
+        "17,903"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "繰延税金資産",
+      "raws": [
+        "28,275",
+        "31,130"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他の非流動資産",
+      "raws": [
+        "1,511",
+        "1,109"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "非流動資産合計",
+      "raws": [
+        "261,990",
+        "298,204"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "total",
+      "label": "資産合計",
+      "raws": [
+        "605,850",
+        "665,040"
+      ]
+    },
+    {
+      "depth": 0,
+      "row_type": "header",
+      "label": "負債及び資本",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "負債",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "流動負債",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "社債及び借入金",
+      "raws": [
+        "－",
+        "19,994"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他の金融負債",
+      "raws": [
+        "9,263",
+        "8,713"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "営業債務及びその他の債務",
+      "raws": [
+        "44,257",
+        "45,406"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "未払法人所得税",
+      "raws": [
+        "16,615",
+        "19,362"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他の流動負債",
+      "raws": [
+        "21,791",
+        "22,839"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "流動負債合計",
+      "raws": [
+        "85,926",
+        "116,314"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "header",
+      "label": "非流動負債",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "社債及び借入金",
+      "raws": [
+        "59,862",
+        "39,911"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他の金融負債",
+      "raws": [
+        "20,262",
+        "15,622"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "引当金",
+      "raws": [
+        "9,527",
+        "8,271"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "繰延税金負債",
+      "raws": [
+        "1,192",
+        "1,213"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "line_item",
+      "label": "その他の非流動負債",
+      "raws": [
+        "1,703",
+        "1,841"
+      ]
+    },
+    {
+      "depth": 3,
+      "row_type": "subtotal",
+      "label": "非流動負債合計",
+      "raws": [
+        "92,546",
+        "66,858"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "負債合計",
+      "raws": [
+        "178,472",
+        "183,172"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "header",
+      "label": "資本",
+      "raws": [
+        "",
+        ""
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "資本金",
+      "raws": [
+        "47,399",
+        "47,399"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "資本剰余金",
+      "raws": [
+        "78,144",
+        "78,144"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "自己株式",
+      "raws": [
+        "△21,603",
+        "△21,617"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "その他の資本の構成要素",
+      "raws": [
+        "20,625",
+        "18,737"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "利益剰余金",
+      "raws": [
+        "302,797",
+        "359,189"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "親会社の所有者に帰属する持分合計",
+      "raws": [
+        "427,362",
+        "481,852"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "line_item",
+      "label": "非支配持分",
+      "raws": [
+        "16",
+        "16"
+      ]
+    },
+    {
+      "depth": 2,
+      "row_type": "subtotal",
+      "label": "資本合計",
+      "raws": [
+        "427,378",
+        "481,868"
+      ]
+    },
+    {
+      "depth": 1,
+      "row_type": "total",
+      "label": "負債及び資本合計",
+      "raws": [
+        "605,850",
+        "665,040"
+      ]
+    }
+  ]
+}
