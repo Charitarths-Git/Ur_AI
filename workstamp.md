@@ -5,10 +5,10 @@
 | Field | Value |
 |---|---|
 | Prompt | P14 — robustness and benchmark improvements |
-| State | DONE (local verification; push verification pending) |
+| State | DONE (push verified) |
 | Last numbered prompt | P14 |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T17:15:55.325085+00:00 |
+| Updated | 2026-10-23T17:25:00+00:00 |
 
 ## Current prompt (verbatim)
 
@@ -313,7 +313,7 @@ No new runtime session is asserted for this continuation. Resume messages were
 
 ## Next action
 
-Verify push and remote HEAD, then owner review of provisional benchmark annotations
+Remote push verified at origin/main. Owner review of provisional benchmark annotations
 and submission email. Do not send email automatically. Historical P13 next action
 was final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit.
 
@@ -321,7 +321,7 @@ was final export_chat.py, redaction of chat_logs, add the Claude conversation lo
 
 | ID | Outcome | Commit |
 |---|---|---|
-| P14 | DONE locally;324 tests/Ruff; supplied exports unchanged; five new provisional pages; regressions and draft email recorded | d4d5fa6 baseline;33025ad candidate;fcce5e0 protocol;f4b6366 maintenance;0248684 validation;631cd7f measurements; final docs commit follows |
+| P14 | DONE; 324 tests/Ruff pass; supplied exports unchanged; five new provisional pages; regressions and draft email recorded | d4d5fa6 baseline; 33025ad candidate; fcce5e0 protocol; f4b6366 maintenance; 0248684 validation; 631cd7f measurements; 54b40bc docs/submission; push verified |
 | P0 | Scaffolding, dependencies, smoke tests done (pre-protocol) | 8c34c1d |
 | P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
 | P2 | Image-derived GT, 43 rows; now VERIFIED by human with no corrections; 12 tests pass | 0be2cf6 (initial GT); verification: 9805d79 |
