@@ -18,6 +18,7 @@ sys.path[:0] = [str(ROOT / "src"), str(ROOT / "scripts")]
 from pdfplumber_baseline import SETTINGS  # noqa: E402
 
 from parser.evaluation.data import Table, read_table  # noqa: E402
+from parser.evaluation.json_tree import validate_tree  # noqa: E402
 from parser.evaluation.metrics import aggregate_reports, score_tables  # noqa: E402
 from parser.normalize import parse_amount  # noqa: E402
 
@@ -86,6 +87,7 @@ def frozen_source(commit, folder):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--download", action="store_true")
+    p.add_argument("--rescore", action="store_true", help="reuse saved extraction/timing runs")
     p.add_argument("--render", action="store_true", help="render annotation review images")
     p.add_argument("--cache", type=Path, default=ROOT / "outputs/benchmark_sources")
     p.add_argument("--out-dir", type=Path, default=ROOT / "eval/results/benchmark")
@@ -102,8 +104,8 @@ def main():
     }
     sources["pdfplumber"] = sources["candidate"]
     reports = []
-    for doc in manifest["documents"]:
-        pdf = args.cache / (doc["id"] + ".pdf")
+    for doc in [manifest["supplied_development"], *manifest["documents"]]:
+        pdf = ROOT / doc["pdf_path"] if "pdf_path" in doc else args.cache / (doc["id"] + ".pdf")
         if args.download and not pdf.exists():
             try:
                 data = urllib.request.urlopen(
@@ -122,30 +124,34 @@ def main():
                     str(args.cache / (doc["id"] + ".png"))
                 )
         truth_path = ROOT / "outputs" / (doc["id"] + "_truth.csv")
-        truth_csv(doc["id"], truth_path)
+        if "gt_path" in doc:
+            truth_path = ROOT / doc["gt_path"]
+        else:
+            truth_csv(doc["id"], truth_path)
         gt = read_table(truth_path, ground_truth=True)
         for engine, source in sources.items():
             dest = ROOT / "outputs/benchmark_runs" / doc["id"] / engine
-            subprocess.run(
-                [
-                    sys.executable,
-                    str(ROOT / "scripts/benchmark_worker.py"),
-                    "--engine",
-                    "pdfplumber" if engine == "pdfplumber" else "parser",
-                    "--source-root",
-                    str(source),
-                    "--pdf",
-                    str(pdf),
-                    "--page",
-                    str(doc["page"]),
-                    "--out",
-                    str(dest),
-                    "--repetitions",
-                    str(args.repetitions),
-                ],
-                check=True,
-                cwd=ROOT,
-            )
+            if not args.rescore or not (dest / "run.json").exists():
+                subprocess.run(
+                    [
+                        sys.executable,
+                        str(ROOT / "scripts/benchmark_worker.py"),
+                        "--engine",
+                        "pdfplumber" if engine == "pdfplumber" else "parser",
+                        "--source-root",
+                        str(source),
+                        "--pdf",
+                        str(pdf),
+                        "--page",
+                        str(doc["page"]),
+                        "--out",
+                        str(dest),
+                        "--repetitions",
+                        str(args.repetitions),
+                    ],
+                    check=True,
+                    cwd=ROOT,
+                )
             run = json.loads((dest / "run.json").read_text("utf-8"))
             pred = (
                 read_table(dest / "prediction.csv")
@@ -165,10 +171,13 @@ def main():
                 "document": doc["id"],
                 "split": doc["split"],
                 "engine": engine,
-                "annotation_status": "AI_DRAFT",
+                "annotation_status": doc.get("annotation_status", "AI_DRAFT"),
                 "run": run,
                 **scores,
             }
+            if engine != "pdfplumber" and run["status"] != "failed":
+                document = json.loads((dest / "prediction.json").read_text("utf-8"))
+                result["json_validation"] = validate_tree(document, pred, gt)
             reports.append(result)
             print(
                 doc["id"],
@@ -180,7 +189,7 @@ def main():
                 flush=True,
             )
     aggregate = {}
-    for split in ["development", "held_out"]:
+    for split in ["supplied_development", "development", "held_out"]:
         aggregate[split] = {}
         for engine in sources:
             subset = [r for r in reports if r["split"] == split and r["engine"] == engine]
@@ -199,7 +208,9 @@ def main():
         "timing_policy": {
             "warmup": 1,
             "repetitions": args.repetitions,
-            "boundary": "PDF open/read, extraction, normalization and in-memory output serialization; excludes process/import startup, output writes, annotations and evaluation. OS file cache warm; no cache flush.",
+            "boundary": "PDF open/read, extraction, normalization and in-memory output "
+            "serialization; excludes process/import startup, output writes, annotations "
+            "and evaluation. OS file cache warm; no cache flush.",
             "variability": "inclusive quartile IQR in milliseconds",
         },
         "pages": reports,
@@ -212,9 +223,11 @@ def main():
         "# Provisional additional-page benchmark",
         "",
         "AI-drafted image annotations; NOT independently checked or human verified. "
-        "Five issuers in one industry; four similarly styled templates. No broad generalisation claim.",
+        "Five issuers in one industry; four similarly styled templates. No broad "
+        "generalisation claim.",
         "",
-        "| Page | Split | Engine | Cells | Labels (normalized) | Parents | Full rows | Missing/extra | Median / IQR ms |",
+        "| Page | Split | Engine | Cells | Labels (normalized) | Parents | Full rows "
+        "| Missing/extra | Median / IQR ms |",
         "|---|---|---|---|---|---|---|---|---|",
     ]
 
@@ -245,7 +258,8 @@ def main():
         "",
         "## Pooled counts and per-page means",
         "",
-        "| Split | Engine | Pooled cells | Mean page cell score | Pooled parents | Mean page parent score |",
+        "| Split | Engine | Pooled cells | Mean page cell score | Pooled parents | "
+        "Mean page parent score |",
         "|---|---|---|---|---|---|",
     ]
     for split, engines in aggregate.items():
@@ -266,7 +280,8 @@ def main():
         "Full per-page counts, raw/printed-cell metrics, every mismatch, "
         "pooled and per-page-average denominators, package/hardware details and individual "
         "timings are in report.json. Baseline structural metrics are N/A, not correct. "
-        "All issuers use million-yen units. An asset-only page is not a complete statement.",
+        "New issuers use million-yen units; supplied page uses thousand-yen units. "
+        "An asset-only page is not a complete statement.",
         "",
         "Reproduce: python scripts/run_benchmark.py --download --render",
         "",

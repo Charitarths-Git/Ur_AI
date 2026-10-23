@@ -70,5 +70,16 @@
   ],
   "candidate_commit": "33025adb0f158d221d8a8d5b549674a9952f91a6",
   "candidate_frozen_before_first_held_out_run": true,
-  "held_out_policy": "No parser changes after candidate freeze. Any future tuning on these outcomes reclassifies the set as development."
+  "held_out_policy": "No parser changes after candidate freeze. Any future tuning on these outcomes reclassifies the set as development.",
+  "supplied_development": {
+    "id": "supplied",
+    "issuer": "supplied take-home document",
+    "page": 1,
+    "split": "supplied_development",
+    "units": "千円",
+    "pdf_path": "data/raw/balance_sheet_after_correction.pdf",
+    "gt_path": "data/gt/page4.csv",
+    "annotation_status": "VERIFIED_BY_HUMAN",
+    "sha256": "0764bba6f5f0e7984a837e4cc19d8bb95db4a7ac22c26f18c95bbe652c983c74"
+  }
 }
