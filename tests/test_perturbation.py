@@ -51,6 +51,17 @@ def test_axis_jitter_and_structural_helpers():
     assert flatten_indentation(page) == flatten_indentation(page)
 
 
+def test_measured_failure_seed_11_split():
+    from parser.pdf_backend import read_pdf_page
+    from parser.rows import reconstruct_page
+
+    raw = read_pdf_page(ROOT / "data/raw/balance_sheet_after_correction.pdf", 1)
+    perturbed = transform(raw, "jitter_y", seed=11, amplitude=0.2)
+    layout = reconstruct_page(perturbed)
+    body_rows = [r for r in layout.rows if r.zone == "body"]
+    assert len(body_rows) == 44
+
+
 def test_exhaustive_fault_population_and_detector_are_deterministic():
     table = read_table(ROOT / "examples/balance_sheet_after_correction_p1.csv")
     rows = account_rows(table)
