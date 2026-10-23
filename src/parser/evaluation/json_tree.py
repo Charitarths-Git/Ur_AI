@@ -1,5 +1,7 @@
 """Validate untrusted JSON trees separately from CSV, deriving actual ancestry."""
 
+from datetime import date
+
 from parser.evaluation.data import EvalRow, Table, value_at
 from parser.evaluation.metrics import ratio, score_tables
 from parser.normalize import parse_amount
@@ -19,6 +21,25 @@ def validate_tree(document, csv_table, truth, *, threshold=0.5):
     for name in ("source", "page"):
         if not isinstance(document.get(name), dict):
             error("$." + name, "expected_object")
+    source = document.get("source")
+    if isinstance(source, dict):
+        for field in ("file", "backend"):
+            if not isinstance(source.get(field), str) or not source[field]:
+                error("$.source." + field, "expected_nonempty_string")
+        if type(source.get("page")) is not int or source["page"] < 1:
+            error("$.source.page", "expected_positive_integer")
+    page = document.get("page")
+    if isinstance(page, dict):
+        for field in ("unit", "correction_marker"):
+            if field not in page or (page[field] is not None and not isinstance(page[field], str)):
+                error("$.page." + field, "expected_string_or_null")
+        for field in ("unit_multiplier", "printed_page_number"):
+            if field not in page or (page[field] is not None and type(page[field]) is not int):
+                error("$.page." + field, "expected_integer_or_null")
+        if "title" not in page or (
+            page["title"] is not None and not isinstance(page["title"], str)
+        ):
+            error("$.page.title", "expected_string_or_null")
     if not isinstance(document.get("warnings"), list):
         error("$.warnings", "expected_array")
     if not isinstance(document.get("hierarchy_source"), str):
@@ -41,8 +62,11 @@ def validate_tree(document, csv_table, truth, *, threshold=0.5):
             error(path + ".index", "invalid_or_duplicate_index")
         if not isinstance(col.get("heading"), str):
             error(path + ".heading", "expected_string")
-        if col.get("period_end") is not None and not isinstance(col["period_end"], str):
-            error(path + ".period_end", "expected_string_or_null")
+        try:
+            if col.get("period_end") is not None:
+                date.fromisoformat(col["period_end"])
+        except (TypeError, ValueError):
+            error(path + ".period_end", "expected_iso_date_or_null")
         roles.append(role)
         indices.append(index)
 

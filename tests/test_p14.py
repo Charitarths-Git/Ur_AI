@@ -129,3 +129,65 @@ def test_correct_json_and_optional_omission_distinguished():
         report["json_validation"]["gt_accuracy"]["metrics"]["fully_correct_rows"]["numerator"] == 43
     )
     assert evaluate_files(CSV, GT)["json_validation"]["status"] == "not_supplied"
+
+
+@pytest.mark.parametrize("seed", [1, 11])
+def test_x_jitter_recovers_all_values_without_losing_column_roles(seed):
+    from parser.evaluation.perturb import transform
+    from parser.export import row_values
+
+    raw = read_pdf_page(PDF)
+    original = parse_page(PDF)
+    page = parse_layout(
+        reconstruct_page(transform(raw, "jitter_x", seed=seed, amplitude=0.3)), PDF.name
+    )
+    assert [c.role for c in page.columns] == [c.role for c in original.columns]
+    assert [row_values(r, page.columns) for r in page.rows] == [
+        row_values(r, original.columns) for r in original.rows
+    ]
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [("source", {"page": True}), ("page", {"title": 42}), ("columns", [None]), ("rows", {})],
+)
+def test_json_bad_schema_is_structured(tmp_path, field, value):
+    doc = json.loads(JSON.read_text(encoding="utf-8"))
+    doc[field] = value
+    path = tmp_path / "invalid.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    result = evaluate_files(CSV, GT, path)
+    assert result["json_validation"]["status"] == "invalid"
+    assert result["json_validation"]["errors"]
+
+
+def test_json_invalid_cli_writes_report_and_exits_two(tmp_path):
+    import subprocess
+    import sys
+
+    bad = tmp_path / "broken.json"
+    bad.write_text("{", encoding="utf-8")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "eval/run_eval.py"),
+            "--pred",
+            str(CSV),
+            "--pred-json",
+            str(bad),
+            "--gt",
+            str(GT),
+            "--out-dir",
+            str(tmp_path),
+        ],
+        capture_output=True,
+        timeout=30,
+    )
+    assert result.returncode == 2
+    assert b"Traceback" not in result.stderr
+    assert (
+        json.loads((tmp_path / "page4_report.json").read_text(encoding="utf-8"))["json_validation"][
+            "status"
+        ]
+        == "invalid"
+    )

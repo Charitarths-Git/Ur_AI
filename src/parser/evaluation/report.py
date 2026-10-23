@@ -82,7 +82,7 @@ def evaluate_files(pred_csv, gt_csv, pred_json=None, gt_meta=None, *, threshold=
 
 def _display(value):
     if value is None:
-        return "â€”"
+        return "—"
     return str(value).replace("|", "\\|").replace("\n", " ")
 
 
@@ -98,8 +98,6 @@ def markdown_report(report: dict) -> str:
     )
     lines = [
         "# Development evaluation: supplied page 4",
-        "",
-        headline,
         "",
         headline,
         "",

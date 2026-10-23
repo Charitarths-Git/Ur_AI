@@ -357,3 +357,7 @@ All five pages evaluated by frozen original/candidate and pdfplumber. Four image
 ## P14 progress: maintenance verified
 
 Exporter refuses existing products, writes separately by default, rejects malformed source, and explicit replacement backs up originals. Four new protection tests passed in317-test run. Workflow uses pinned dependency install on Windows/Python3.14 and has no document downloads. Supplemental29 visible messages and all JSONL validated; original consolidated logs unchanged. Next: finish report/submission draft, final suite and remote delivery.
+
+## P14 final local checks
+
+324 tests passed; Ruff passed. Fresh supplied CSV/JSON byte-identical to committed examples. Protected PDF/GT and original logs have empty diffs; some original Windows text checkouts differ from Git blobs only by CRLF, explicitly recorded rather than falsely claiming raw Git-blob byte identity. Final visible-message supplement36 records; parsed JSONL privacy scan has zero decoded identity/path/email findings. Candidate parser remains frozen at33025ad; evaluator schema hardening does not change parser outputs. Full findings, raw hash evidence and test commands in notes/p14_verification.json. Final documentation/email and delivery commits next.

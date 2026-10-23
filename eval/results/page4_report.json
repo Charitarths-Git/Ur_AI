@@ -344,7 +344,372 @@
   },
   "mismatches": [],
   "input_issues": [],
-  "schema_version": "1.0",
+  "schema_version": "1.1",
+  "csv_metrics_note": "metrics and mismatches score CSV; JSON is separate",
+  "json_validation": {
+    "status": "valid",
+    "errors": [],
+    "derived_rows": 43,
+    "csv_consistency": {
+      "consistent": true,
+      "rows": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "identical rows by ID / union of CSV and JSON IDs"
+      },
+      "differences": []
+    },
+    "gt_accuracy": {
+      "metrics": {
+        "label_exact": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "exact printed labels / all GT rows (missing rows wrong)"
+        },
+        "label_key": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "matching label_key / all GT rows"
+        },
+        "row_type": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "correct row types / all GT rows"
+        },
+        "level": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "correct ancestor-count levels / all GT rows"
+        },
+        "parent": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "parents mapped by row alignment (both roots correct) / all GT rows"
+        },
+        "parent_path": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "exact printed ancestor paths / all GT rows"
+        },
+        "ancestor_jaccard": {
+          "numerator": 43.0,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "sum of alignment-mapped ancestor-set Jaccards / all GT rows"
+        },
+        "fully_correct_rows": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "exact label, both/all values, type, mapped parent and level / all GT rows"
+        },
+        "cell_accuracy_all": {
+          "numerator": 86,
+          "denominator": 86,
+          "score": 1.0,
+          "meaning": "correct integer/null cells / all GT row-column cells"
+        },
+        "cell_accuracy_printed": {
+          "numerator": 74,
+          "denominator": 74,
+          "score": 1.0,
+          "meaning": "correct integer/null cells / GT cells with nonempty raw"
+        },
+        "raw_accuracy": {
+          "numerator": 86,
+          "denominator": 86,
+          "score": 1.0,
+          "meaning": "identical raw strings / all GT row-column cells"
+        },
+        "row_precision": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "aligned rows / predicted rows"
+        },
+        "row_recall": {
+          "numerator": 43,
+          "denominator": 43,
+          "score": 1.0,
+          "meaning": "aligned rows / GT rows"
+        },
+        "row_f1": {
+          "numerator": 86,
+          "denominator": 86,
+          "score": 1.0,
+          "meaning": "2 * aligned rows / (prediction rows + GT rows)"
+        },
+        "column_roles": {
+          "numerator": 0,
+          "denominator": 0,
+          "score": null,
+          "meaning": "correct role at each unique expected column index / max(expected,predicted columns); optional JSON/meta"
+        },
+        "column_periods": {
+          "numerator": 0,
+          "denominator": 0,
+          "score": null,
+          "meaning": "correct date at each unique expected column index / max(expected,predicted columns); optional JSON/meta"
+        }
+      },
+      "alignment": {
+        "threshold": 0.5,
+        "matched": 43,
+        "predicted_rows": 43,
+        "gt_rows": 43,
+        "pairs": [
+          {
+            "prediction": "1",
+            "gt": "r001",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "2",
+            "gt": "r002",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "3",
+            "gt": "r003",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "4",
+            "gt": "r004",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "5",
+            "gt": "r005",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "6",
+            "gt": "r006",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "7",
+            "gt": "r007",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "8",
+            "gt": "r008",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "9",
+            "gt": "r009",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "10",
+            "gt": "r010",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "11",
+            "gt": "r011",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "12",
+            "gt": "r012",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "13",
+            "gt": "r013",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "14",
+            "gt": "r014",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "15",
+            "gt": "r015",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "16",
+            "gt": "r016",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "17",
+            "gt": "r017",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "18",
+            "gt": "r018",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "19",
+            "gt": "r019",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "20",
+            "gt": "r020",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "21",
+            "gt": "r021",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "22",
+            "gt": "r022",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "23",
+            "gt": "r023",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "24",
+            "gt": "r024",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "25",
+            "gt": "r025",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "26",
+            "gt": "r026",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "27",
+            "gt": "r027",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "28",
+            "gt": "r028",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "29",
+            "gt": "r029",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "30",
+            "gt": "r030",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "31",
+            "gt": "r031",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "32",
+            "gt": "r032",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "33",
+            "gt": "r033",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "34",
+            "gt": "r034",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "35",
+            "gt": "r035",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "36",
+            "gt": "r036",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "37",
+            "gt": "r037",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "38",
+            "gt": "r038",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "39",
+            "gt": "r039",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "40",
+            "gt": "r040",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "41",
+            "gt": "r041",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "42",
+            "gt": "r042",
+            "similarity": 1.0
+          },
+          {
+            "prediction": "43",
+            "gt": "r043",
+            "similarity": 1.0
+          }
+        ],
+        "unmatched_prediction": [],
+        "unmatched_gt": []
+      },
+      "confusion_matrix": {
+        "contra": {
+          "contra": 5
+        },
+        "header": {
+          "header": 6
+        },
+        "line_item": {
+          "line_item": 22
+        },
+        "net": {
+          "net": 4
+        },
+        "subtotal": {
+          "subtotal": 5
+        },
+        "total": {
+          "total": 1
+        }
+      },
+      "mismatches": [],
+      "input_issues": []
+    },
+    "passes": true
+  },
+  "validation_passes": true,
   "inputs": {
     "prediction": "balance_sheet_after_correction_p1.csv",
     "gt": "page4.csv"

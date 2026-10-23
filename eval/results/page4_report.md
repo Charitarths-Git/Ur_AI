@@ -2,8 +2,6 @@
 
 Accounting pass rate=1.000000; evaluable_fraction=1.000000.
 
-Accounting pass rate=1.000000; evaluable_fraction=1.000000.
-
 ## Metrics and denominators
 
 | Metric | Correct / denominator | Score | Meaning |
@@ -87,3 +85,30 @@ Truncation interval consistency: 20/20. This is a hypothesis diagnostic, never a
 - The truncation hypothesis rests on one page and must be verified by the human; it does not set pass/fail.
 - Alignment can be ambiguous for identical repeated labels/values; earliest-pair ties do not prove identity.
 - Accounting tests consistency of predicted structure, not truth; absent or wrong checks can escape detection.
+
+## Hierarchical JSON (separate from CSV)
+
+Status: valid.
+JSON/CSV consistent: True; validation passes: True.
+
+| JSON/GT metric | Correct / denominator |
+|---|---:|
+| label_exact | 43 / 43 |
+| label_key | 43 / 43 |
+| row_type | 43 / 43 |
+| level | 43 / 43 |
+| parent | 43 / 43 |
+| parent_path | 43 / 43 |
+| ancestor_jaccard | 43.0 / 43 |
+| fully_correct_rows | 43 / 43 |
+| cell_accuracy_all | 86 / 86 |
+| cell_accuracy_printed | 74 / 74 |
+| raw_accuracy | 86 / 86 |
+| row_precision | 43 / 43 |
+| row_recall | 43 / 43 |
+| row_f1 | 86 / 86 |
+| column_roles | 0 / 0 |
+| column_periods | 0 / 0 |
+
+Structured schema errors: []
+CSV differences: []
