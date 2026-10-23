@@ -14,6 +14,7 @@ from parser.layout_types import (
     LayoutConfig,
     LayoutThresholds,
     PageLayout,
+    ParseWarning,
     RawPage,
     Row,
 )
@@ -43,10 +44,10 @@ def _thresholds(page, config, words):
 
 
 def _clusters(items, position, tolerance):
-    """Sorted 1D groups against a running median; avoid unbounded gap chaining."""
+    """Sorted 1D groups using gap-based clustering when gap exceeds tolerance."""
     groups = []
     for item in sorted(items, key=position):
-        if not groups or position(item) - median(position(x) for x in groups[-1]) > tolerance:
+        if not groups or position(item) - position(groups[-1][-1]) > tolerance:
             groups.append([item])
         else:
             groups[-1].append(item)
@@ -244,4 +245,7 @@ def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -
     indent_centres = tuple(median(r.label_x0 for r in group) for group in indent_groups)
     assignments = {r.index: step for step, group in enumerate(indent_groups) for r in group}
     rows = [replace(r, indent_step=assignments.get(r.index)) for r in rows]
-    return PageLayout(tuple(rows), columns, indent_centres, thresholds)
+    warnings = []
+    if not centres:
+        warnings.append(ParseWarning("no_columns_detected", "no numeric columns detected"))
+    return PageLayout(tuple(rows), columns, indent_centres, thresholds, tuple(warnings))

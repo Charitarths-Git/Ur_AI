@@ -73,7 +73,16 @@ def accounting_checks(
         nets = [r for r in children.get(row.row_id, []) if r.row_type == "net"]
         if nets:
             return (_number(nets[0], col), nets[0].row_id) if len(nets) == 1 else (None, row.row_id)
-        if row.values[col] is not None or row.raws[col] or row.row_type != "header":
+        if row.row_type != "header" or row.values[col] is not None or row.raws[col]:
+            contras = [r for r in children.get(row.row_id, []) if r.row_type == "contra"]
+            if contras:
+                base = _number(row, col)
+                contra_vals = [_number(c, col) for c in contras]
+                if base is not None and all(cv is not None for cv in contra_vals):
+                    val = base + sum(contra_vals)
+                else:
+                    val = None
+                return (val, (row.row_id, *(c.row_id for c in contras)))
             return _number(row, col), row.row_id
         totals = [r for r in children.get(row.row_id, []) if r.row_type == "subtotal"]
         return (
@@ -108,9 +117,15 @@ def accounting_checks(
         low = -sum(v < 0 for v in values) if residual is not None else None
         high = sum(v > 0 for v in values) - 1 if residual is not None else None
         consistent = low <= residual <= high if residual is not None else None
-        dependencies = tuple(
-            dict.fromkeys([(rid, role) for _, rid in parts] + ([(ident, role)] if ident else []))
-        )
+        flat_deps = []
+        for _, rid in parts:
+            if isinstance(rid, (list, tuple)):
+                flat_deps.extend((r, role) for r in rid)
+            else:
+                flat_deps.append((rid, role))
+        if ident:
+            flat_deps.append((ident, role))
+        dependencies = tuple(dict.fromkeys(flat_deps))
         results.append(
             AccountingCheck(
                 f"{kind}:{ident or 'page'}:{role}",
@@ -160,9 +175,11 @@ def accounting_checks(
 def accounting_summary(checks: tuple[AccountingCheck, ...]) -> dict:
     counts = Counter(c.status for c in checks)
     evaluable = sum(counts[s] for s in ["exact", "within_tolerance", "fail"])
+    not_evaluable = counts["not_evaluable"]
     passed = counts["exact"] + counts["within_tolerance"]
     diagnostic = [c for c in checks if c.truncation_consistent is not None]
     inside = sum(c.truncation_consistent for c in diagnostic)
+    denom = evaluable + not_evaluable
     return {
         "statuses": {
             s: counts[s]
@@ -170,7 +187,9 @@ def accounting_summary(checks: tuple[AccountingCheck, ...]) -> dict:
         },
         "passed": passed,
         "evaluable": evaluable,
+        "not_evaluable": not_evaluable,
         "pass_rate": passed / evaluable if evaluable else None,
+        "evaluable_fraction": evaluable / denom if denom else None,
         "truncation_inside": inside,
         "truncation_evaluable": len(diagnostic),
         "truncation_fraction": inside / len(diagnostic) if diagnostic else None,

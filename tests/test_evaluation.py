@@ -260,6 +260,14 @@ def test_file_reader_gt_paths_and_invalid_cells(tmp_path):
     assert t.issues
 
 
+def test_read_table_missing_columns_returns_issues(tmp_path):
+    bad_csv = tmp_path / "bad.csv"
+    bad_csv.write_text("label,parent,level,row_type\n行A,,0,line_item\n", encoding="utf-8-sig")
+    table = read_table(bad_csv)
+    assert len(table.rows) == 0
+    assert any("missing CSV fields" in issue for issue in table.issues)
+
+
 def test_cli_without_encoding_environment_and_committed_report(tmp_path):
     env = dict(os.environ)
     env.pop("PYTHONIOENCODING", None)

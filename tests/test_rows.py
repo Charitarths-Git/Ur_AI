@@ -231,6 +231,18 @@ def test_backend_is_only_package_pymupdf_importer():
     assert importers == ["pdf_backend.py"]
 
 
+def test_reconstruct_page_no_columns_warning():
+    words = [
+        word("資産合計", 10, 50, 40, 10),
+        word("1,234", 100, 50, 30, 10),
+    ]
+    raw = RawPage(width=200, height=300, words=tuple(words))
+    layout = reconstruct_page(raw)
+    assert len(layout.columns) == 0
+    assert any(w.code == "no_columns_detected" for w in layout.warnings)
+
+
+
 def gt_report(layout, gt):
     """Informational comparison only; never used by production reconstruction."""
     rows = body(layout)

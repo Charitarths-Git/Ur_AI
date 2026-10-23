@@ -51,7 +51,7 @@ def parse_layout(
         hierarchy.tree,
         metadata.page,
         metadata.columns,
-        hierarchy.warnings + metadata.warnings,
+        hierarchy.warnings + metadata.warnings + layout.warnings,
         hierarchy.hierarchy_source,
     )
 

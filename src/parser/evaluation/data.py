@@ -40,7 +40,11 @@ def read_table(path: str | Path, *, ground_truth: bool = False) -> Table:
         fields = reader.fieldnames or []
         required = {"row_id", "label", "parent", "parent_path", "level", "row_type"}
         if not required <= set(fields):
-            raise ValueError(f"missing CSV fields: {sorted(required - set(fields))}")
+            return Table(
+                rows=(),
+                columns=(),
+                issues=(f"missing CSV fields: {sorted(required - set(fields))}",),
+            )
         value_fields = [f for f in fields if f.endswith("_value") or f.startswith("value_")]
         columns = tuple(f.removesuffix("_value") for f in value_fields)
         raw_fields = [
@@ -52,7 +56,11 @@ def read_table(path: str | Path, *, ground_truth: bool = False) -> Table:
             for i, c in enumerate(columns)
         ]
         if not set(raw_fields) <= set(fields):
-            raise ValueError("missing raw value columns")
+            return Table(
+                rows=(),
+                columns=columns,
+                issues=(f"missing raw value columns: {sorted(set(raw_fields) - set(fields))}",),
+            )
         records = list(reader)
     rows, issues, seen = [], [], set()
     paths = {}

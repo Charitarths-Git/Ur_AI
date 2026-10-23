@@ -3,17 +3,10 @@
 from dataclasses import dataclass
 from typing import Literal
 
-from parser.layout_types import PageLayout, Row
+from parser.layout_types import PageLayout, ParseWarning, Row
 from parser.rules import JA_FINANCIAL_STATEMENT, RuleSet
 
 RowType = Literal["header", "line_item", "contra", "net", "subtotal", "total"]
-
-
-@dataclass(frozen=True)
-class ParseWarning:
-    code: str
-    message: str
-    row_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -57,7 +50,10 @@ def classify_row(
     elif rules.prefix(row.label, rules.contra_labels):
         kind = "contra"
     else:
-        kind, source = ("contra" if evidence.all_negative_cells else "line_item"), "structural"
+        # Note on loss rows: rows with all-negative cells without an explicit contra prefix
+        # (e.g. operating losses 営業損失) are classified as line_item, not contra,
+        # with a possible_contra_or_loss warning emitted.
+        kind, source = "line_item", "structural"
     warnings = []
     if kind in {"subtotal", "net", "total"} and not evidence.rule_above:
         warnings.append(
@@ -67,6 +63,14 @@ def classify_row(
         warnings.append(
             ParseWarning(
                 "contra_without_negative", "contra label has no negative numeric cell", row_id
+            )
+        )
+    if evidence.all_negative_cells and not rules.prefix(row.label, rules.contra_labels):
+        warnings.append(
+            ParseWarning(
+                "possible_contra_or_loss",
+                "all-negative numeric cells without contra label prefix",
+                row_id,
             )
         )
     if row.cells and not row.label:

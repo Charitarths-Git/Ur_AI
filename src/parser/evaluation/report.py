@@ -155,10 +155,13 @@ def markdown_report(report: dict) -> str:
         cells += [interval, check["truncation_consistent"]]
         lines.append("| " + " | ".join(_display(c) for c in cells) + " |")
     summary = report["accounting"]
+    eval_fraction = summary.get("evaluable_fraction")
+    eval_fraction_str = f"{eval_fraction:.6f}" if eval_fraction is not None else "N/A"
     lines += [
         "",
         f"Accounting passes: {summary['passed']}/{summary['evaluable']}; "
-        f"statuses={summary['statuses']}.",
+        f"statuses={summary['statuses']}; "
+        f"evaluable_fraction={eval_fraction_str}.",
         f"Truncation interval consistency: "
         f"{summary['truncation_inside']}/{summary['truncation_evaluable']}. "
         "This is a hypothesis diagnostic, never a pass/fail criterion.",

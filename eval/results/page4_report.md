@@ -72,7 +72,7 @@ Nil raw marks alone allow a null to contribute zero; invalid/empty amounts are n
 | balance | — | previous_year | 0 | — | — | — | — | not_applicable | N/A | — |
 | balance | — | current_year | 0 | — | — | — | — | not_applicable | N/A | — |
 
-Accounting passes: 20/20; statuses={'exact': 7, 'within_tolerance': 13, 'fail': 0, 'not_evaluable': 0, 'not_applicable': 2}.
+Accounting passes: 20/20; statuses={'exact': 7, 'within_tolerance': 13, 'fail': 0, 'not_evaluable': 0, 'not_applicable': 2}; evaluable_fraction=1.000000.
 Truncation interval consistency: 20/20. This is a hypothesis diagnostic, never a pass/fail criterion.
 
 ## Limitations of this evaluation

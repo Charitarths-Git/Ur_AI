@@ -311,4 +311,32 @@ else:
     except Exception as e:
         print(f"  ERROR: {type(e).__name__}: {e}")
 
+# ─────────────────────────────────────────────────────────────────────────────
+# PROBE 9 — brute-force fault injection on a toy tree
+# ─────────────────────────────────────────────────────────────────────────────
+sep("PROBE 9: brute-force fault injection on a toy tree")
+from parser.evaluation.accounting import AccountRow, accounting_checks
+from parser.evaluation.faults import apply_fault, iter_faults, run_fault_injection
+
+toy_rows = (
+    AccountRow("h", None, "header", (None,), ("",)),
+    AccountRow("l1", "h", "line_item", (100,), ("100",)),
+    AccountRow("l2", "h", "line_item", (200,), ("200",)),
+    AccountRow("s1", "h", "subtotal", (300,), ("300",)),
+)
+toy_cols = ("value_1",)
+toy_report = run_fault_injection(toy_rows, toy_cols)
+toy_sub_check = next(c for c in accounting_checks(toy_rows, toy_cols) if c.row_id == "s1")
+toy_faults = list(iter_faults(toy_rows))
+toy_detected_brute = sum(
+    next(c for c in accounting_checks(apply_fault(toy_rows, f), toy_cols) if c.row_id == "s1").status == "fail"
+    for f in toy_faults
+)
+toy_detected_report = sum(v["detected"] for v in toy_report["by_fault_type"].values())
+print(f"  Brute-force detected faults: {toy_detected_brute}/{len(toy_faults)}")
+print(f"  Report detected faults:      {toy_detected_report}/{toy_report['faults']}")
+print(f"  Match: {toy_detected_brute == toy_detected_report}")
+print(f"  Hundreds digit detected: {toy_report['by_digit_position']['2']['detected']}/{toy_report['by_digit_position']['2']['total']}")
+print(f"  Units digit detected:    {toy_report['by_digit_position']['0']['detected']}/{toy_report['by_digit_position']['0']['total']} (slips under tolerance)")
+
 print("\n=== PROBES COMPLETE ===")

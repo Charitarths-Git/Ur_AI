@@ -120,8 +120,16 @@ class Row:
 
 
 @dataclass(frozen=True)
+class ParseWarning:
+    code: str
+    message: str
+    row_id: int | None = None
+
+
+@dataclass(frozen=True)
 class PageLayout:
     rows: tuple[Row, ...]
     columns: tuple[Column, ...]
     indent_centres: tuple[float, ...]
     thresholds: LayoutThresholds
+    warnings: tuple[ParseWarning, ...] = ()

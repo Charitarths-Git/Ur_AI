@@ -52,8 +52,9 @@ def layout(rows=(), columns=None):
         ("減価償却累計額", ("△10",), "contra", "label_rule"),
         ("貸倒引当金追加", ("△0",), "contra", "label_rule"),
         ("自己株式", ("△10",), "contra", "label_rule"),
-        ("Unknown", ("△10", "△0"), "contra", "structural"),
-        ("Unknown", ("△10", "－"), "contra", "structural"),
+        ("Unknown", ("△10", "△0"), "line_item", "structural"),
+        ("Unknown", ("△10", "－"), "line_item", "structural"),
+        ("営業損失", ("△1234", "△5678"), "line_item", "structural"),
         ("Unknown", ("△10", "20"), "line_item", "structural"),
         ("Unknown", ("－",), "line_item", "structural"),
         ("Unknown", ("1.5",), "line_item", "structural"),
@@ -90,6 +91,14 @@ def test_ruled_header_and_negative_zero_contra_do_not_warn():
     assert not classify_row(row("Heading", rule=True)).warnings
     typed = classify_row(row("貸倒引当金", raws=("△0",)))
     assert typed.evidence.all_negative_cells and not typed.warnings
+
+
+def test_loss_row_warns_possible_contra_or_loss():
+    typed = classify_row(row("営業損失", raws=("△1234", "△5678"), rule=False), row_id=12)
+    assert typed.row_type == "line_item"
+    assert typed.type_source == "structural"
+    assert "possible_contra_or_loss" in {w.code for w in typed.warnings}
+    assert any(w.row_id == 12 for w in typed.warnings)
 
 
 def test_rules_can_be_replaced_and_are_frozen():

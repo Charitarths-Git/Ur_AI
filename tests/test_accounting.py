@@ -123,3 +123,38 @@ def test_header_without_subtotal_cannot_contribute_guessed_sum():
 def test_empty_checks_have_no_pass_rate():
     summary = accounting_summary(accounting_checks((), COLS))
     assert summary["pass_rate"] is None and summary["evaluable"] == 0
+    assert summary["evaluable_fraction"] is None
+
+
+def test_gross_with_contra_child_and_no_net_row_contributes_gross_plus_contra():
+    rows = (
+        a("h", None, "header", None),
+        a("g1", "h", "line_item", 100),
+        a("c1", "g1", "contra", -20, "△20"),
+        a("s1", "h", "subtotal", 80),
+    )
+    checks = accounting_checks(rows, COLS)
+    subtotal = next(c for c in checks if c.row_id == "s1")
+    assert subtotal.expected == 80
+    assert subtotal.printed == 80
+    assert subtotal.residual == 0
+    assert subtotal.status == "exact"
+    assert ("g1", "value_1") in subtotal.dependencies
+    assert ("c1", "value_1") in subtotal.dependencies
+    assert ("s1", "value_1") in subtotal.dependencies
+
+
+def test_accounting_summary_evaluable_fraction():
+    # 1 exact, 1 not_evaluable
+    rows = (
+        a("h", None, "header", None),
+        a("g1", "h", "line_item", 100),
+        a("s1", "h", "subtotal", 100),
+        a("orphan_sub", "missing_parent", "subtotal", 50),
+    )
+    checks = accounting_checks(rows, COLS)
+    summary = accounting_summary(checks)
+    assert summary["evaluable"] == 1
+    assert summary["not_evaluable"] == 1
+    assert summary["evaluable_fraction"] == 0.5
+

@@ -6,9 +6,9 @@ from pathlib import Path
 import pytest
 from test_rows import synthetic_page
 
-from parser.evaluation.accounting import accounting_checks
+from parser.evaluation.accounting import AccountRow, accounting_checks
 from parser.evaluation.data import read_table
-from parser.evaluation.faults import iter_faults, numeric_cells, run_fault_injection
+from parser.evaluation.faults import apply_fault, iter_faults, numeric_cells, run_fault_injection
 from parser.evaluation.perturb import drop_rules, flatten_indentation, transform
 from parser.evaluation.report import account_rows
 
@@ -95,3 +95,51 @@ def test_committed_sweep_is_complete_and_honest_about_undefined_rates():
     for row in report["geometry"]:
         defined = sum(run["metrics"]["accounting_pass_rate"] is not None for run in row["runs"])
         assert row["summary"]["accounting_pass_rate"]["defined_runs"] == defined
+
+
+def test_toy_tree_fault_injection_brute_force():
+    rows = (
+        AccountRow("h", None, "header", (None,), ("",)),
+        AccountRow("l1", "h", "line_item", (100,), ("100",)),
+        AccountRow("l2", "h", "line_item", (200,), ("200",)),
+        AccountRow("s1", "h", "subtotal", (300,), ("300",)),
+    )
+    cols = ("value_1",)
+
+    # 1. Baseline accounting check passes exactly
+    base_checks = accounting_checks(rows, cols)
+    sub_check = next(c for c in base_checks if c.row_id == "s1")
+    assert sub_check.status == "exact"
+    assert sub_check.expected == 300
+    assert sub_check.printed == 300
+
+    # 2. Run fault injection framework
+    report = run_fault_injection(rows, cols)
+    assert report["numeric_cells"] == 3
+    assert report["covered_cells"] == 3
+
+    # 3. Brute force check every generated fault independently
+    faults = list(iter_faults(rows))
+    detected_count = 0
+    for fault in faults:
+        faulty_rows = apply_fault(rows, fault)
+        checks_after = {c.check_id: c for c in accounting_checks(faulty_rows, cols)}
+        is_detected = checks_after[sub_check.check_id].status == "fail"
+        if is_detected:
+            detected_count += 1
+
+    total_detected = sum(v["detected"] for v in report["by_fault_type"].values())
+    assert total_detected == detected_count
+
+    # Sign flips and blank to nil are 100% detected
+    assert report["by_fault_type"]["sign_flip"]["detected"] == 3
+    assert report["by_fault_type"]["blank_to_nil"]["detected"] == 3
+
+    # Position 2 (hundreds digit, e.g. 100 -> 900) detected: residual 800 > tol 2
+    pos2 = report["by_digit_position"]["2"]
+    assert pos2["detected"] == pos2["total"]
+
+    # Position 0 (units digit, e.g. 100 -> 101) slips under tolerance (residual 1 <= tol 2)
+    pos0 = report["by_digit_position"]["0"]
+    assert pos0["detected"] < pos0["total"]
+
