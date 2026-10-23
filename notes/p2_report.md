@@ -1,3 +1,8 @@
+> **2026-10-23 update:** The GT was subsequently verified by the owner; see
+> data/gt/README.md and workstamp.md. Transcription is attributed to GPT 6.1 Sol
+> per the owner (**user-supplied**, not independently verifiable from repo records).
+> The original draft report below is preserved without revision.
+
 # P2 draft ground-truth report
 
 ## Status and provenance

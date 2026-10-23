@@ -6,8 +6,8 @@ The task is to convert a born-digital Japanese consolidated balance sheet into a
 The promised CSV fields are label, parent, level, row_type and previous/current values; exports also retain identifiers, paths and raw strings. (PROJECT_BRIEF.md; README.md)
 
 This is a development result on one supplied page, with rules written after seeing it, not evidence of generalisation. (eval/results/page4_report.md)
-An AI agent transcribed the page image; the user checked it and reported a second review, and a subsequent PDF text-layer cross-check found no disagreements. (README.md; notes/gt_verification.md; notes/p2_report.md)
-[USER: confirm who checked the image and identify the second AI reading; the committed checklist does not identify that reviewer]
+GPT 6.1 Sol transcribed the page image; the owner checked it row by row, and a later Claude conversation gave a second AI reading. These roles are owner-supplied, not independently verifiable from the repo. (workstamp.md, user-supplied attribution)
+The subsequent PDF text-layer cross-check agreed on 74/74 cells, including nil marks and signed zero. (notes/p2_report.md)
 
 ## 2. Approach
 
@@ -39,7 +39,7 @@ Pass rate is (exact+within_tolerance)/(exact+within_tolerance+fail); evaluable_f
 Both matter because checks can disappear while the remaining pass rate looks healthy. (notes/failure_analysis.md)
 
 The separate interval [−negative-addend count, positive-addend count−1] is a **truncation hypothesis diagnostic**, never the default pass rule; signed/zero edge cases prevent treating it as universal. (notes/evaluation_design.md)
-[USER: confirm the filing's rounding or truncation policy]
+The actual filing policy remains unconfirmed. (notes/evaluation_design.md)
 
 ## 4. Results on the supplied page
 
@@ -92,10 +92,12 @@ To address the documented indentation limitation, I would compare learned layout
 
 ## 7. How I used AI tools
 
-The session log attributes setup/inspection to Claude Opus 4.6, continuation to Claude Sonnet 4.6, and builder/auditor work to GPT-6 in Codex; the review instead names the builder GPT-6.1 Sol. (workstamp.md; notes/review_P9.md)
-The handoff describes a P9 reviewer applying P10 fixes in another tool/session, followed by P10b auditing in a further session; however, the session table labels review Claude Sonnet 4.6 and fixes Gemini 3.8 Flash. (workstamp.md; notes/review_P9.md)
-[USER: confirm tool/model attribution and whether the reviewer also applied the fixes]
-This is a documented review/fix/audit chain, not a claim of full independence. (workstamp.md; notes/p10_audit.md)
+The following attribution is **owner-supplied**, not independently verifiable from repo records. (workstamp.md, user-supplied attribution)
+Claude on the web, using a separate account, drafted the implementation plan and prompts; a later Claude conversation provided the second AI GT reading and reviewed prompts and results. (workstamp.md, user-supplied attribution)
+Claude Opus 4.6 handled P0–P1; GPT 6.1 Sol in Codex handled P2–P8 and P10b–P13. (workstamp.md, user-supplied attribution)
+
+The P9 reviewer, Claude Sonnet 4.6, differed from the builder model; P10a fixes were applied by a third model, Gemini Flash 3.8, with that work recorded in commits 5565491 and d51c47f. P10a is the fix stage labelled P10 in the experiment comparisons. (workstamp.md, user-supplied attribution)
+GPT 6.1 Sol then audited the fixes in P10b, reusing the original builder model. This has weaker independence than a human audit; it is not a claim of full independence. (workstamp.md, user-supplied attribution)
 The handoff file records plans, commits, decisions and usage-limit cutoffs across sessions. (workstamp.md)
 
 [USER: total time spent, including human verification]

@@ -1,3 +1,10 @@
+> **2026-10-23 attribution correction (user-supplied):** The owner attributes
+> P13 and the original P2–P8 implementation to GPT 6.1 Sol (Codex), P9 review to
+> Claude Sonnet 4.6, P10a fixes (5565491, d51c47f) to Gemini Flash 3.8, and the
+> P10b audit to the original builder model, GPT 6.1 Sol. Model/tool identity is
+> owner-supplied, not independently established by this clean-clone check.
+> All test, timing, hash and hygiene observations below remain unchanged.
+
 # P13 clean-clone reproducibility check
 
 ## Scope and tested revision
@@ -131,7 +138,7 @@ Ignore probes (all matched): .venv/probe, nested/__pycache__/probe.pyc, .pytest_
 
 - In the cloned revision README.md:5–6 still says P10b/current and P11/P13 next, while workstamp.md:7–8 records P13 IN PROGRESS and its history records P11 complete. README phase rows 85–89 lag actual completion and omit the additional P10b audit.
 - README and PROJECT_BRIEF share the original P0–P13 plan. PROJECT_BRIEF.md:42–59 is explicitly Planned Phases, with only the original setup checkmark; it is not a synchronized completion dashboard. Workstamp is the authoritative live state under its agent rules. README now explains that distinction rather than rewriting the original brief.
-- Existing factual provenance questions remain: reviewer/fixer identity and model labels differ across the session log and review; the historical P2 report says DRAFT while the later verification checklist says VERIFIED. No personal facts were invented or corrected here.
+- The cloned revision contained conflicting model labels. The owner later supplied the authoritative attribution on 2026-10-23: P9 reviewer Claude Sonnet 4.6; P10a fixer Gemini Flash 3.8; original builder and P10b/P13 auditor GPT 6.1 Sol (Codex). These identities are user-supplied, not a result of the clone test. The dated note on the historical P2 draft now points to the later verified GT record. The owner also identifies Claude as the second AI GT reader; those roles are recorded in workstamp.md.
 - No command was missing or wrong for the tested Windows environment. README changes put the existing UTF-8 setting next to setup, clarify the two alternative installation routes, consolidate the already-tested commands, link this evidence, and update stale phase/status text. No code, tests, lockfile, data, eval artifact, examples, threshold or REPORT.md was changed.
 
 ## Cleanup and unresolved work

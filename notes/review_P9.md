@@ -1,3 +1,6 @@
+> **2026-10-23 attribution note:** The reviewer was Claude Sonnet 4.6 per the
+> owner (**user-supplied**). The review findings below are unchanged.
+
 # P9 Independent Review — jp-balance-sheet-parser
 
 **Reviewer:** Claude Sonnet 4.6 (Thinking) — independent of the builder agents (GPT-6.1 Sol / Claude Opus 4.6).  

@@ -5,10 +5,10 @@
 | Field | Value |
 |---|---|
 | Prompt | housekeeping |
-| State | IN PROGRESS |
+| State | DONE |
 | Last numbered prompt | P13 DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T12:08:40+00:00 |
+| Updated | 2026-10-23T12:14:23+00:00 |
 
 ## Current prompt (verbatim)
 
@@ -61,15 +61,57 @@ experiment and test records are unchanged.
 ## Plan for this housekeeping
 
 1. [x] Read brief/handoff and Git state; record owner-supplied attribution and preserve P13 next action.
-2. [~] Correct only requested docs; prepend dated notes without rewriting historical P2/review bodies.
-3. [ ] Verify every report number against cited artifacts, list corrections and residual attribution wording elsewhere.
-4. [ ] Full suite, scope/status checks and final named documentation commit; mark housekeeping DONE.
+2. [x] Correct only requested docs; prepend dated notes without rewriting historical P2/review bodies.
+3. [x] Verify every report number against cited artifacts, list corrections and residual attribution wording elsewhere.
+4. [x] Full suite, scope/status checks and final named documentation commit; mark housekeeping DONE.
 
 ## Files created or modified
 
+- REPORT.md — owner-supplied GT/tool roles; builder-model audit caveat; unconfirmed policy and two owner-only placeholders.
+- notes/p2_report.md — dated verification/attribution note only; original body preserved.
+- notes/review_P9.md — dated owner attribution note only; original findings preserved.
+- notes/p13_clean_clone_check.md — dated owner attribution correction; reproduction measurements unchanged.
 - workstamp.md — housekeeping request, plan, user-supplied attribution and corrected session/phase records.
 
 ## Last action and result
+
+Housekeeping DONE: full suite298 passed in11.93s; git diff --check clean.
+Only REPORT.md, notes/p2_report.md, notes/review_P9.md,
+notes/p13_clean_clone_check.md and workstamp.md changed. No pre-existing or
+unrelated user changes observed; no code/tests/data/eval/examples changes.
+Dated P2/review notes preserve their original bodies/findings. All attribution
+corrections are explicitly owner/user-supplied, not claimed repo verification.
+REPORT.md numerical audit found no measured mismatches; added verified74/74
+text-layer agreement and corrected model/role labels. Remaining USER markers:
+time spent including human verification; one-paragraph personal reflection.
+Filing policy still unconfirmed; all honest limits/regressions preserved.
+P13 Next action remains byte-for-byte unchanged. No new numbered prompt/session.
+Plan commitf8b54d3; final commit named docs: correct attribution and finalize report draft.
+
+All REPORT.md numbers checked against cited files/artifacts: metric numerators/
+denominators, seven exact/thirteen within-tolerance/two N/A checks, residuals
+-1..+3,20/20 truncation consistency, both1.000000 accounting fractions,20 seeds/
+360 attempts, all four before/after mean-min rows,90 assignment cases, seed11
+at.2H,38/43 and14/43 ablation results,72/72 coverage and249/648,621/639,3007/3025
+digit detection ratios, and0.5/max(1,n)/n+1 method constants. No measured numeric
+mismatches found or changed. Added74/74 text-layer agreement from compared74,
+disagreements0. Model/version labels corrected from owner attribution, not
+inferred from metrics. REPORT.md now1208 words with only time/reflection markers.
+P13 next action unchanged. Original P2/review bodies match their prior versions.
+
+Remaining historical names: notes/p2_report.md:12 (preserved historical label;
+new note supersedes it); chat_logs/transcript_full.jsonl:226 (legacy model name).
+Unqualified audit-independence wording remains in README.md:392,405;
+notes/evaluation_design.md:24,268; notes/p10_audit.md:1. Report these locations,
+without changing unrequested docs/logs. Full suite/scope check now running.
+
+Requested doc corrections written. Historical P2/review bodies preserved byte-for-
+byte beneath dated notes. Report now attributes planning/second reading to Claude,
+implementation/audit to GPT 6.1 Sol (Codex), review to Claude Sonnet 4.6, fixes to
+Gemini Flash 3.8; all marked owner/user-supplied. P13 attribution corrected without
+changing measurements. GT cross-check74/74 added from compared74/disagreements0.
+Rounding remains unconfirmed; only time/reflection USER placeholders remain.
+Numeric and residual-conflict audit in progress; no protected files changed.
 
 Clean main at97cfb11; no pre-existing uncommitted changes. P13 DONE. Attribution
 comes from the owner, not a fresh forensic inference. Current chat continues;
@@ -124,7 +166,7 @@ final export_chat.py, redaction of chat_logs, add the Claude conversation log, s
 
 | P13 | GPT 6.1 Sol (Codex), user-supplied; fresh committed clones; both README install paths pass 298 tests/Ruff, exports and reports byte-identical; hygiene redaction pending; temporary envs removed | b178e09 (evidence); 9911ca7 (README); final completion commit named P13: clean-clone reproducibility check |
 
-| housekeeping | Owner-supplied attribution correction and final report draft; IN PROGRESS | Pending |
+| housekeeping | User-supplied attribution corrected in five docs; report numbers verified,74/74 text agreement added; two placeholders remain;298 tests pass | f8b54d3 (plan); final commit named docs: correct attribution and finalize report draft |
 
 ## Sessions
 
