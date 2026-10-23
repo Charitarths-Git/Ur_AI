@@ -2,13 +2,16 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P13 reproduction checks passed on Windows / Python 3.14.0; hygiene review remains. GT is **VERIFIED**.
-> Next action: final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit.
+> **Status**: Parser, evaluation framework and report complete for the supplied page. P13 reproduction checks passed on Windows / Python 3.14.0. GT is **VERIFIED**.
+> AI conversation exports are included in [chat_logs/](chat_logs/); see its [coverage notes](chat_logs/README.md) for sources, snapshot cutoffs and export limitations.
 
 ## Results at a glance
 
-See [REPORT.md](REPORT.md) for the draft write-up, correctness definitions,
-measured results, remaining failures and facts awaiting human confirmation.
+See [REPORT.md](REPORT.md) for the approach, correctness definitions,
+measured results, known failures and next steps. On the supplied page, all 43
+rows and 74 printed value cells match the verified GT; all 20 evaluable accounting
+checks pass within the documented tolerance. These are single-page development
+results, not evidence of accuracy on unseen documents.
 
 ## Quick start
 
@@ -75,8 +78,8 @@ pytest
 ## Phases
 
 PROJECT_BRIEF.md retains the original plan; workstamp.md is the current handoff
-record. P10b was an additional audit after P10. The write-up remains a draft for
-human editing, and P12 is optional.
+record. P10b was an additional audit after P10. The report is in REPORT.md;
+P12 is optional and was not implemented.
 
 | Phase | Scope |
 |---|---|
@@ -92,7 +95,7 @@ human editing, and P12 is optional.
 | P9 — Independent review | Review by a different AI agent ✅ |
 | P10 — Review fixes | Apply fixes from the review ✅ |
 | P10b — Audit | Audit fixes, close reporting/test gaps; remaining geometry limits documented ✅ |
-| P11 — Write-up | Draft complete; human rewrite remains ✅ |
+| P11 — Write-up | Report with design, results, failure cases, AI attribution and next steps ✅ |
 | P12 — OCR/VLM stub | Optional backend stub for scanned pages |
 | P13 — Reproducibility | Both fresh install routes, tests and artifact comparisons verified ✅ |
 
@@ -439,8 +442,10 @@ The evaluator command scores the committed example files. The check first
 compared freshly generated outputs with those examples byte for byte, then
 compared all four regenerated evaluation reports with their committed versions.
 Only the temporary clones were used to regenerate reports during the check.
-Tracked conversation logs still need the final human export/redaction review;
-a reproducible result does not mean the repository is ready for public release.
+AI conversation records are kept in [chat_logs/](chat_logs/). The
+[coverage notes](chat_logs/README.md) document included sessions, snapshot cutoffs,
+redaction and export limitations. The reproduction results above concern the
+code and generated artifacts; conversation coverage is documented separately.
 
 ## License
 

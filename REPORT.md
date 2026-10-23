@@ -1,4 +1,11 @@
-# DRAFT — Japanese balance-sheet extraction
+# Japanese balance-sheet extraction
+
+A geometry-based parser converts the supplied born-digital Japanese balance
+sheet into flat CSV and hierarchical JSON. All 43 rows and 74 printed value
+cells match the verified ground truth, and all 20 evaluable accounting checks
+pass within the documented rounding tolerance. Geometry perturbations expose
+remaining row and hierarchy failures. These results describe development on
+one supplied page; broader document accuracy remains untested.
 
 ## 1. Problem and assumptions
 
@@ -102,12 +109,15 @@ The handoff file records plans, commits, decisions and usage-limit cutoffs acros
 
 Time spent: about two days of elapsed time (Wed 21 to Fri 23 Oct 2026), mostly agent runtime plus my own planning, prompt drafting and manual verification of the ground truth. I did not keep a precise log, so this is an estimate.
 
-<!-- drafted by agent from repo facts; owner may edit -->
-I used accounting checks to expose small rounding-sized differences between printed totals and component sums that exact agreement with transcribed cells alone cannot explain. (eval/results/page4_report.md; notes/evaluation_design.md)
-I used jitter sweeps to expose real failures, including the P10 fixes' regressions in row F1 and parent accuracy at higher noise. (notes/failure_analysis.md)
-I retained the documented rejection of the pitch-threshold attempt and the remaining seed-11 row split as limitations. (notes/p10_audit.md; notes/failure_analysis.md)
-I measured everything on one page, with rules written after seeing it, so these results do not establish generalisation. (REPORT.md, sections 1 and 5)
-My next step would be held-out pages and an OCR/VLM backend, evaluated as new work rather than assumed capability. (notes/failure_analysis.md; PROJECT_BRIEF.md)
+Accounting checks exposed small rounding-sized differences between printed totals
+and component sums that exact agreement with transcribed cells alone cannot
+explain. Jitter sweeps exposed real failures, including the P10 fixes' regressions
+in row F1 and parent accuracy at higher noise. The rejected pitch-threshold
+attempt and remaining seed-11 row split are documented limitations. All results
+come from one page, with rules written after seeing it, so they do not establish
+generalisation. The next step is evaluation on held-out pages, followed by an
+OCR/VLM backend evaluated on new inputs. (eval/results/page4_report.md;
+notes/evaluation_design.md; notes/failure_analysis.md; notes/p10_audit.md)
 
 ## 8. Reproduce
 
