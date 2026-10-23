@@ -77,7 +77,6 @@ def run_robustness(
                         metrics = {key: report["metrics"][key]["score"] for key in GT_METRICS}
                         metrics["accounting_pass_rate"] = report["accounting"]["pass_rate"]
                         metrics["evaluable_fraction"] = report["accounting"]["evaluable_fraction"]
-                        metrics["evaluable_fraction"] = report["accounting"]["evaluable_fraction"]
                         runs.append(
                             {
                                 "seed": seed,
@@ -179,6 +178,9 @@ def robustness_markdown(report):
         "",
         f"Seeds: {report['seeds']}. Jitter units: median word height.",
         "",
+        f"Baseline accounting pass rate={pct(report['baseline']['accounting']['pass_rate'])}; "
+        f"evaluable_fraction={pct(report['baseline']['accounting']['evaluable_fraction'])}.",
+        "",
         "## Geometry sweep",
         "",
         "Each entry is mean / minimum over defined seeds. "
@@ -212,7 +214,7 @@ def robustness_markdown(report):
     ]
     for mode, ablation in report["ablations"].items():
         if ablation["crash"]:
-            lines.append(f"| {mode} | CRASH | | | | | |")
+            lines.append(f"| {mode} | CRASH | | | | | | |")
             continue
         r = ablation["report"]
         metrics = [

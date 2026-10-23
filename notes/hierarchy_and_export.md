@@ -10,7 +10,8 @@ claim or P7 evaluation module is made here.
 
 Orientation: clean tree at 9012bae; baseline 166 passed in 6.73s. Session 5
 continues. Verified GT and raw PDF are read-only. P3 normalization and all P4
-production modules are unchanged.
+production modules were unchanged in P5–P6; P10 later changed clustering, and
+P10b audited it and added explicit empty/one-column warnings.
 
 ## Small corrections
 
@@ -40,6 +41,7 @@ map a printed marker to its metadata value without surrounding parentheses.
 | net_suffixes | （純額）; (純額), identical after label_key | Validated on page 4 only |
 | contra_labels, prefix/exact | 減価償却累計額; 貸倒引当金 | Validated on page 4 only |
 | contra_labels, prefix/exact | 自己株式 | Untested heuristic |
+| all_negative_cells evidence | No classification rule; unlisted negatives warn possible_contra_or_loss and remain line_item | Synthetic 営業損失 regression; page4 contras all use explicit label prefixes |
 | unit_pattern | `\(単位:(?P<unit>[^()]+)\)` on comparison keys | 千円 line validated on page 4 only |
 | unit_multipliers | 千円 → 1000 | Validated as metadata on page 4; never applied to cell values |
 | unit_multipliers | 百万円 → 1000000; 円 → 1 | Untested real-document heuristics; synthetic parsing tests only |
@@ -50,8 +52,10 @@ map a printed marker to its metadata value without surrounding parentheses.
 ## Classification and independent evidence
 
 Order: no cells → header; total exact/suffix; net suffix; subtotal suffix;
-contra prefix; then structural fallback (all valid numeric cells printed
-negative → contra; otherwise line_item). No-cells takes precedence even if a
+contra prefix; then structural line_item fallback. All valid numeric cells printed
+negative is evidence only: without a listed contra prefix, emit
+possible_contra_or_loss on the row and page. It cannot distinguish a contra from
+a loss such as 営業損失. No-cells takes precedence even if a
 label contains a total keyword. Nil and invalid cells are not numeric for sign
 evidence; with no valid numeric cells, all-negative is false. Printed △0 is a
 valid numeric negative representation and contributes true negative evidence.
@@ -94,7 +98,10 @@ warning explicitly states that header nesting is unknown. The first body row
 is the root. Later headers and totals attach to root; line items/subtotals attach
 to the most recent header; contra/net rows attach to the nearest preceding line
 item, with header/root only as a safety fallback if no such item exists. This is
-deliberately partial. Empty input returns an empty forest and the fallback warning.
+deliberately partial. Empty input returns an empty forest with empty_input,
+not the misleading insufficient_indentation warning. Zero supported value columns
+emit no_columns_detected; one emits one_column_detected. No body emits
+no_body_rows. These reach page JSON and the CLI summary.
 
 On page 4, indentation produces the GT convention directly: each subtotal is
 under its section, each contra/net pair under its gross item, and the final total

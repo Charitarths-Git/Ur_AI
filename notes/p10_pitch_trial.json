@@ -1,0 +1,25 @@
+{
+  "candidate": "row tolerance = clamp(0.45 * median pitch, existing tolerance, 0.65 H)",
+  "body_rows_seed11": 43,
+  "acceptance_test_exit_code": 1,
+  "observations": [
+    {
+      "pitch_H": 1.338689689921425,
+      "candidate_tolerance_H": 0.6024103604646412
+    },
+    {
+      "pitch_H": 1.3877308685755247,
+      "candidate_tolerance_H": 0.6244788908589862
+    },
+    {
+      "pitch_H": 1.338689689921425,
+      "candidate_tolerance_H": 0.6024103604646412
+    },
+    {
+      "pitch_H": 1.3877308685755247,
+      "candidate_tolerance_H": 0.6244788908589862
+    }
+  ],
+  "elapsed_seconds": 0.499,
+  "decision": "REJECTED at first existing-test failure; in-memory override restored; no production threshold change"
+}

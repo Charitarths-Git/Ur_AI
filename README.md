@@ -2,8 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P7–P8 — file evaluation, accounting checks and robustness experiments complete. GT is **VERIFIED**.
-> Next action: independent review (P9).
+> **Status**: P10b — P10 fixes independently audited; reporting, warnings and tests completed. GT is **VERIFIED**.
+> Next action: write-up (P11) and final checks (P13).
 
 ## Quick start
 
@@ -282,7 +282,9 @@ and evidence remain available via each parsed row's `.typed` record.
 
 Page metadata comes from header/footer zones. Exported column headings exclude
 unit lines. Exactly two distinct dates determine previous/current roles by date,
-otherwise columns use value_1..value_N and warn. Unit multipliers are metadata
+otherwise columns use value_1..value_N and warn. No supported value columns
+emits no_columns_detected; one emits one_column_detected. No reconstructed body
+emits no_body_rows and hierarchy empty_input. JSON and CLI list these warnings. Unit multipliers are metadata
 only: financial values are never scaled.
 
 The CSV uses **UTF-8 with BOM**, with this exact column order:
@@ -348,12 +350,17 @@ and integer zero are different. Empty metric denominators are undefined, not
 perfect. With one page the micro/macro averages coincide. `accounting_checks`
 accepts only `AccountRow` IDs, types, values and raw amounts: no labels or GT.
 Its replaceable tolerance defaults to the number of addends (at least one).
+Without a net child, gross contribution includes contra children; unknown
+negative labels remain line_item with possible_contra_or_loss.
 
 The real page scores 1.0 on every GT metric (86/86 cells, 43/43 rows). Accounting
 has 7 exact and 13 within-tolerance checks, no failures, and two balance checks
 not applicable. Residuals range from -1 to +3 千円. All 20 evaluable checks fit
 the requested truncation interval, a diagnostic hypothesis that still needs
-human confirmation of the filing's policy.
+human confirmation of the filing's policy. `evaluable_fraction` is evaluable /
+applicable accounting checks (excluding not_applicable). Pass rate is N/A with
+no evaluable checks. JSON/Markdown headlines show both; robustness geometry
+tables show mean/minimum over defined seeds, and ablations show both values.
 
 The robustness CLI reads the PDF once, perturbs RawPage geometry, then runs the
 full parser/export/file-evaluation pipeline. It retains all 20 seeds (0..19) for
@@ -369,8 +376,8 @@ These are **development results on one page**, whose rules were designed after
 seeing it. They do not establish generalisation. The AI-drafted GT was verified
 by one human, who also reported an independent second review. Accounting pass
 rates must be read alongside not-evaluable counts: severe geometry damage can
-remove checks without producing failures. Exposed parser issues are documented
-for P9 review; they were not repaired during this phase.
+remove checks without producing failures. P10 fixes have now been independently audited in P10b. Remaining geometry
+limitations are recorded with current measurements.
 
 See [evaluation_design.md](notes/evaluation_design.md) for formulas, denominator
 rules, accounting derivation and experiment design, and
@@ -381,6 +388,20 @@ expectations. Run all tests and lint with:
 python -m pytest
 python -m ruff check src scripts tests eval
 ```
+
+## P10b independent audit
+
+The audited starting state was283 tests at e40462b, including the seed11 failure
+regression from7f5afbd. [p10_audit.md](notes/p10_audit.md) records initial/final
+status per requirement. [failure_analysis.md](notes/failure_analysis.md) preserves
+the P8 baseline and adds all P8/P10/current geometry, ablation and fault tables.
+
+Gap clustering improved P8 x=.3H mean cell accuracy0.3331 to0.9360 and y=.3H
+0.5994 to0.8890. P10b does not change these scores. All20 x=.3 seeds detect two
+correct column roles; the remaining errors come mostly from the cell-assignment
+gate. The seed11 y=.2 split remains. A pitch-based candidate was rejected at its
+first existing-test failure; no threshold change was retained. A high accounting
+pass rate can coexist with low evaluable_fraction, so read both columns.
 
 ## License
 

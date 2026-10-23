@@ -19,8 +19,10 @@ then invokes the same file evaluator, with no privileged object-based scoring.
 The PDF is read once per robustness run; only RawPage objects are perturbed.
 
 All output ordering, seeds and tie rules are fixed. Reports contain no timestamps;
-source names are basenames. Generated report text is UTF-8. Existing parser code,
-GT, raw PDF, examples and dependency manifests remain unchanged. Existing test
+source names are basenames. Generated report text is UTF-8. P7–P8 left existing parser code,
+GT, raw PDF, examples and dependency manifests unchanged. P10 later fixed the
+reviewed parser behavior; P10b independently audited it. Protected GT/raw/examples
+remain unchanged. Existing test
 transform helpers were moved into evaluation.perturb without weakening assertions.
 
 ## Ordered alignment
@@ -100,7 +102,9 @@ and parent_path also have their own metrics rather than silently entering it.
 
 `aggregate_reports` pools numerator/denominator counts for micro averages and
 averages defined page scores for macro averages, reporting defined/total pages.
-It also pools accounting pass and truncation-diagnostic counts when present.
+It also pools accounting pass, evaluable_fraction and truncation-diagnostic counts
+when present. Coverage pools evaluable/applicable counts, with N/A for zero
+applicable checks.
 Tests combine the same page twice. **For one page, defined micro and macro scores
 coincide.** This does not turn one page into an independent validation set.
 
@@ -113,7 +117,9 @@ two printed nil cells are included among printed cells and remain distinct from 
 Rebuild ordered sibling groups from row_id/parent_row_id. For a node's contribution:
 
 1. If it has exactly one net child, use that child's amount.
-2. Otherwise if it has its own amount/raw, use that amount.
+2. Without a net child, use its own amount plus all contra-child amounts. Nil
+   contributes zero only for a raw nil marker; any invalid required amount
+   makes this contribution not_evaluable. Dependencies include gross and contras.
 3. Otherwise for a header, use its exactly one subtotal child's amount.
 4. Missing or ambiguous contributions are not_evaluable, never guessed by summing leaves.
 
@@ -134,6 +140,12 @@ printed, residual=`printed−expected`, tolerance, status and dependency cells.
 Statuses: exact, within_tolerance, fail, not_evaluable, not_applicable. A missing
 parent or required net/contra contribution cannot yield a passing guessed zero.
 Accounting pass rate is `(exact+within_tolerance)/(exact+within_tolerance+fail)`.
+`evaluable_fraction = evaluable / applicable`, where applicable excludes only
+not_applicable. Thus zero evaluable among positive applicable checks is coverage0
+with pass-rate N/A; no applicable checks makes both N/A. Page JSON accounting
+and Markdown headlines show both. Geometry JSON/Markdown show their mean/minimum
+over defined seeds, with defined/attempted-run counts retained. Ablations show
+both values for each deterministic transformation.
 Always show not_evaluable and N/A counts too: missing checks can inflate a rate
 computed on the surviving checks. No evaluable checks means N/A, not success.
 
@@ -249,3 +261,44 @@ Validation: full suite **275 passed in 8.73s**, from a 223-test baseline.
 `python -m ruff check src scripts tests eval`: **All checks passed!**
 All 19 protected-file baseline hashes match, including the unchanged UTF-8-BOM
 GT CSV, raw PDF, examples, original parser modules and dependency manifests.
+
+
+## P10b audit and measured geometry limits
+
+P10 was applied in a different session/tool, then independently audited against
+commit e40462b (283 tests). Existing successful fixes were preserved. The new
+oracle independently generates digit/sign/nil mutations and directly computes
+two arithmetic residuals (a four-addend subtotal and a gross/contra/net check),
+without importing library fault generation or accounting-check logic.
+
+Rows, right-edge columns and indentation share consecutive-gap single linkage
+in rows._clusters. Defaults remain row0.35H, column0.30H, indent0.40H. Clustering
+and cell assignment are distinct: after clustering establishes a median right
+edge, _cells still accepts only tokens within0.30H of that edge. All20 x=.3 seeds
+find two correct chronological columns, yet this assignment gate loses cells in
+90 row-seed cases. Label contamination comes from those leftover numeric tokens;
+no pure label-token spacing/order errors were observed. Indent splitting changes
+81 row-seed indices but changes only two parents (seed5, rows14 and43).
+
+At y=.2/.3H there are no cross-source-row merges in the measured20 seeds;
+within-row consecutive gaps exceed0.35H and split words that moved independently.
+The median original body pitch is1.338690H; row24 seed11 gap is0.350053H.
+A 1.3H-pitch synthetic jitter test guards against merging adjacent row identities.
+
+An optional in-memory candidate estimated median pitch from provisional groups
+and used clamp(0.45*pitch, existing0.35H,0.65H), leaving a separation margin below
+half-pitch. It restored43 rows at seed11 but immediately failed the existing
+44-row failure-recording test. Per stop-at-first-problem/no-test-weakening rules,
+the candidate was rejected and restored within minutes, well inside20 minutes.
+No production pitch threshold was implemented; no candidate-wide robustness
+claim is made. See p10_pitch_trial.json and p10_diagnose.py --pitch-trial.
+
+Warnings: no_columns_detected for zero supported columns, one_column_detected
+for one, no_body_rows for no reconstructed body, and empty_input from hierarchy
+when there are no typed rows. Page JSON and parse CLI surface them. Default
+unlisted all-negative lines stay line_item with possible_contra_or_loss.
+
+Full P8/P10/current means/minima, ablations and fault counts are in
+failure_analysis.md. P10b changes reporting/tests/warnings, not clustering defaults.
+Schema issues for missing fields/raw columns return Table.issues; malformed row
+identities still raise explicitly and are outside that schema-only fix.

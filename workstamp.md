@@ -54,16 +54,46 @@ Orientation; the audit table (status per requirement); the gaps closed (with com
 
 1. [x] Audit real P10 history, source, tests, reports and protected bytes before changes; baseline suite and initial audit table.
 2. [x] Close report/coverage gaps and add independent accounting, warnings, geometry and fault-oracle tests without weakening existing tests.
-3. [~] Diagnose y=0.2/0.3H and x=0.3H over all seeds; time-box any pitch experiment, keep only with all acceptance conditions met.
-4. [ ] Regenerate parse/evaluation/robustness, document complete P8/P10/current comparisons and update design/README/audit.
-5. [ ] Full suite, ruff, determinism/protected checks, final commit and DONE handoff.
+3. [x] Diagnose y=0.2/0.3H and x=0.3H over all seeds; time-box any pitch experiment, keep only with all acceptance conditions met.
+4. [x] Regenerate parse/evaluation/robustness, document complete P8/P10/current comparisons and update design/README/audit.
+5. [~] Full suite, ruff, determinism/protected checks, final commit and DONE handoff.
 
 ## Files created or modified
 
-- notes/p10_audit.md — initial audit with before-change evidence and gap list.
+- notes/p10_audit.md — initial/final audit evidence.
+- tests/test_p10b.py — 15 independent acceptance tests.
+- src/parser/evaluation/{accounting,metrics,report,robustness}.py — coverage counts/aggregation/headlines/sweep fields.
+- src/parser/{rows,hierarchy}.py — one-column/no-body/empty-input warnings.
+- eval/results/page4_report.{json,md}; robustness_report.{json,md} — regenerated current reports.
+- notes/p10_diagnose.py; p10_geometry_diagnosis.json; p10_pitch_trial.json — reproducible diagnosis and rejected in-memory trial.
+- notes/p10_compare.py — reproducible P8/P10/current comparisons.
+- README.md; notes/{hierarchy_and_export,evaluation_design,failure_analysis}.md — current rules, warnings, limits and full comparison tables.
 - workstamp.md — verbatim P10b request, overrides and plan.
 
 ## Last action and result
+
+Final validation: 298 passed in9.38s (baseline283); ruff check src scripts tests
+ eval plus both new diagnostic scripts: All checks passed! git diff --check clean.
+All13 protected SHA256 hashes match (GT/raw/examples/P8 artifacts/chat logs).
+Fresh parse CLI CSV+JSON byte-identical to examples; GT retains UTF-8 BOM.
+All GT metrics1.0; accounting checks/residuals identical to P8,20/20 passing.
+Regenerated evaluation JSON/Markdown deterministic. AST comparison confirms
+_thresholds and _clusters unchanged from audited P10. Existing tests unchanged;
+git diff e40462b -- tests lists only the new test_p10b.py. Audit final9 PASS,
+item5 PARTIAL because retained failure-recording test still requires44 rows.
+
+Documentation complete: initial/final audit, preserved P8 table plus full P8/P10/
+P10b mean/min grids, six ablations and fault-type/position comparisons. P10b
+metrics equal P10; historical P10 regressions at high x/y noise are explicitly
+reported. All current reports regenerated. Parse CLI reports43 rows/no warnings.
+
+Section C complete. Reproducible diagnostic records six body split events at
+y=.2H and112 at .3H, no merged source groups; x=.3 detects2 correct columns in
+all20 seeds but90 row-seed cell assignments differ,81 indent indices and2
+parents. No pure label-token spacing/order errors. In-memory pitch candidate
+restored43 rows but immediately failed existing seed11 test that requires44;
+stopped and restored original function, within minutes of the20-minute budget.
+No production threshold change; no candidate-wide sweep claim.
 
 Gap closure: 15 additional acceptance tests, full suite 298 passed in 13.80s;
 full-tree ruff clean. Geometry JSON/Markdown now show mean/min evaluable_fraction
