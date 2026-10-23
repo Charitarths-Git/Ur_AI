@@ -302,3 +302,29 @@ Full P8/P10/current means/minima, ablations and fault counts are in
 failure_analysis.md. P10b changes reporting/tests/warnings, not clustering defaults.
 Schema issues for missing fields/raw columns return Table.issues; malformed row
 identities still raise explicitly and are outside that schema-only fix.
+
+
+## P14: hierarchical JSON validation is now separate
+
+Top-level metrics/alignment/mismatches remain CSV results (report schema1.1).
+json_validation independently checks the JSON schema, required types, columns,
+IDs, children and raw/value/status agreement. It traverses actual nesting to derive
+parents/depth, reports inconsistent declarations, and never credits declared
+levels alone. JSON/CSV consistency joins IDs (integer JSON IDs normalize to CSV
+strings) and compares label/type/depth/ancestry/value/raw/validity. Missing or extra
+nodes count against the union of identities. Duplicate IDs are errors, never
+silently collapsed. JSON/GT uses its own ordered label/value DP alignment with
+the same threshold as CSV; IDs are not evidence of correspondence to GT.
+
+Omitted JSON is not_supplied, with JSON passes undefined. Supplied invalid/empty
+JSON has passes=false even if CSV is perfect. CLI writes the structured report
+and exits2 for schema-invalid/malformed JSON. Valid-schema but inaccurate JSON
+has passes=false in the report; callers should inspect validation_passes, not
+infer correctness from process exit alone. Raw equality remains separate from
+the historical fully_correct_rows metric, but any JSON raw mismatch prevents
+JSON passes=true. Accounting scores still describe CSV predictions only.
+
+Benchmarks use independent image-derived provisional annotations, retain failures,
+and report micro sums and macro means with explicit denominators. Human-verified
+supplied-page results and provisional additional-page results are separate.
+See benchmarks/README.md and notes/p14_changes.md.

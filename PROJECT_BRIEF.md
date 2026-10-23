@@ -75,3 +75,15 @@ Any agent (human or AI) working on this repository **must read `workstamp.md` be
 - Everything must be reproducible from a fresh clone with documented commands.
 - Full AI chat log must be submitted alongside the code.
 
+
+
+## Post-submission improvement extension (P14)
+
+The original phases above are historical. P14 adds structural header detection,
+independent hierarchical-JSON validation, a five-issuer provisional benchmark,
+a fixed pdfplumber/runtime comparison, bounded numeric recovery/review warnings,
+safe transcript export and CI. See REPORT.md and notes/p14_changes.md for measured
+results and regressions; workstamp.md records completion and next actions.
+Human verification applies only to the original supplied-page GT. New image-derived
+annotations remain AI drafts and require independent/human review. OCR/VLM,
+training and GPU serving were outside this extension's scope.

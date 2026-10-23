@@ -1,0 +1,168 @@
+{
+  "baseline_commit": "3e14d249ba755a9c12a4975f562c1224feb3464e",
+  "candidate_commit": "33025ad",
+  "verified_at": "2026-10-23T17:10:49.139414+00:00",
+  "tests": {
+    "passed": 324,
+    "failed": 0,
+    "command": "python -B -m pytest -q -p no:cacheprovider --tb=short",
+    "duration_seconds": 10.35
+  },
+  "ruff": "passed: python -m ruff check src scripts tests eval --no-cache",
+  "exports": {
+    "balance_sheet_after_correction_p1.csv": {
+      "sha256": "943c9d8a7f200db1438e0d0da023d34615fbe011691a6c06788d6148a01f85b2",
+      "fresh_sha256": "943c9d8a7f200db1438e0d0da023d34615fbe011691a6c06788d6148a01f85b2",
+      "byte_identical": true
+    },
+    "balance_sheet_after_correction_p1.json": {
+      "sha256": "2540ff40c6724bb93a28dd4e65650ec50eb14490b097ed41b3de19912dbab9ab",
+      "fresh_sha256": "2540ff40c6724bb93a28dd4e65650ec50eb14490b097ed41b3de19912dbab9ab",
+      "byte_identical": true
+    }
+  },
+  "jsonl_records": {
+    "codex_transcript.jsonl": 555,
+    "supplement_p14.jsonl": 36,
+    "transcript_full.jsonl": 771
+  },
+  "raw_pattern_findings_requiring_classification": [
+    {
+      "file": "chat_logs/transcript_full.jsonl",
+      "pattern": "local_windows_path",
+      "lines": [
+        157,
+        168,
+        171,
+        173,
+        192,
+        194,
+        205,
+        291,
+        293,
+        295,
+        297,
+        307,
+        365,
+        399,
+        503,
+        505,
+        573,
+        625,
+        626,
+        627
+      ],
+      "count": 20
+    },
+    {
+      "file": "chat_logs/transcript_full.jsonl",
+      "pattern": "email",
+      "lines": [
+        205
+      ],
+      "count": 1
+    }
+  ],
+  "ci": "configured; remote execution not yet checked",
+  "protected_and_original_log_checks": {
+    "data/raw/balance_sheet_after_correction.pdf": {
+      "byte_equal_to_git_blob": true,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "0764bba6f5f0e7984a837e4cc19d8bb95db4a7ac22c26f18c95bbe652c983c74",
+      "git_diff_empty": true
+    },
+    "data/gt/.gitkeep": {
+      "byte_equal_to_git_blob": true,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "ed45997568637e060206a72bf0cdf61f210287fd20659183a4812e48b0fc1170",
+      "git_diff_empty": true
+    },
+    "data/gt/README.md": {
+      "byte_equal_to_git_blob": false,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "c428b937b8ff3f4193434b5a5c076fdfa204b2cf8b6785dcab6a88f96dcca7bb",
+      "git_diff_empty": true
+    },
+    "data/gt/page4.csv": {
+      "byte_equal_to_git_blob": false,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "c26ba476e9537c7f1748cef09109b810ca1356f80f96acb5955761ad17174835",
+      "git_diff_empty": true
+    },
+    "data/gt/page4_meta.json": {
+      "byte_equal_to_git_blob": false,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "6e21ec3d0d4adc1a016534e1f90f24f9ebc32f795baca2f5afa64a87ec7d66a7",
+      "git_diff_empty": true
+    },
+    "chat_logs/chat_log.md": {
+      "byte_equal_to_git_blob": false,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "25eedfef1fa3d83cb658cf72e0accdd15a6d88175118e77974ed95f538e2b647",
+      "git_diff_empty": true
+    },
+    "chat_logs/transcript_full.jsonl": {
+      "byte_equal_to_git_blob": true,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "620765ac697bf3727f6b4a9801056a1a58e546a7114fac9b7207c931ff822e29",
+      "git_diff_empty": true
+    },
+    "chat_logs/codex_transcript.jsonl": {
+      "byte_equal_to_git_blob": true,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "4735568442105aa8ef35a22133f7d967e5e1fc6407b8f78ffb2c96f233280bc0",
+      "git_diff_empty": true
+    },
+    "chat_logs/claude_conversation.md": {
+      "byte_equal_to_git_blob": true,
+      "equal_after_checkout_newline_normalization": true,
+      "current_sha256": "546edf6567976220b88765fc4888a9a04830069f3acb835425b8a83dd983446f",
+      "git_diff_empty": true
+    }
+  },
+  "line_ending_note": "Git blobs use LF; existing Windows checkouts of some GT/Markdown files use CRLF. Those files were not edited. Raw Git-blob byte inequality is not reported as an edit; normalized equality and empty Git diff verified.",
+  "decoded_jsonl_findings": [],
+  "privacy_classification": "No local username or credential findings. Raw serialized-JSON path/email matches are historical code/escape artifacts, checked again after decoding nested JSON strings; see decoded_jsonl_findings.",
+  "supplement_cutoffs": [
+    {
+      "session_id": "01a164c4-bb0b-78c1-9838-3200db561076",
+      "through": "2026-10-23T17:11:23.445Z",
+      "messages": 25
+    },
+    {
+      "session_id": "01a16976-34c2-7c52-afcf-4459f42ddade",
+      "through": "2026-10-23T16:25:19.679Z",
+      "messages": 11
+    }
+  ],
+  "final_local_commit_before_docs": "631cd7f",
+  "gt_utf8_bom": true,
+  "email_body_word_count": 211,
+  "source_dates_checked_from_pdf_first_pages": true,
+  "defect_reproduction": {
+    "original": {
+      "normal_body_rows": 43,
+      "footer_body_rows": 0,
+      "empty_json_csv_full_rows": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "exact label, both/all values, type, mapped parent and level / all GT rows"
+      },
+      "json_validation": "not_implemented",
+      "overall_validation": null
+    },
+    "current": {
+      "normal_body_rows": 43,
+      "footer_body_rows": 43,
+      "empty_json_csv_full_rows": {
+        "numerator": 43,
+        "denominator": 43,
+        "score": 1.0,
+        "meaning": "exact label, both/all values, type, mapped parent and level / all GT rows"
+      },
+      "json_validation": "invalid",
+      "overall_validation": false
+    }
+  }
+}

@@ -1,132 +1,186 @@
 # Japanese balance-sheet extraction
 
-A geometry-based parser converts the supplied born-digital Japanese balance
-sheet into flat CSV and hierarchical JSON. All 43 rows and 74 printed value
-cells match the verified ground truth, and all 20 evaluable accounting checks
-pass within the documented rounding tolerance. Geometry perturbations expose
-remaining row and hierarchy failures. These results describe development on
-one supplied page; broader document accuracy remains untested.
+A born-digital Japanese PDF parser produces flat CSV and hierarchical JSON.
+This report separates the original human-verified development page from a small,
+provisional additional-page benchmark. It reports failures as well as successful
+extraction. Start with the reproduction commands below and the detailed results.
 
-## 1. Problem and assumptions
+## 1. Problem and scope
 
-The task is to convert a born-digital Japanese consolidated balance sheet into a flat CSV and hierarchical JSON, retaining amounts in printed 千円 units. (PROJECT_BRIEF.md)
-The promised CSV fields are label, parent, level, row_type and previous/current values; exports also retain identifiers, paths and raw strings. (PROJECT_BRIEF.md; README.md)
+The original task is a consolidated balance-sheet page in 千円, with comparative
+periods, repeated labels, nil marks, triangular negatives and indentation-based
+hierarchy. Amounts stay in printed units; JSON includes unit metadata. The backend
+interface isolates PDF reading for a possible future OCR/VLM implementation.
+(PROJECT_BRIEF.md; README.md)
 
-This is a development result on one supplied page, with rules written after seeing it, not evidence of generalisation. (eval/results/page4_report.md)
-GPT 6.1 Sol transcribed the page image; the owner checked it row by row, and a later Claude conversation gave a second AI reading. These roles are owner-supplied, not independently verifiable from the repo. (workstamp.md, user-supplied attribution)
-The subsequent PDF text-layer cross-check agreed on 74/74 cells, including nil marks and signed zero. (notes/p2_report.md)
+The original rules were written after seeing the supplied page. Its image-based
+GT was transcribed by GPT 6.1 Sol, checked row by row by the owner and given a
+second AI reading by Claude; that attribution is owner-supplied. A PDF text-layer
+cross-check agreed on74/74 printed cells. (workstamp.md; notes/p2_report.md)
 
-## 2. Approach
+## 2. Approach and changes
 
-PyMuPDF extracts words and geometry into backend-neutral records; reconstruction groups rows, repeated numeric right edges and indentation, then classification, hierarchy, metadata and deterministic export follow. (README.md)
-Distances scale with median word height rather than fixed coordinates; Japanese label patterns live separately in a replaceable RuleSet. (README.md)
-An indentation stack assigns parents; without useful indentation, the warned fallback only partially reconstructs nesting. (notes/hierarchy_and_export.md)
-The backend interface permits a later OCR/VLM reader, but that reader is not implemented. (README.md)
+PyMuPDF words and ruling evidence feed relative row/column clustering, row typing,
+indentation-based parents, metadata and deterministic exports. Language rules are
+separate from geometry. CSV retains IDs, parents, raw strings and normalized values;
+JSON nests the same rows. (README.md; notes/hierarchy_and_export.md)
+
+Period headings now need a complete, unique date band in the detected numeric
+column regions before supported body values. Footer dates and dated body labels
+cannot move the header past those values. Missing or ambiguous dates retain the
+first-value-row fallback with a warning; leading label-only sections can be lost
+in that fallback. Multiple tables and repeated numeric notes remain limitations.
+(notes/p14_changes.md; tests/test_p14.py)
+
+Recognized numeric tokens can recover to their nearest column within twice the
+clustering tolerance, bounded by neighbouring midpoints. Other text keeps the
+strict assignment gate. Review flags expose invalid amounts, incomplete cells,
+unassigned numbers and orphan amount rows; ambiguous roles and weak indentation
+also warn. Warnings are visible in JSON and the CLI, not confidence probabilities.
+No body/columns produces CLI exit2; usable output with warnings exits0.
+(notes/p14_changes.md)
 
 ## 3. What “correct” means
 
-The evaluator reads exported files independently of parser objects, while accounting receives only predicted IDs, types, amounts and raw strings, without labels or GT. (notes/evaluation_design.md)
+CSV alignment uses order-preserving dynamic programming with equal label-similarity
+and matching-value contributions and threshold0.5. Missing/extra rows remain in
+denominators and mismatch lists. Indistinguishable repeated rows can still align
+ambiguously. (notes/evaluation_design.md)
 
-Alignment comes before scoring: order-preserving dynamic programming handles missing, extra and repeated labels, combining label similarity and matching-value fraction with equal weights and a default threshold of 0.5. (notes/evaluation_design.md)
-Ties are deterministic, but indistinguishable repeated rows remain ambiguous; aligned-row F1 alone cannot prove semantic correctness. (notes/evaluation_design.md)
+**Cells:** compare exact integer/null values against all GT cells and, separately,
+printed cells with nonempty raw strings. Raw representations and exact/normalized
+labels are separate metrics. Unknown amounts are not silently zero.
+(notes/evaluation_design.md)
 
-**Cell correctness:** exact integer/null equality, with all GT cells and nonempty-raw printed cells reported separately; missing GT rows count wrong, and nil differs from zero. (notes/evaluation_design.md)
-Raw-string and exact/normalized-label accuracy separately expose representation errors. (notes/evaluation_design.md)
+**Structure:** row precision/recall/F1, types, depth, mapped parents, ancestor paths
+and fully correct rows are separate. A fully correct CSV row requires the exact
+label, values, type, mapped parent and depth; raw equality is reported separately.
+Undefined denominators are N/A. (notes/evaluation_design.md)
 
-**Structural correctness:** precision is aligned/predicted rows, recall is aligned/GT rows, and F1 combines them. (notes/evaluation_design.md)
-Type, level, parent path, ancestor-chain Jaccard and optional column roles/dates are scored separately; parent correctness maps identities through alignment, avoiding duplicate-label confusion. (notes/evaluation_design.md)
-A fully correct row requires label, values, type, mapped parent and level to agree; undefined denominators are N/A. (notes/evaluation_design.md)
+**JSON:** standalone evaluation validates schema/types and value records, walks
+actual nesting to derive depth and parents, and detects duplicate/missing IDs,
+malformed children, inconsistent declarations and absent nodes. JSON/CSV consistency
+joins by identity; JSON/GT accuracy uses its own label/value alignment. Declared
+levels never substitute for nesting. Omitted JSON is explicitly not_supplied;
+empty/malformed JSON fails validation even with a perfect CSV. Schema-invalid JSON
+writes a diagnostic report and exits2. Data mismatches remain in the report.
+(notes/p14_changes.md; tests/test_p14.py)
 
-**Accounting consistency:** subtotals/totals sum preceding sibling contributions; a net child replaces gross, otherwise gross includes contra children, and headers contribute their subtotal. (notes/evaluation_design.md)
-Net checks add gross and negative contras; null contributes zero only for a raw nil marker, while invalid inputs make checks unevaluable. (notes/evaluation_design.md)
+**Accounting:** predicted subtotals, net amounts and totals are checked without GT
+or labels. Default tolerance is max(1,n) for n addends: if an underlying identity
+holds, truncation bounds the integer residual by n, and nearest rounding is also
+covered. The tighter signed truncation interval is only an unconfirmed hypothesis
+diagnostic. A raw nil mark permits a null contribution; invalid amounts make a
+check unevaluable. Report pass rate alongside evaluable/applicable coverage because
+broken structure can remove checks. Arithmetic consistency is not extraction truth.
+(notes/evaluation_design.md)
 
-Residual means printed minus expected; default tolerance is max(1,n), with n addends. (notes/evaluation_design.md)
-Under an exact underlying identity, truncation errors bound the absolute residual below n+1, so its integer value is at most n; nearest rounding is also covered. This is a conservative allowance, not an error detector guarantee. (notes/evaluation_design.md)
-Pass rate is (exact+within_tolerance)/(exact+within_tolerance+fail); evaluable_fraction is evaluable/applicable checks, excluding not_applicable. (notes/evaluation_design.md)
-Both matter because checks can disappear while the remaining pass rate looks healthy. (notes/failure_analysis.md)
+## 4. Supplied-page development results
 
-The separate interval [−negative-addend count, positive-addend count−1] is a **truncation hypothesis diagnostic**, never the default pass rule; signed/zero edge cases prevent treating it as universal. (notes/evaluation_design.md)
-The actual filing policy remains unconfirmed. (notes/evaluation_design.md)
-
-## 4. Results on the supplied page
-
-| Metric | Correct / denominator |
+| Metric | Result |
 |---|---|
-| All value cells; raw strings | 86/86 each (eval/results/page4_report.md) |
-| Printed cells, including nil | 74/74 (eval/results/page4_report.md) |
-| Exact labels; types; levels; parents; fully correct rows | 43/43 each (eval/results/page4_report.md) |
-| Row precision; recall; F1 | 43/43; 43/43; 86/86 (eval/results/page4_report.md) |
-| Column roles; dates | 2/2 each (eval/results/page4_report.md) |
+| CSV all cells / printed cells |86/86;74/74 |
+| Exact labels, parents, fully correct rows |43/43 each |
+| JSON/GT fully correct rows; JSON/CSV |43/43; consistent |
+| Accounting |20/20 evaluable:7 exact,13 within tolerance;2 not applicable |
 
-Accounting has seven exact and thirteen within-tolerance checks, no failures, and two balance checks not applicable because only one total is present. (eval/results/page4_report.md)
-Pass rate and evaluable_fraction are both 1.000000. (eval/results/page4_report.md)
-Residuals range from −1 to +3 千円; truncation consistency is 20/20, which does not establish the filing's policy. (eval/results/page4_report.md; notes/evaluation_design.md)
+Source: eval/results/page4_report.json. Fresh CSV/JSON match committed examples
+byte for byte. These results describe the supplied development page, not a
+held-out measurement. (notes/p14_changes.md)
 
-## 5. Robustness and failure analysis
+## 5. Additional pages and baseline
 
-Measured sweeps perturb word geometry, not the PDF: twenty seeds per amplitude/axis, with 360 runs; H denotes median word height. (notes/failure_analysis.md)
-Selected P8→P10 results below remain unchanged in P10b. (notes/failure_analysis.md)
+Five official filings were split by issuer before acquisition: Nintendo/Capcom
+for development; Sega Sammy/Square Enix/Konami held out. Original parser3e14d24
+and candidate33025ad were frozen before held-out predictions. No parser tuning
+followed those results. All new pages use 百万円. Four share similar templates,
+and all issuers are in one industry. (benchmarks/manifest.json)
 
-| Test and metric | Before → after, mean/minimum |
-|---|---|
-| x=0.3H, cell accuracy | .3331/.0000 → .9360/.8488 (notes/failure_analysis.md) |
-| y=0.3H, cell accuracy | .5994/.0000 → .8890/.0000 (notes/failure_analysis.md) |
-| x=0.75H, row F1 | .9500/.8605 → .6503/.5581 (notes/failure_analysis.md) |
-| x=0.75H, parent accuracy | .5698/.3721 → .2977/.0698 (notes/failure_analysis.md) |
+Annotations were drafted from rendered pages before predictions by the coding
+agent, not a separate reviewer. They are **AI-only and provisional**. Four
+transcription mistakes were corrected after mismatches prompted enlarged-image
+review; initial drafts and results are preserved. That adjudication was not blind.
+Row-type ontology disagreements remain. (benchmarks/README.md)
 
-Gap clustering improved cells but regressed structure at higher noise; success cannot be claimed from cell accuracy alone. (notes/failure_analysis.md)
-At x=0.3H all seeds retain correct column roles, yet the cell-assignment gate affects ninety row-seed cases; rejected numbers contaminate labels. (notes/failure_analysis.md)
-The y=0.2H seed-11 lease-depreciation split remains. (notes/failure_analysis.md)
-A pitch-based candidate was rejected at a test preserving that known failure; no threshold change or candidate-wide robustness success was retained. (notes/p10_audit.md)
+| Scope / engine | Cells | Fully correct rows |
+|---|---|---|
+| New development, either parser |118/118|50/59|
+| Held out, either parser |262/262|129/131|
+| Held out, pdfplumber |250/262|N/A: no hierarchy/types|
 
-Flattening indentation preserves values but lowers parent accuracy to 38/43 and fully correct rows to 14/43; dropping rules, translation, scaling and shuffling preserve the measured GT scores. (notes/failure_analysis.md)
+Source: eval/results/benchmark/report.json. Candidate/original labels and parents
+are131/131 held out; per-page cell means are1.0000 for both. Pdfplumber omits two
+leading headers per held-out page. All selected pages and mismatches remain in the
+reports; success on this narrow provisional sample is not broad generalisation.
 
-Fault injection covers 72/72 numeric cells and exhaustively mutates digits, signs and nil blanks. (eval/results/robustness_report.md)
+The baseline uses fixed pdfplumber text-grid settings and a format/normalization
+adapter, without parser coordinates or GT. Its chronology assumes left-to-right
+ordering. Timings include PDF opening through in-memory serialization, excluding
+startup, annotations and evaluation: one warmup, five repetitions on the same
+Windows/Python3.14.0 machine. (benchmarks/README.md; eval/results/benchmark/report.json)
 
-| Digit position | Detected / injected |
-|---|---|
-| Units | 249/648 (eval/results/robustness_report.md) |
-| Tens | 621/639 (eval/results/robustness_report.md) |
-| All higher-than-units digits combined | 3007/3025 (eval/results/robustness_report.md) |
+| Page | Candidate median/IQR ms | pdfplumber median/IQR ms |
+|---|---:|---:|
+| Supplied |16.97/4.27|102.49/2.76|
+| Sega Sammy |24.55/3.01|180.96/19.66|
+| Square Enix |13.70/1.02|424.13/10.69|
+| Konami |41.78/0.28|101.46/4.17|
 
-A small last-digit error can hide within a many-addend tolerance; arithmetic also cannot distinguish signed-zero/nil no-ops. (notes/failure_analysis.md)
+Source: eval/results/benchmark/report.json. Original-parser medians on these
+held-out pages were24.91,11.77,40.67ms respectively; the candidate is not uniformly
+faster. Small differences, fixed engine order and warm caches preclude a speedup
+claim between parser revisions. Baseline structural capability is explicitly unequal.
 
-## 6. Limitations and next steps
+## 6. Robustness and remaining failures
 
-Scans, wrapped/multi-page or multiple tables, other statements and languages remain expected challenges, not tested results. (notes/failure_analysis.md)
-Proposed work, not measured capability: add OCR/VLM behind the existing interface, then validate each new input class on a held-out set. (PROJECT_BRIEF.md; notes/failure_analysis.md)
-To address the documented indentation limitation, I would compare learned layout models; to scale beyond the current file evaluator, I would annotate many PDFs, freeze document-level development/held-out splits, and report pooled counts plus per-document averages. These are proposals, not implemented results. (README.md; notes/evaluation_design.md; notes/failure_analysis.md: motivations)
+The supplied-page sweep retains20 seeds per condition and360 geometry runs.
+At x=.3H, mean/minimum cell accuracy improves .9360/.8488→1.0000/1.0000;
+mean parent accuracy improves .9640→.9977, while accounting pass rate drops
+1.0000→.9950 as coverage rises .7650→1.0000. (eval/results/p14/comparison.md)
 
-## 7. How I used AI tools
+There are regressions: at y=.5H, mean cells .3866→.3843, row F1 .7975→.7906,
+parents .8581→.7535. At y=.3H cell mean remains .8890, minimum0. The seed-11
+row split remains. The earlier pitch-threshold attempt was rejected, not a success.
+The historical P10 high-noise structural regressions are still documented.
+(eval/results/p14/comparison.md; notes/failure_analysis.md; notes/p10_audit.md)
 
-The following attribution is **owner-supplied**, not independently verifiable from repo records. (workstamp.md, user-supplied attribution)
-Claude on the web, using a separate account, drafted the implementation plan and prompts; a later Claude conversation provided the second AI GT reading and reviewed prompts and results. (workstamp.md, user-supplied attribution)
-Claude Opus 4.6 handled P0–P1; GPT 6.1 Sol in Codex handled P2–P8 and P10b–P13. (workstamp.md, user-supplied attribution)
+Ablations still expose weak indentation: parent38/43 and fully correct14/43.
+Fault detection is unchanged:3256/3673 digit substitutions,71/72 sign flips and
+71/72 nil/blank faults. Only249/648 units-digit faults are detected; the tolerance
+has not been tightened to inflate detection. (eval/results/p14/robustness_report.json)
 
-The P9 reviewer, Claude Sonnet 4.6, differed from the builder model; P10a fixes were applied by a third model, Gemini Flash 3.8, with that work recorded in commits 5565491 and d51c47f. P10a is the fix stage labelled P10 in the experiment comparisons. (workstamp.md, user-supplied attribution)
-GPT 6.1 Sol then audited the fixes in P10b, reusing the original builder model. This has weaker independence than a human audit; it is not a claim of full independence. (workstamp.md, user-supplied attribution)
-The handoff file records plans, commits, decisions and usage-limit cutoffs across sessions. (workstamp.md)
+Scanned pages, OCR/VLM, training/GPU serving, multi-page assembly and learned
+hierarchy remain unimplemented. Next evaluation needs independently reviewed
+annotations and a broader held-out issuer/layout set. If these outcomes guide
+future fixes, this held-out set must become development data. (benchmarks/README.md)
 
-Time spent: about two days of elapsed time (Wed 21 to Fri 23 Oct 2026), mostly agent runtime plus my own planning, prompt drafting and manual verification of the ground truth. I did not keep a precise log, so this is an estimate.
+## 7. AI use and maintenance
 
-Accounting checks exposed small rounding-sized differences between printed totals
-and component sums that exact agreement with transcribed cells alone cannot
-explain. Jitter sweeps exposed real failures, including the P10 fixes' regressions
-in row F1 and parent accuracy at higher noise. The rejected pitch-threshold
-attempt and remaining seed-11 row split are documented limitations. All results
-come from one page, with rules written after seeing it, so they do not establish
-generalisation. The next step is evaluation on held-out pages, followed by an
-OCR/VLM backend evaluated on new inputs. (eval/results/page4_report.md;
-notes/evaluation_design.md; notes/failure_analysis.md; notes/p10_audit.md)
+Owner-supplied attribution: Claude web helped planning/prompts; Claude Opus4.6
+handled P0–P1, GPT6.1 Sol P2–P8/P10b–P13, Claude Sonnet4.6 reviewed P9,
+and Gemini Flash3.8 applied P10a fixes. The builder model's P10b audit is weaker
+independence than a human audit. P14 implementation and provisional annotations
+were agent-assisted in Codex; no independent reviewer is claimed. (workstamp.md)
+
+The handoff tracks interrupted work and immutable baselines. Log export now defaults
+to a separate directory, refuses implicit replacement and backs up explicit
+replacement. Existing logs are preserved; a visible-message supplement documents
+its cutoff and excludes private reasoning/platform instructions. CI runs tests and
+Ruff without benchmark downloads. (chat_logs/README.md; notes/p14_changes.md)
 
 ## 8. Reproduce
 
-With the virtual environment activated, run these README commands from the repository root; committed examples are the evaluation inputs. (README.md)
+Install in the README's Windows/Python3.14 environment, set PYTHONIOENCODING=utf-8,
+and run from the repository root. New benchmark downloads are explicit and hash-checked.
 
-```bash
+```powershell
+python -m pytest
+python -m ruff check src scripts tests eval
 python scripts/parse_page.py data/raw/balance_sheet_after_correction.pdf --page 1 --out-dir outputs
 python eval/run_eval.py --pred examples/balance_sheet_after_correction_p1.csv --pred-json examples/balance_sheet_after_correction_p1.json --gt data/gt/page4.csv --gt-meta data/gt/page4_meta.json
-python eval/run_robustness.py
+python eval/run_robustness.py --out-dir eval/results/p14
+python scripts/run_benchmark.py --download --render
 ```
 
-Command source: (README.md).
+Source: README.md. See benchmarks/README.md for the verified-TLS Windows download
+fallback, annotation review and timing boundaries. No OCR/backend deployment is claimed.

@@ -2,16 +2,25 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: Parser, evaluation framework and report complete for the supplied page. P13 reproduction checks passed on Windows / Python 3.14.0. GT is **VERIFIED**.
+> **Status**: P14 adds structural header detection, separate JSON validation, provisional five-issuer benchmarking, numeric assignment recovery, safe log export and CI. Supplied-page GT remains human-verified; new annotations are AI drafts.
 > AI conversation exports are included in [chat_logs/](chat_logs/); see its [coverage notes](chat_logs/README.md) for sources, snapshot cutoffs and export limitations.
 
 ## Results at a glance
 
-See [REPORT.md](REPORT.md) for the approach, correctness definitions,
-measured results, known failures and next steps. On the supplied page, all 43
-rows and 74 printed value cells match the verified GT; all 20 evaluable accounting
-checks pass within the documented tolerance. These are single-page development
-results, not evidence of accuracy on unseen documents.
+[REPORT.md](REPORT.md) explains correctness, measured results and limitations.
+The supplied development page retains86/86 value cells and43/43 fully correct rows;
+JSON is now validated separately, and20/20 evaluable accounting checks pass.
+The [provisional benchmark](eval/results/benchmark/report.md) adds five issuers:
+two development, three held out before predictions. Both frozen parser revisions
+score262/262 held-out cells and129/131 fully correct rows against **AI-only drafts**;
+pdfplumber scores250/262 cells and has no hierarchy/type inference. This narrow
+sample does not establish broad generalisation. Annotation corrections after
+mismatch review and all failures are recorded in [benchmarks/README.md](benchmarks/README.md).
+
+At x=.3H jitter, candidate mean cell accuracy rises .9360→1.0000; higher y noise
+regresses, and seed11's row split remains. See the full [comparison](eval/results/p14/comparison.md).
+The original results remain frozen under eval/versions/3e14d24 and the original
+parser is recoverable from that Git revision.
 
 ## Quick start
 
@@ -338,12 +347,17 @@ With the virtual environment active, run from the repository root:
 
 ```bash
 python eval/run_eval.py --pred examples/balance_sheet_after_correction_p1.csv --pred-json examples/balance_sheet_after_correction_p1.json --gt data/gt/page4.csv --gt-meta data/gt/page4_meta.json
-python eval/run_robustness.py
+python eval/run_robustness.py --out-dir eval/results/p14
 ```
 
 Both CLIs configure UTF-8 console output automatically. The evaluator accepts any
 prediction using the P6 flat CSV schema (`utf-8-sig`); JSON/meta inputs are optional
-and enable column-role/date checks. `--threshold` controls the default 0.5 ordered
+and enable column-role/date checks. Supplied JSON is also schema-validated and
+scored separately against GT using actual nesting. Top-level metrics remain CSV
+metrics; json_validation contains JSON/CSV identity consistency, JSON/GT accuracy
+and structured errors. not_supplied differs from invalid. Invalid/empty JSON
+writes its diagnostic report and exits2; ordinary GT mismatches remain in the
+report. validation_passes covers the supplied artifacts, not accounting truth. `--threshold` controls the default 0.5 ordered
 alignment threshold; `--out-dir` changes the report directory. Reports are
 [page4_report.md](eval/results/page4_report.md) and its adjacent JSON, with every
 metric numerator/denominator, mismatch, confusion matrix and accounting check.
@@ -405,7 +419,7 @@ python -m pytest
 python -m ruff check src scripts tests eval
 ```
 
-## P10b audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit
+## Historical P10b audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit
 
 The audited starting state was283 tests at e40462b, including the seed11 failure
 regression from7f5afbd. [p10_audit.md](notes/p10_audit.md) records initial/final
@@ -435,7 +449,7 @@ python -m pytest
 python -m ruff check src scripts tests eval
 python scripts/parse_page.py data/raw/balance_sheet_after_correction.pdf --page 1 --out-dir outputs
 python eval/run_eval.py --pred examples/balance_sheet_after_correction_p1.csv --pred-json examples/balance_sheet_after_correction_p1.json --gt data/gt/page4.csv --gt-meta data/gt/page4_meta.json
-python eval/run_robustness.py
+python eval/run_robustness.py --out-dir eval/results/p14
 ```
 
 The evaluator command scores the committed example files. The check first
@@ -450,3 +464,44 @@ code and generated artifacts; conversation coverage is documented separately.
 ## License
 
 This project is a take-home assignment and is not licensed for redistribution.
+
+## P14 reproduction and maintenance
+
+The tested local environment is Windows11/Python3.14.0 using requirements.lock.
+The GitHub Actions workflow configures Windows/Python3.14 tests and Ruff with that
+lock; external PDF downloads and benchmarks are deliberately excluded from CI.
+A remote workflow configuration is not itself a claim that CI has run successfully.
+
+```powershell
+$env:PYTHONIOENCODING="utf-8"
+python scripts/run_benchmark.py --download --render
+```
+
+This obtains the registered official PDFs with TLS verification and hash checks,
+materializes the frozen original/candidate source revisions, evaluates all selected
+pages, and writes eval/results/benchmark/report.json and report.md. Source PDFs
+and review PNGs stay in ignored outputs/. See [benchmark instructions](benchmarks/README.md)
+for issuer-level split, source rights, annotation review, certificate-store fallback,
+normalization, timing boundaries and all per-page/pooled denominators. Timings vary;
+no speedup is claimed between closely timed parser revisions.
+
+Important warnings are exported in JSON and printed by parse_page.py. Invalid
+amounts retain raw text and null values. Missing columns/body is fatal (exit2);
+usable warned extraction exits0. Inspect raw geometry with scripts/dump_rows.py.
+Footer dates no longer erase the table; missing/ambiguous heading dates still
+use the documented fallback, which can lose leading section headers.
+
+Safe single-session log export (does not consolidate Codex/Claude):
+
+```powershell
+python scripts/export_chat.py --out-dir outputs/chat_export
+```
+
+Existing output files cause refusal. `--replace` is explicit and first retains
+original products in a backup-UUID directory. Existing consolidated chat_logs/
+are not overwritten by default. [Coverage notes](chat_logs/README.md) describe the
+preserved logs and the dated supplement; active conversations are not complete.
+
+See [P14 implementation notes](notes/p14_changes.md) for evaluator semantics,
+regressions and review flags. [SUBMISSION_EMAIL.md](SUBMISSION_EMAIL.md) is a draft;
+no email was sent and no attachment package is claimed.

@@ -45,21 +45,23 @@ Seven source text attachments containing the original phase prompts are included
 
 ## P14 supplement
 
-[supplement_p14.md](supplement_p14.md) and supplement_p14.jsonl append available visible messages without rewriting the existing exports. Source cutoffs:
+supplement_p14.md and supplement_p14.jsonl append available visible messages
+without rewriting existing exports. Final captured source cutoffs:
 
 [
   {
     "session_id": "01a164c4-bb0b-78c1-9838-3200db561076",
-    "after": "2026-10-23T15:47:30.145Z",
-    "through": "2026-10-23T16:46:36.034Z",
-    "messages": 19
+    "through": "2026-10-23T17:11:23.445Z",
+    "messages": 25
   },
   {
     "session_id": "01a16976-34c2-7c52-afcf-4459f42ddade",
-    "after": "2026-10-23T16:00:55.827Z",
-    "through": "2026-10-23T16:24:39.319Z",
-    "messages": 10
+    "through": "2026-10-23T16:25:19.679Z",
+    "messages": 11
   }
 ]
 
-Messages after these cutoffs, including completion of P14, are outside this frozen supplement. No new Claude web export or later Antigravity source was available in this task; existing supplied records are retained. No completeness claim for active conversations.
+Messages after these snapshots, including the current resumption and final delivery,
+are not available in the captured source export and are not claimed included.
+No new Claude web export or later Antigravity source was obtained. Existing
+records remain unchanged; active conversations are not claimed complete.

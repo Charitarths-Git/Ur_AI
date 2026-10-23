@@ -1,21 +1,17 @@
-# Conversation supplement (P14)
+# P14 visible conversation supplement
 
-Actual visible user/assistant messages after the earlier snapshots. No reasoning, platform instructions or raw tool payloads. Active conversations are not complete.
-
-Coverage:
+Source snapshots only; not complete active conversations. Internal reasoning, platform instructions and tool payloads excluded.
 
 [
   {
     "session_id": "01a164c4-bb0b-78c1-9838-3200db561076",
-    "after": "2026-10-23T15:47:30.145Z",
-    "through": "2026-10-23T16:46:36.034Z",
-    "messages": 19
+    "through": "2026-10-23T17:11:23.445Z",
+    "messages": 25
   },
   {
     "session_id": "01a16976-34c2-7c52-afcf-4459f42ddade",
-    "after": "2026-10-23T16:00:55.827Z",
-    "through": "2026-10-23T16:24:39.319Z",
-    "messages": 10
+    "through": "2026-10-23T16:25:19.679Z",
+    "messages": 11
   }
 ]
 
@@ -568,6 +564,46 @@ I’ll resume from the interrupted state, verify the downloads and uncommitted c
 complete the above work
 
 
+## assistant — 2026-10-23T16:46:45.470Z (01a164c4-bb0b-78c1-9838-3200db561076)
+
+Four official PDFs downloaded successfully; the Sega Sammy download failed. I’ll retry that source, finish the implementation and provisional annotations, and keep the held-out results separate from development results.
+
+
+## assistant — 2026-10-23T16:49:14.607Z (01a164c4-bb0b-78c1-9838-3200db561076)
+
+All five filings are now available. The full suite has 312 passes and one failure because the committed evaluation report still uses the old schema; the new report includes separate JSON validation.
+
+The reconstruction change adds a bounded recovery rule for numeric tokens that fall just outside a detected column band. I’ll freeze this candidate before the first held-out run, then report both gains and regressions.
+
+
+## assistant — 2026-10-23T16:53:12.989Z (01a164c4-bb0b-78c1-9838-3200db561076)
+
+The new numeric assignment rule raises mean cell accuracy at x-jitter 0.3H from 0.9360 to 1.0000. Y-jitter results are unchanged, and the seed-11 row split remains. Fault-injection detection is also unchanged.
+
+The benchmark is running against both frozen parser revisions and the pdfplumber baseline. Next I’m adding log-overwrite protection and CI.
+
+
+## assistant — 2026-10-23T16:55:00.673Z (01a164c4-bb0b-78c1-9838-3200db561076)
+
+The first benchmark run exposed four errors in my provisional transcription. I checked enlarged page crops and confirmed them: one Nintendo spelling, two Capcom labels and one Konami amount. I’ll preserve the initial results, record the annotation corrections and rescore without changing the frozen parser.
+
+The remaining row-type disagreements will stay visible. All new annotations remain AI-only drafts.
+
+
+## assistant — 2026-10-23T17:01:19.005Z (01a164c4-bb0b-78c1-9838-3200db561076)
+
+After the documented annotation corrections, both frozen parsers score 262/262 cells and 129/131 fully correct rows on the three held-out pages. Pdfplumber scores 250/262 cells; it does not infer hierarchy.
+
+The complete sweep also shows a tradeoff I need to correct in my earlier update: y-jitter at 0.3H is unchanged, but higher y-noise regresses. At 0.5H, mean parent accuracy falls from 0.8581 to 0.7535. I’m retaining those results and the seed-11 failure in the report.
+
+
+## assistant — 2026-10-23T17:11:23.445Z (01a164c4-bb0b-78c1-9838-3200db561076)
+
+Final local checks pass: **324 tests and Ruff**. Fresh supplied-page CSV and JSON are byte-identical to the committed examples. The benchmark, regression comparison and 207-word submission email draft are written.
+
+I’m checking the final commit scope and privacy findings before pushing. The source PDF and GT have no Git changes; their raw hash differences from Git blobs appear to be Windows line endings, which I’m verifying rather than reporting as data edits.
+
+
 ## user — 2026-10-23T16:11:25.668Z (01a16976-34c2-7c52-afcf-4459f42ddade)
 
 
@@ -900,3 +936,66 @@ Best regards,\
 this was the mail i was previously going to send&#x20;
 in the prompt add a section that instruct it to give things i can include in my mail and create a new and better mail 
 
+
+## assistant — 2026-10-23T16:25:19.679Z (01a16976-34c2-7c52-afcf-4459f42ddade)
+
+Add this section to the prompt before **“Final verification and delivery”**:
+
+```text
+7. Prepare the submission email
+
+After completing and verifying the work, create SUBMISSION_EMAIL.md containing:
+
+A. Verified facts I can use in my email
+- What was implemented and where reviewers should start.
+- Results on the supplied page.
+- New benchmark results, with the sample size, split, and ground-truth verification status.
+- Baseline comparison and runtime findings, if completed.
+- The most important remaining limitations.
+- Reproduction instructions and supported environment.
+- Links to the report, examples, evaluation results, and chat-log coverage notes.
+
+Every fact must match the final committed artifacts. Clearly distinguish supplied-page development results from held-out results. Do not describe AI-only annotations as human-verified or incomplete experiments as completed.
+
+B. A polished submission email
+- Address it to Arun and sign it “Charitarth Singh.”
+- Include a suitable subject line.
+- Keep the body approximately 180–250 words, written in natural, professional English.
+- Lead with the GitHub repository and a direct link to REPORT.md.
+- Briefly explain the parser, CSV/JSON outputs, and how correctness is evaluated.
+- Include two or three meaningful results with clear scope and denominators.
+- Mention the most important limitation without listing every known defect.
+- Link to reproduction instructions and AI conversation records.
+- Describe AI use transparently and concisely; leave detailed model/session attribution in the repository.
+- Say logs are “attached” only if an actual attachment package has been prepared and identify its filename separately.
+- Do not claim all conversations are included beyond the documented cutoff.
+- Do not claim GitHub contains local changes until the push has succeeded.
+- Avoid promotional language, unsupported claims, and excessive implementation detail.
+
+Provide the ready-to-send email in your final response as well as in SUBMISSION_EMAIL.md. Draft it only; do not send it.
+```
+
+Here is a cleaner email based on the **version already verified and pushed**. The agent should update its results paragraph after finishing the improvements.
+
+---
+
+**Subject: Ur AI take-home submission — Charitarth Singh**
+
+Hi Arun,
+
+Thank you for the take-home problem. My submission is available here:
+
+[GitHub repository](https://github.com/Charitarths-Git/Ur_AI) · [Technical report](https://github.com/Charitarths-Git/Ur_AI/blob/main/REPORT.md)
+
+I built a parser for the supplied born-digital Japanese balance sheet that produces a flat CSV and hierarchical JSON. The report explains the design and evaluates correctness through cell accuracy against human-verified ground truth, hierarchy and alignment metrics, and label-free accounting checks with a rounding tolerance for 千円 units.
+
+On the supplied page, all 43 rows are fully correct against the annotated ground truth, all 74 printed value cells match, and all 20 evaluable accounting checks pass within the documented tolerance. These are development results on the page used to design the parser; they do not establish generalisation to unseen documents. The report also documents robustness experiments, observed failures, and regressions.
+
+Example outputs are in [examples/](https://github.com/Charitarths-Git/Ur_AI/tree/main/examples), and the [README](https://github.com/Charitarths-Git/Ur_AI/blob/main/README.md) provides reproduction commands verified from a fresh clone on Windows/Python 3.14.
+
+I used AI tools for planning, implementation, and review. The [chat_logs/](https://github.com/Charitarths-Git/Ur_AI/tree/main/chat_logs) folder contains the exported conversations and coverage notes, including snapshot cutoffs; the report explains the attribution.
+
+Thank you for the opportunity. I would be happy to walk through the implementation and findings.
+
+Best regards,  
+Charitarth Singh

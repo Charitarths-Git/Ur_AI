@@ -42,12 +42,13 @@ are present.
    established column. Multiple fragments assigned to a cell are retained and
    separated by a space, so ambiguity is visible through an invalid parse rather
    than silently discarded. Only the explicitly merged sign/digits omit a space.
-6. The last visual row containing a complete parse_period_end date ends the
-   header. Without such a row, the first supported valid/nil value row begins
-   the body; preceding label-only rows remain header. Body ends at the last
-   aligned cell, including invalid cells. Everything thereafter is footer.
-   Without supported cells, all nonempty rows are header. Header/footer rows
-   retain their complete text as labels and expose no value cells.
+6. P14: a complete, unique period-date band in numeric column regions, before
+   the first supported value row, ends the header. Footer/body-label dates do
+   not move the boundary. Missing/ambiguous dates warn and fall back to the first
+   supported valid/nil value row; leading label-only rows remain header. Body ends
+   at the last aligned cell, including invalid cells; everything after is footer.
+   No supported cells means no body. Relative column bands replace the historical
+   global last-date heuristic. See notes/p14_changes.md for remaining limits.
 7. Body labels are the remaining original words in x order. Insert a space only
    if the gap exceeds label_space_gap, preserving existing token whitespace.
    No NFKC, stripping or accounting-word logic is applied to output labels.
@@ -191,7 +192,7 @@ Final full-suite and ruff results are recorded in workstamp.md and appended belo
 - Rotated PDFs are explicitly rejected by the default backend. Scanned pages
   need a future OCR/VLM backend; this adapter does not recognize image text.
 - Multiple tables on one page are not segmented. Columns may be pooled and the
-  last date row may hide an earlier table inside the header zone.
+  global column pool can still mix unrelated tables; P14 only fixes date boundary selection.
 - Short tables below column_min_support, or columns containing only invalid
   tokens, cannot establish columns unless configured otherwise. Repeated label
   digits aligned across enough rows can resemble a column. Proportional or

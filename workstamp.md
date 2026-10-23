@@ -5,10 +5,10 @@
 | Field | Value |
 |---|---|
 | Prompt | P14 — robustness and benchmark improvements |
-| State | IN PROGRESS |
-| Last numbered prompt | P13 DONE |
+| State | DONE (local verification; push verification pending) |
+| Last numbered prompt | P14 |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T16:05:48+00:00 |
+| Updated | 2026-10-23T17:15:55.325085+00:00 |
 
 ## Current prompt (verbatim)
 
@@ -223,7 +223,7 @@ Do not call the task complete if a required item remains unimplemented; identify
 4. [x] Acquire official pages; record split before tuning; image-draft provisional annotations.
 5. [x] Freeze candidate; run held-out comparisons, pdfplumber baseline and timings.
 6. [x] Protect log exports, add supplement and deterministic CI.
-7. [~] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
+7. [x] Rerun affected experiments, document evidence, draft submission email, verify and deliver.
 
 Starting commit: 3e14d249ba755a9c12a4975f562c1224feb3464e. Original parser is recoverable from this immutable Git revision; artifact copies and SHA-256 manifest: eval/versions/3e14d24/. Existing PDFs and verified GT remain unchanged. Previous housekeeping request: `update all  the chat_log.`; its completed plan and results below are historical.
 
@@ -262,7 +262,7 @@ experiment and test records are unchanged.
 - chat_logs/README.md: source counts, cutoffs, privacy exclusions and legacy-exporter warning.
 - workstamp.md: housekeeping request, plan, verification and outcome.
 
-## Last action and result
+## Historical chat-log housekeeping action and result
 
 Follow-up completeness check: seven original pasted-text phase prompts were available outside the repo and are now embedded, after redaction, beside their corresponding Codex messages and in JSONL attachment fields. Source files were read only; message/tool record counts remain555. Markdown now has6348 lines. The authoritative Claude file and its full embedded bytes remain unchanged. Follow-up local commit named chore: include pasted prompt text in chat logs; no push requested.
 
@@ -283,26 +283,45 @@ Hygiene redaction remains. P13 did not modify REPORT.md; this later housekeeping
 prompt now authorizes report edits. P13 final commit97cfb11; evidenceb178e09;
 README9911ca7. No numerical record or protected artifact changed here.
 
-## Decisions and assumptions
+## Historical attribution-housekeeping decisions and assumptions
 
 Owner-supplied historical attribution supersedes stale labels, without claiming
 independent verification from logs. P2/review original bodies must remain intact.
 Do not alter code/tests/data/eval/examples/thresholds or unrelated user changes.
 Retain one-page development caveats, regressions and known failures in the draft.
 
-## Known issues / open questions
+## Historical housekeeping issues
 
 Rounding/truncation policy remains unconfirmed. Current-file redaction is verified; historical Git revisions were not rewritten. Seven unconfirmed protected binary path-pattern hits remain unchanged. Requested push and remote-HEAD check follow the final local commit; any delivery failure must be reported without workaround.
 
+## Current result and remaining limitations
+
+P14 implementation locally verified:324 tests, Ruff, supplied exports byte-identical,
+structured JSON corruption detection, complete frozen-parser/pdfplumber benchmark,
+360 geometry runs/ablations/faults, safe log export tests and documented supplement.
+Source PDF and verified GT untouched. New benchmark annotations remain provisional
+AI-only; independent/human review is future work, not claimed complete. Higher-y
+regressions, seed11 split, weak indentation and semantic type disagreements remain.
+OCR/VLM, training and GPU serving were outside scope. GitHub CI is configured;
+remote execution and final push state must be checked separately.
+
+Current scope supersedes older housekeeping-only restrictions quoted above.
+Resume instructions: preserve candidate33025ad when comparing held-out results;
+any parser tuning motivated by held-out failures reclassifies that set as development.
+No new runtime session is asserted for this continuation. Resume messages were
+`complete the above work` (twice); earlier progress is retained rather than restarted.
+
 ## Next action
 
-Complete P14 plan from the first unchecked step. Historical P13 next action was final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit.
+Verify push and remote HEAD, then owner review of provisional benchmark annotations
+and submission email. Do not send email automatically. Historical P13 next action
+was final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit.
 
 ## Prompt history
 
 | ID | Outcome | Commit |
 |---|---|---|
-| P14 | IN PROGRESS; baseline frozen at 3e14d24; six improvements and submission draft | pending |
+| P14 | DONE locally;324 tests/Ruff; supplied exports unchanged; five new provisional pages; regressions and draft email recorded | d4d5fa6 baseline;33025ad candidate;fcce5e0 protocol;f4b6366 maintenance;0248684 validation;631cd7f measurements; final docs commit follows |
 | P0 | Scaffolding, dependencies, smoke tests done (pre-protocol) | 8c34c1d |
 | P1 | PDF inspection: script, outputs, PNG, inspection.md, 11 tests pass | 0597652 |
 | P2 | Image-derived GT, 43 rows; now VERIFIED by human with no corrections; 12 tests pass | 0be2cf6 (initial GT); verification: 9805d79 |
@@ -361,3 +380,5 @@ Exporter refuses existing products, writes separately by default, rejects malfor
 ## P14 final local checks
 
 324 tests passed; Ruff passed. Fresh supplied CSV/JSON byte-identical to committed examples. Protected PDF/GT and original logs have empty diffs; some original Windows text checkouts differ from Git blobs only by CRLF, explicitly recorded rather than falsely claiming raw Git-blob byte identity. Final visible-message supplement36 records; parsed JSONL privacy scan has zero decoded identity/path/email findings. Candidate parser remains frozen at33025ad; evaluator schema hardening does not change parser outputs. Full findings, raw hash evidence and test commands in notes/p14_verification.json. Final documentation/email and delivery commits next.
+
+Final direct defect reproduction used isolated frozen original/current imports: original footer-date case43→0 body rows, current43→43. Original evaluator still credits43/43 CSV rows with empty JSON; current reports JSON invalid and overall validation false. Recorded in notes/p14_verification.json. The supplemental Markdown retains a source-message two-space line break; git diff --check flags that intentional historical text. No benchmark tuning occurred after freeze.
