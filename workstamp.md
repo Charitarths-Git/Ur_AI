@@ -5,9 +5,9 @@
 | Field | Value |
 |---|---|
 | Prompt | P11 |
-| State | IN PROGRESS |
+| State | DONE |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T11:33:02+00:00 |
+| Updated | 2026-10-23T11:37:58+00:00 |
 
 ## Current prompt (verbatim)
 
@@ -46,7 +46,7 @@ Final message: the word count, a list of every placeholder, every claim you coul
 2. [x] Read committed permitted sources; map claims and flag contradictory provenance.
 3. [x] Draft REPORT.md, prioritizing correctness definitions, measured failures and placeholders; add short README pointer.
 4. [x] Check word count, tables, citations, exact README commands, placeholders and file scope.
-5. [~] Commit draft and DONE handoff; next human rewrite then P13.
+5. [x] Commit draft and DONE handoff; next human rewrite then P13.
 
 ## Files created or modified
 
@@ -55,6 +55,22 @@ Final message: the word count, a list of every placeholder, every claim you coul
 - workstamp.md — verbatim corrected P11 prompt, plan and baseline.
 
 ## Last action and result
+
+P11 complete. REPORT.md is explicitly DRAFT, with1156 total whitespace words
+(992 excluding three tables and commands), five USER placeholders, eight requested
+sections and source parentheses after factual claims. Draft content commit2ee75d2;
+final completion commit is named docs(P11): draft write-up. README changes only
+add the short Results at a glance pointer. Baseline298 tests passed in12.51s;
+no code or test changes. Scope and diff checks pass. Current session continues:
+no Sessions row added. No P13 work or push performed.
+
+Unresolved facts: second reviewer's identity/AI role, exact tool/model attribution
+and reviewer/fixer identity, actual filing rounding policy, time spent, personal
+reflection. Future learned-layout/multi-PDF evaluation is marked proposed, not a
+sourced implemented capability. Contradictions for final Things to check: session
+labels versus reviewer/fixer handoff; GPT-6 versus review's GPT-6.1 Sol builder;
+historical p2_report DRAFT versus later verified checklist. Existing page4_report
+also repeats the headline; not edited in this docs-only prompt.
 
 Draft validation: 992 prose words excluding tables/commands; 1156 total
 whitespace-delimited words; three small tables; five explicit USER placeholders.
@@ -89,7 +105,7 @@ Things to check and leave visible report placeholders for user confirmation.
 
 ## Next action
 
-Finish source mapping and draft the short report.
+human rewrite of REPORT.md, then P13 final checks
 
 ## Prompt history
 
@@ -106,6 +122,8 @@ Finish source mapping and draft the short report.
 | P10 | Apply review fixes with user adjustments; gap-based clustering; 283 tests pass | 7f5afbd |
 
 | P10b | Independent audit; coverage/warnings/oracle tests and comparisons; 298 tests pass; nine PASS, geometry item PARTIAL | f535470cbf737c2db70ea81fa13132ea158be44d |
+
+| P11 | Sourced draft REPORT.md;1156 words, three tables, five placeholders; README pointer; docs-only baseline298 tests pass | 2ee75d2 (draft content); final completion commit named docs(P11): draft write-up |
 
 ## Sessions
 
