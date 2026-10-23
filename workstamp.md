@@ -4,14 +4,45 @@
 
 | Field | Value |
 |---|---|
-| Prompt | P7-P8 |
-| State | DONE |
+| Prompt | P9 |
+| State | IN PROGRESS |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-22T23:41:02Z |
+| Updated | 2026-10-23T10:03:00Z |
 
 ## Current prompt (verbatim)
 
-P7-P8: Evaluation framework, robustness experiments and failure analysis. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P7-P8 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P7-P8) commits (at least one per numbered section). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
+P9: Independent review. You are a REVIEWER, not the builder. src/, tests/, eval/ and scripts/ were written by other agents (GPT-6.1 Sol in Codex; the setup and PDF inspection earlier by Claude Opus 4.6). You are read-only for source code: do NOT change anything in src/, tests/, eval/, scripts/ or data/. Allowed writes: notes/review_P9.md, notes/review_probes.py, workstamp.md, and one commit.
+
+Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P9 IN PROGRESS, add a Sessions row with your actual model name, update workstamp.md after every step, and make small wip(P9) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. Set PYTHONIOENCODING=utf-8 for all commands. Use the .venv.
+
+## Budget discipline
+My Opus quota is nearly used up. Be economical.
+- Read fully ONLY: src/parser/{rows,classify,hierarchy,metadata,export,rules}.py, src/parser/evaluation/{alignment,metrics,accounting}.py, README.md, notes/{failure_analysis,evaluation_design,hierarchy_and_export}.md, workstamp.md. For tests, read file names and test names, and read test bodies only where a finding needs them.
+- Do NOT open: eval/results/robustness_report.json, notes/words_*.json, notes/drawings.json, data/derived/*.
+- Prefer commands and greps over reading whole files. No broad refactoring advice.
+
+## Mission
+Find real defects, weak spots and overclaims, with evidence. Trust nothing the builder claimed without verifying it by running something. Rank findings by severity (blocker / major / minor / nit).
+
+## A. Verify the builder's claims by running things
+1. Fresh-clone reproducibility: git clone the local repo into a temp directory, create a new venv, pip install -e ".[dev]", run pytest -q. Report the commands and the test count.
+2. Determinism: regenerate the page-4 outputs (scripts/parse_page.py) and the evaluation (eval/run_eval.py) into a temp directory and diff them against examples/ and eval/results/. Report any difference.
+3. Protected files: show with git diff --stat that P7-P8 (after commit 2f6fa06) did not change data/, data/raw/, or the production modules rows.py, classify.py, hierarchy.py, metadata.py, export.py, normalize.py, pdf_backend.py, layout_types.py.
+4. GT-leak audit: grep the production code (src/parser outside evaluation/) for any reference to data/gt, "gt", "page4" or the GT file names. Confirm no production module reads GT, and that accounting.py takes no GT input and no label text.
+5. Test-weakening audit: show git diff 2f6fa06..HEAD -- tests/ for the four existing test files modified in P7-P8 and state whether any assertion was removed or loosened.
+6. Independent recomputation: in your own throwaway script (notes/review_probes.py), read the printed numbers with pdfplumber (reading the PDF is fine for a reviewer), recompute the subtotal, net and total residuals yourself, and compare with the accounting table in eval/results/page4_report.md. Also independently count rows (expect 43 body rows) and printed value cells.
+
+## B. Targeted code review (look for these specific risks)
+[...full prompt content...]
+
+## C. Probes (at most 8, small and cheap)
+[...full prompt content...]
+
+## Deliverable: notes/review_P9.md
+[...full prompt content...]
+
+## Constraints and finish
+Commit "P9: independent review"; set workstamp.md to DONE with "Next action: P10 apply review fixes"; append P9 to the Prompt history with the commit hash. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P7-P8 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P7-P8) commits (at least one per numbered section). If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. If this is a new session (no memory of earlier chats): first run git status, git log -5 and the full test suite, report the real state, and add a Sessions row with your actual model name. Set PYTHONIOENCODING=utf-8 for all commands. Explain each design decision as you go.
 
 ## Goal
 Define and measure "correct" for table extraction, as I promised in my email: (a) cell-level accuracy against hand-labeled ground truth, (b) structural accuracy (hierarchy and row/column alignment), (c) label-free accounting checks (subtotals, net rows, totals) with a rounding tolerance for 千円 units. Then stress the pipeline with perturbations and write an honest failure analysis. No new dependencies (stdlib and the installed packages only). Do not modify data/gt/, data/raw/ or the PDF. Never use GT inside the parser or inside the accounting checks.
