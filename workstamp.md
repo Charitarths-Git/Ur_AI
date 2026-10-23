@@ -4,108 +4,90 @@
 
 | Field | Value |
 |---|---|
-| Prompt | P11 |
-| State | DONE |
+| Prompt | P13 |
+| State | IN PROGRESS |
 | GT | VERIFIED by human; read-only |
-| Updated | 2026-10-23T11:37:58+00:00 |
+| Updated | 2026-10-23T11:43:56+00:00 |
 
 ## Current prompt (verbatim)
 
-FIRST: Read PROJECT_BRIEF.md ("Agent working rules") and workstamp.md, then run git status, git log -5 and the full test suite (PYTHONIOENCODING=utf-8) and report the real state. Follow the handoff protocol for this prompt: copy this prompt verbatim into workstamp.md, write a numbered plan, set P11 IN PROGRESS, update workstamp.md after every step, and make small commits. Sessions table: if this is a continuation of the current session, do not add a "Resumed in new session" row; only add a row (with your ACTUAL model name) if this is genuinely a new session. If workstamp.md shows an interrupted prompt, follow the resume procedure.
+FIRST: Read PROJECT_BRIEF.md ("Agent working rules") and workstamp.md, then run git status, git log -5 and the full test suite (PYTHONIOENCODING=utf-8) and report the real state. Follow the handoff protocol: copy this prompt verbatim into workstamp.md, write a numbered plan, set P13 IN PROGRESS, update workstamp.md after every step, make small commits. Sessions table: only add a row (with your ACTUAL model name) if this is genuinely a new session. If workstamp.md shows an interrupted prompt, follow the resume procedure.
 
-# P11: Write-up draft (docs only, no code changes)
-Write REPORT.md at the repo root: the short write-up for a take-home problem (parse a Japanese consolidated balance sheet page into a correct table; define and measure "correct"). Target 900 to 1,400 words plus at most three small tables. I will rewrite it in my own words, so write a clear, plain, honest DRAFT, not marketing. The most important part is how "correct" is defined and measured (section 3), then the honest results and failures.
+IMPORTANT: I may be editing REPORT.md by hand while you work. Do NOT modify, stage, stash, revert or commit REPORT.md. Stage only the specific files you changed (never "git add -A"). If git status shows uncommitted changes you did not make, leave them alone and mention them.
 
-## Hard rules
-- Use ONLY facts and numbers that you read from committed files in this repo: README.md, PROJECT_BRIEF.md, workstamp.md, notes/*.md, eval/results/*, examples/*. Do not use numbers from memory or from this prompt. After each number or claim give the source file in parentheses.
-- Never claim generalisation: results are on ONE page, the rules were written after seeing it, and the ground truth was transcribed by an AI agent from the page image, checked by me and a second AI reading, and cross-checked against the PDF text layer. Say so plainly.
-- Separate "measured" from "expected but not tested".
-- Report regressions as well as improvements. P10 lowered row F1 and parent accuracy at higher noise (see notes/failure_analysis.md). A pitch-based threshold was tried in P10b and rejected; list it as a known limitation, not a success. The y-jitter seed-11 row split remains.
-- Describe the process accurately: the independent review (P9) was written by one agent, the fixes (P10) were applied in a different tool and session by the same agent that wrote the review, and P10b (a third session) audited them. Do not call the review "fully independent" beyond what the repo supports.
-- Where I must supply a fact only I know, write a visible placeholder such as [USER: who verified the ground truth, and how] and do not invent it. Also leave placeholders for time spent and for a one-paragraph personal reflection.
-- If any file contradicts another, list the contradiction in a "Things to check" section at the end of your final message instead of picking one silently.
+# P13: Clean-clone reproducibility check
 
-## Sections
-1. Problem and assumptions (born-digital PDF, 千円 units, the output schema I promised: flat CSV plus hierarchical JSON).
-2. Approach: pipeline from PDF to words, rows, columns, row types, hierarchy, export; the key design decisions and why (relative geometry instead of absolute coordinates, language rules separated from logic, pluggable backend for a later OCR/VLM path).
-3. What "correct" means: the three families of metrics (cell-level against hand-labeled ground truth, structural accuracy, label-free accounting checks with a rounding tolerance), including the rounding tolerance reasoning and the truncation hypothesis labelled as a hypothesis.
-4. Results on the supplied page: one table with the headline metrics and denominators, and the accounting check summary.
-5. Robustness and failure analysis: jitter sweeps before and after the clustering fix (use the before/after table from the notes), ablations, fault-injection detection by digit position, the main failure modes, and what is still broken.
-6. Limitations and next steps: scanned pages and a VLM or OCR backend, multi-page and other statements, learned layout models for hierarchy without indentation, how I would scale evaluation to many PDFs, a held-out set.
-7. How I used AI tools: the roles (which tool and model did what), the handoff file used across sessions and usage-limit cutoffs, the review and audit chain described above, human verification steps (placeholders where I must confirm).
-8. Reproduce: the exact commands from the README that regenerate the page-4 outputs and the evaluation reports.
+Goal: prove that a stranger can reproduce the results from a fresh clone using only the documented commands. Test the COMMITTED state, not my working directory.
+
+## 1. Fresh clone
+- Create a temporary directory OUTSIDE the project folder (for example under %TEMP%) and run: git clone <path to this repo> <temp>\clean_clone. Work only inside the clone for steps 2 to 5. Do not copy any untracked or ignored file into it.
+- Record the cloned commit hash.
+
+## 2. Environment from the documented commands only
+- In the clone, create a new virtual environment and install exactly as README.md says (pyproject install; also test installing from requirements.lock if the README mentions it). Use only the commands written in README.md. If a step is missing or wrong in the README, record it as a finding; fix the README afterwards (step 6), not by improvising silently.
+- Set PYTHONIOENCODING=utf-8 as the README says. Report the Python version.
+
+## 3. Tests
+- Run the full test suite in the clone. Report the counts and compare with the main working copy (expected: the same number passing). Run ruff if the README documents it.
+- Report any test that depends on an ignored or untracked file (that would be a reproducibility bug).
+
+## 4. Regenerate outputs and compare
+- Run the documented commands that regenerate the page-4 CSV and JSON exports and the evaluation reports (page-4 report and, if documented, the robustness run).
+- Compare the regenerated CSV and JSON with examples/ BYTE FOR BYTE (hash comparison) and report.
+- Compare regenerated evaluation reports with the committed ones in eval/results/ and list differences. Distinguish timestamps/paths (acceptable) from numeric differences (a finding). If the robustness run is slow, report its runtime; run it only if the README documents it and it finishes in a reasonable time, otherwise say it was skipped and why.
+- Confirm data/raw/ PDF, data/gt/ files and data/derived/page4_200dpi.png are present in the clone (tracked), and that the GT CSV still starts with a UTF-8 BOM.
+
+## 5. Hygiene scan (report only, do not delete or edit anything for this step)
+- Search the clone for absolute local paths (for example "C:\\Users", the local username), email addresses, tokens or API-key-like strings, in all tracked files including chat_logs/ and workstamp.md. Report file and line numbers only; do NOT print secrets in full (mask them).
+- Check .gitignore covers .venv, __pycache__, .pytest_cache, .ruff_cache and outputs/, and that no such directory is tracked.
+- Check that README, PROJECT_BRIEF.md and workstamp.md describe the same phase list and the same final state; list contradictions.
+
+## 6. Fix only documentation gaps
+- If the README commands were incomplete or wrong, fix README.md (and only docs). Do not change code, tests, data, eval, examples or any threshold. If the check revealed a CODE or DATA problem, do NOT fix it: report it with evidence and stop.
+- Commit as "docs(P13): fix reproduction instructions" only if you changed something. Delete the temporary clone and venv afterwards.
 
 ## Finish
-Do not modify anything except REPORT.md, README.md (a short "Results at a glance" pointer to REPORT.md near the top) and workstamp.md. Commit "docs(P11): draft write-up"; set workstamp.md DONE with "Next action: human rewrite of REPORT.md, then P13 final checks".
+- Write notes/p13_clean_clone_check.md with a PASS/FAIL table per check (clone, install, tests, exports byte-identical, reports match, protected files present, hygiene), the commands used, and the findings.
+- workstamp.md: P13 DONE with "Next action: final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit". Final commit "P13: clean-clone reproducibility check".
 
-Final message: the word count, a list of every placeholder, every claim you could not source, and the "Things to check" list.
+Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clone versus the main copy, byte-identity result, differences in reports, hygiene findings (masked, with file:line), README fixes made, and anything unresolved.
 
 ## Plan for this prompt
 
-1. [x] Read brief/handoff; inspect Git and full suite; report actual baseline.
-2. [x] Read committed permitted sources; map claims and flag contradictory provenance.
-3. [x] Draft REPORT.md, prioritizing correctness definitions, measured failures and placeholders; add short README pointer.
-4. [x] Check word count, tables, citations, exact README commands, placeholders and file scope.
-5. [x] Commit draft and DONE handoff; next human rewrite then P13.
+1. [x] Read brief/handoff; Git status/log and full main-copy baseline; record user-edit boundary.
+2. [~] Fresh temporary clone outside project; record commit and test README environment/install paths independently.
+3. [ ] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
+4. [ ] Scan every tracked file for hygiene locations without printing values; verify ignore rules, protected assets and phase/state consistency.
+5. [ ] Record PASS/FAIL evidence; fix documentation gaps only, if any; preserve REPORT.md and other user edits.
+6. [ ] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
 
 ## Files created or modified
 
-- REPORT.md — sourced draft with eight requested sections and three small tables.
-- README.md — short Results at a glance pointer only.
-- workstamp.md — verbatim corrected P11 prompt, plan and baseline.
+- workstamp.md — verbatim P13 request, plan, baseline and boundaries.
 
 ## Last action and result
 
-P11 complete. REPORT.md is explicitly DRAFT, with1156 total whitespace words
-(992 excluding three tables and commands), five USER placeholders, eight requested
-sections and source parentheses after factual claims. Draft content commit2ee75d2;
-final completion commit is named docs(P11): draft write-up. README changes only
-add the short Results at a glance pointer. Baseline298 tests passed in12.51s;
-no code or test changes. Scope and diff checks pass. Current session continues:
-no Sessions row added. No P13 work or push performed.
-
-Unresolved facts: second reviewer's identity/AI role, exact tool/model attribution
-and reviewer/fixer identity, actual filing rounding policy, time spent, personal
-reflection. Future learned-layout/multi-PDF evaluation is marked proposed, not a
-sourced implemented capability. Contradictions for final Things to check: session
-labels versus reviewer/fixer handoff; GPT-6 versus review's GPT-6.1 Sol builder;
-historical p2_report DRAFT versus later verified checklist. Existing page4_report
-also repeats the headline; not edited in this docs-only prompt.
-
-Draft validation: 992 prose words excluding tables/commands; 1156 total
-whitespace-delimited words; three small tables; five explicit USER placeholders.
-All three reproduction commands exactly match committed README. Every cited file
-exists in source snapshot6127601; every factual sentence/table row manually
-checked against those records. Only three allowed paths differ. git diff --check
-clean. No extra tests needed after baseline for docs-only changes.
-
-Committed source mapping complete at baseline6127601. Draft written with source
-parentheses, measured improvements/regressions, rejected pitch trial, independent
-accounting definitions and explicit provenance/personal placeholders. Five
-placeholders; exact count/length and citation checks in progress. README adds
-only requested pointer. No new session row.
-
-Clean main at6127601; ahead of origin/main by5 commits. No interrupted prompt:
-P10b DONE. Full baseline:298 passed in12.51s. This is a continuation of Session5;
-no new Sessions row added. Only REPORT.md, README.md pointer and this file may change.
+Main clean atf8e354d; ahead of origin/main by8 commits. Baseline298 passed in13.38s.
+P11 DONE; no interrupted prompt. Current chat continues Session5; no Sessions row.
+No uncommitted user changes at orientation; recheck throughout. REPORT.md must
+never be modified, staged, stashed, reverted or committed by this task.
 
 ## Decisions and assumptions
 
-Use only committed permitted repository sources (baseline6127601). No code/tests/
-reports regeneration in this docs-only prompt. Distinguish measured outcomes from
-future proposals. Do not invent tool/model or GT reviewer identity; flag conflicts.
+Clone committed HEAD after this handoff record, not the working directory.
+No untracked/ignored files copied. Separate clean venv for each README install
+route. Steps2–5 execute inside clone only. Hygiene scan outputs file:line/category,
+never full matching values. Only docs may change in main; code/data failures
+must be recorded without repair. Stage only named files this task changed.
 
 ## Known issues / open questions
 
-GT notes say independent second review without identifying AI/model; P2 report
-still says DRAFT versus later verified checklist. P9 identifies Claude Sonnet4.6
-and GPT-6.1 Sol builder; Sessions says P10 Gemini3.8 Flash and builder GPT-6,
-while P10b handoff context says reviewer also applied fixes. Record in final
-Things to check and leave visible report placeholders for user confirmation.
+Pending clean-clone evidence. Existing report/model provenance contradictions
+and the historical GT draft note remain; do not resolve facts by inventing them.
 
 ## Next action
 
-human rewrite of REPORT.md, then P13 final checks
+Create temporary clone, record its revision, test README commands verbatim.
 
 ## Prompt history
 
