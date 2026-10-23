@@ -56,16 +56,36 @@ Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clo
 
 1. [x] Read brief/handoff; Git status/log and full main-copy baseline; record user-edit boundary.
 2. [x] Fresh temporary clone outside project; record commit and test README environment/install paths independently.
-3. [~] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
+3. [x] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
 4. [x] Scan every tracked file for hygiene locations without printing values; verify ignore rules, protected assets and phase/state consistency.
-5. [ ] Record PASS/FAIL evidence; fix documentation gaps only, if any; preserve REPORT.md and other user edits.
-6. [ ] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
+5. [x] Record PASS/FAIL evidence; fix documentation gaps only, if any; preserve REPORT.md and other user edits.
+6. [~] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
 
 ## Files created or modified
 
+- notes/p13_clean_clone_check.md — commands, hashes, PASS/FAIL evidence and masked hygiene locations.
+- README.md — existing-command clarification, reproduction evidence and current status.
 - workstamp.md — verbatim P13 request, plan, baseline and boundaries.
 
 ## Last action and result
+
+Evidence note written with complete command list, per-route timings, six common
+artifact hashes, protected asset hashes and all masked hygiene line locations.
+README instructions already worked: only clarifications/consolidation and stale
+phase/status text changed. No executable or data repair required. Final cleanup
+pending exact temporary-target boundary checks; staged paths will be explicit.
+
+Both committed-state routes complete: editable298 passed in20.39s, pinned298
+passed in12.55s; main baseline298 in13.38s. Ruff clean in both. Robustness20.571s
+and18.831s, all360 runs retained. Six generated artifacts byte-identical to
+committed references in BOTH environments; no report content/numeric/path/time
+changes. Clone status clean. Required assets tracked/present, GT BOM retained.
+
+Reproduction passes; hygiene readiness FAIL (masked identifying text locations),
+phase/state agreement at cloned revision FAIL (stale README). No code/data
+reproduction problem found; no code/data fixes. README now clarifies existing
+working commands and updates stale state; original planned brief left intact.
+REPORT.md and all user edits remain excluded from staging/changes.
 
 Both README install routes succeeded in separate fresh .venv directories/clones
 at the same committed8e61adc revision. Pinned route tests/lint/regeneration now

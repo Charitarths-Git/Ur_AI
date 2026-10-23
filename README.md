@@ -2,8 +2,8 @@
 
 Parse Japanese consolidated balance sheets (連結貸借対照表) from PDF into structured CSV and JSON.
 
-> **Status**: P10b — P10 fixes independently audited; reporting, warnings and tests completed. GT is **VERIFIED**.
-> Next action: write-up (P11) and final checks (P13).
+> **Status**: P13 reproduction checks passed on Windows / Python 3.14.0; hygiene review remains. GT is **VERIFIED**.
+> Next action: final export_chat.py, redaction of chat_logs, add the Claude conversation log, submit.
 
 ## Results at a glance
 
@@ -23,10 +23,13 @@ python -m venv .venv
 # macOS / Linux
 source .venv/bin/activate
 
-# 3. Install dependencies (exact versions)
+# Set UTF-8 console I/O (PowerShell; cmd uses set PYTHONIOENCODING=utf-8)
+$env:PYTHONIOENCODING="utf-8"
+
+# 3. Choose ONE install route: pinned dependencies for scripts/tests
 pip install -r requirements.lock
 
-# 3b. Or install with flexible versions (editable, for development)
+# 3b. Or install the local package with flexible dependencies (editable, for development/API use)
 pip install -e ".[dev]"
 
 # 4. Run tests
@@ -71,6 +74,10 @@ pytest
 
 ## Phases
 
+PROJECT_BRIEF.md retains the original plan; workstamp.md is the current handoff
+record. P10b was an additional audit after P10. The write-up remains a draft for
+human editing, and P12 is optional.
+
 | Phase | Scope |
 |---|---|
 | P0 — Setup | Repository layout, dependencies, smoke test ✅ |
@@ -82,11 +89,12 @@ pytest
 | P6 — CSV and JSON export | Deterministic flat CSV and hierarchical JSON; committed examples ✅ |
 | P7 — Evaluation metrics | Independent file metrics, alignment and label-free accounting ✅ |
 | P8 — End-to-end run | 360 geometry sweeps, six ablations, exhaustive faults and failure analysis ✅ |
-| P9 — Independent review | Review by a different AI agent |
-| P10 — Review fixes | Apply fixes from the review |
-| P11 — Write-up | Report with design decisions, results, future work |
+| P9 — Independent review | Review by a different AI agent ✅ |
+| P10 — Review fixes | Apply fixes from the review ✅ |
+| P10b — Audit | Audit fixes, close reporting/test gaps; remaining geometry limits documented ✅ |
+| P11 — Write-up | Draft complete; human rewrite remains ✅ |
 | P12 — OCR/VLM stub | Optional backend stub for scanned pages |
-| P13 — Reproducibility | Clean-clone reproducibility verification |
+| P13 — Reproducibility | Both fresh install routes, tests and artifact comparisons verified ✅ |
 
 ## Dependencies
 
@@ -407,6 +415,32 @@ correct column roles; the remaining errors come mostly from the cell-assignment
 gate. The seed11 y=.2 split remains. A pitch-based candidate was rejected at its
 first existing-test failure; no threshold change was retained. A high accounting
 pass rate can coexist with low evaluable_fraction, so read both columns.
+
+## Clean-clone reproduction (P13)
+
+[notes/p13_clean_clone_check.md](notes/p13_clean_clone_check.md) records the tested
+commit, commands, hashes and masked hygiene findings. Both Quick start install
+routes passed in separate fresh environments on Windows / Python 3.14.0. This
+checks that environment; other Python versions and operating systems were not
+newly tested. The pinned route installs dependencies for the repository scripts
+and tests; the editable route also installs the local package for API use.
+
+After activating the environment, these commands reproduce the committed results:
+
+```bash
+python -m pytest
+python -m ruff check src scripts tests eval
+python scripts/parse_page.py data/raw/balance_sheet_after_correction.pdf --page 1 --out-dir outputs
+python eval/run_eval.py --pred examples/balance_sheet_after_correction_p1.csv --pred-json examples/balance_sheet_after_correction_p1.json --gt data/gt/page4.csv --gt-meta data/gt/page4_meta.json
+python eval/run_robustness.py
+```
+
+The evaluator command scores the committed example files. The check first
+compared freshly generated outputs with those examples byte for byte, then
+compared all four regenerated evaluation reports with their committed versions.
+Only the temporary clones were used to regenerate reports during the check.
+Tracked conversation logs still need the final human export/redaction review;
+a reproducible result does not mean the repository is ready for public release.
 
 ## License
 
