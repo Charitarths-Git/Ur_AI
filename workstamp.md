@@ -5,38 +5,39 @@
 | Field | Value |
 |---|---|
 | Prompt | housekeeping |
-| State | DONE |
+| State | IN PROGRESS |
 | Last numbered prompt | P13 DONE |
 | GT | VERIFIED by human; read-only |
 | Updated | 2026-10-23T12:14:23+00:00 |
 
-## Current prompt (verbatim)
+## Current prompt (verbatim except personal-path redaction)
 
-Docs only. Do not touch code, tests, data, eval, examples or any threshold. Stage only the files you change (never "git add -A"). Set PYTHONIOENCODING=utf-8. Follow the handoff protocol (update workstamp.md, small commits); record this under "housekeeping" in the Prompt history, not as a new numbered prompt. If git status shows uncommitted changes you did not make, leave them alone and mention them.
+Docs and logs only. Do not touch code logic, tests, data/, eval/, examples/ or any threshold. Set PYTHONIOENCODING=utf-8. Record this under "housekeeping" in workstamp.md's Prompt history, not as a new numbered prompt. Never print a full secret, email or username in your messages; mask them. Stage only files you changed (never "git add -A", never .venv or ignored files). Never force-push and do not change the remote configuration.
 
-The owner supplied this authoritative attribution (user-supplied, not verifiable from the repo):
-- Implementation plan and prompt drafting: Claude (web, separate account), later a Claude conversation that also gave a second AI reading of the GT transcription and reviewed prompts and results.
-- P0, P1: Claude Opus 4.6
-- P2 to P8 and P10b to P13: GPT 6.1 Sol (Codex)
-- P9 independent review: Claude Sonnet 4.6
-- P10a fixes (commits 5565491 and d51c47f): Gemini Flash 3.8
-- The P10b audit was done by GPT 6.1 Sol, which also built the original code.
+A. REPORT.md placeholders
+1. Replace [USER: total time spent, including human verification] with this exact text: "Time spent: about two days of elapsed time (Wed 21 to Fri 23 Oct 2026), mostly agent runtime plus my own planning, prompt drafting and manual verification of the ground truth. I did not keep a precise log, so this is an estimate."
+2. Replace [USER: one-paragraph personal reflection] with a first-person paragraph of 4 to 6 sentences using ONLY facts already in this repo (REPORT.md, notes/, workstamp.md): that accounting checks caught what cell metrics cannot (printed totals differing from component sums by small rounding amounts), that the jitter sweeps exposed real failures and that the P10 fixes also caused regressions at higher noise, that the pitch-threshold attempt was rejected, that everything is measured on one page with rules written after seeing it, and that the next step would be held-out pages and an OCR/VLM backend. Do not invent feelings, hours or anecdotes. Mark the paragraph's first line with an HTML comment <!-- drafted by agent from repo facts; owner may edit -->.
+3. Confirm no "[USER:" text remains in REPORT.md. The only remaining placeholder allowed is none.
 
-Tasks:
-1. workstamp.md: correct the Sessions table and handoff text to match this attribution, marking it "user-supplied". Remove any statement that the reviewer applied the fixes and any "GPT-6" naming that conflicts with "GPT 6.1 Sol". Leave the P13 "Next action" line unchanged.
-2. Add a dated note at the top of notes/p2_report.md saying the GT was later verified (see data/gt/README.md and workstamp.md). Do not rewrite the rest.
-3. Add a short dated note at the top of notes/review_P9.md saying the reviewer was Claude Sonnet 4.6 per the owner. Do not edit its findings.
-4. Correct conflicting attribution in notes/p13_clean_clone_check.md and the P13 entries in workstamp.md.
-5. REPORT.md: you may edit it now (I am no longer editing it). Fix section 7 so it matches the attribution above: the review model (Claude Sonnet 4.6) differs from the builder (GPT 6.1 Sol), the fixes were applied by a third model (Gemini Flash 3.8), and the fixes were then audited by the builder model, which is weaker independence than a human audit. Fill the placeholders as follows, and leave a visible [USER: ...] marker only for facts you cannot know:
-   - GT verification: transcribed by an AI agent (GPT 6.1 Sol) from the page image, checked row by row by the owner, second AI reading by Claude, cross-checked against the PDF text layer (74 of 74 cells agreed, per notes/p2_report.md or workstamp.md; verify the number in the repo).
-   - Rounding/truncation: keep it labelled as an unconfirmed hypothesis.
-   - Time spent and personal reflection: keep as [USER: ...] placeholders.
-   Verify every number in REPORT.md against its cited file and fix any mismatch; list each correction you made. Keep the honest points: one page only, rules written after seeing it, P10 regressions, the rejected pitch threshold, the remaining seed-11 split.
-6. Run the full test suite and git status.
+B. Wording fixes
+In README.md lines 392 and 405, notes/evaluation_design.md lines 24 and 268, and notes/p10_audit.md line 1, replace unqualified "independent audit" with "audit by the builder model (GPT 6.1 Sol), which is weaker independence than a human audit". Change nothing else there. Leave notes/p2_report.md:12 and chat_logs/transcript_full.jsonl:226 as they are (historical).
 
-Commit as "docs: correct attribution and finalize report draft".
+C. Redaction
+1. Using notes/p13_clean_clone_check.md as the starting list, search ALL tracked files (git ls-files) and chat_logs/claude_conversation.md if it exists for: the local Windows username, absolute local paths (<path>, drive-letter paths), email addresses (including any student email or roll number), and token or API-key-like strings.
+2. Replace username with <user>, absolute local paths with <path> (keep the repo-relative part), emails with <email>. Cover chat_logs/chat_log.md, chat_logs/transcript_full.jsonl, chat_logs/claude_conversation.md (if present), notes/p2_report.md, notes/p13_clean_clone_check.md, scripts/export_chat.py, workstamp.md, REPORT.md and any other tracked file the search finds. Keep public references (example.com, the Ur AI company name, GitHub URLs, the repo URL github.com/Charitarths-Git/Ur_AI).
+3. transcript_full.jsonl: after redaction verify every line parses as JSON. If it cannot be redacted cleanly, delete it, keep chat_log.md only, and update README, workstamp.md and scripts/export_chat.py so they stop mentioning it.
+4. scripts/export_chat.py: make it redact username, absolute paths and emails automatically on output; otherwise unchanged behaviour.
+5. Do not modify data/raw/, data/gt/, data/derived/, examples/ or eval/results/. If a finding is inside one, report file:line and leave it.
+6. Re-run the search and show counts per file (masked); expect zero username, email and absolute-path matches outside the protected files.
 
-Final message: files changed, commit hash, test count, git status, corrections made to REPORT.md numbers, remaining [USER: ...] placeholders, and any conflicting attributions found elsewhere (file:line).
+D. Verify, commit, push
+1. Run the full test suite (expect 298 passed) and git status.
+2. Commit as "chore: finalize report text and redact personal info".
+3. Run "git push -u origin main". If it fails (authentication, network, non-fast-forward), stop and report the exact error with no workaround.
+4. After success show "git status -sb", "git log --oneline -3", and confirm local and remote HEAD match with "git ls-remote origin main".
+5. Check README.md and REPORT.md render sensibly: report their first 15 lines.
+
+Final message: files changed, whether transcript_full.jsonl was kept or deleted, remaining matches (masked, file:line), test count, commit hash, push result with local versus remote hash, and anything you could not do.
 
 ## Authoritative attribution — user-supplied (2026-10-23)
 
@@ -60,62 +61,20 @@ experiment and test records are unchanged.
 
 ## Plan for this housekeeping
 
-1. [x] Read brief/handoff and Git state; record owner-supplied attribution and preserve P13 next action.
-2. [x] Correct only requested docs; prepend dated notes without rewriting historical P2/review bodies.
-3. [x] Verify every report number against cited artifacts, list corrections and residual attribution wording elsewhere.
-4. [x] Full suite, scope/status checks and final named documentation commit; mark housekeeping DONE.
+1. [x] Read handoff and Git state; record this housekeeping request. Existing untracked Claude conversation is authorized for scanning/redaction; no other changes found.
+2. [x] Complete report placeholders and exact audit wording; scan all tracked files plus Claude log, redact identifying text, add export-output redaction, validate JSONL and rescan.
+3. [~] Run full tests; verify protected hashes and scope; inspect README/report previews; commit only changed files.
+4. [ ] Push main once as requested; stop on failure; otherwise compare local/remote HEAD and report final status.
 
 ## Files created or modified
 
-- REPORT.md — owner-supplied GT/tool roles; builder-model audit caveat; unconfirmed policy and two owner-only placeholders.
-- notes/p2_report.md — dated verification/attribution note only; original body preserved.
-- notes/review_P9.md — dated owner attribution note only; original findings preserved.
-- notes/p13_clean_clone_check.md — dated owner attribution correction; reproduction measurements unchanged.
-- workstamp.md — housekeeping request, plan, user-supplied attribution and corrected session/phase records.
+Pending scope verification. Only documentation, conversation logs and the explicitly requested export-output sanitizer may change.
 
 ## Last action and result
 
-Housekeeping DONE: full suite298 passed in11.93s; git diff --check clean.
-Only REPORT.md, notes/p2_report.md, notes/review_P9.md,
-notes/p13_clean_clone_check.md and workstamp.md changed. No pre-existing or
-unrelated user changes observed; no code/tests/data/eval/examples changes.
-Dated P2/review notes preserve their original bodies/findings. All attribution
-corrections are explicitly owner/user-supplied, not claimed repo verification.
-REPORT.md numerical audit found no measured mismatches; added verified74/74
-text-layer agreement and corrected model/role labels. Remaining USER markers:
-time spent including human verification; one-paragraph personal reflection.
-Filing policy still unconfirmed; all honest limits/regressions preserved.
-P13 Next action remains byte-for-byte unchanged. No new numbered prompt/session.
-Plan commitf8b54d3; final commit named docs: correct attribution and finalize report draft.
+Step 2: exact owner time estimate inserted, five factual first-person reflection sentences added with required HTML marker, no REPORT.md USER placeholders remain. Five targeted audit-wording replacements made; historical attribution labels retained. Scanned all tracked files plus existing Claude conversation. Redacted JSON string values recursively, preserving JSONL syntax; public GitHub references retained. Added export-output sanitization and removed literal personal default path (same home-relative source). Initial token/private-key/credential patterns: none. Rescan: 95 files, zero identifying text/key/credential matches outside protected files. Remaining seven compressed-binary path-pattern candidates are unchanged. JSONL retained (258 valid lines). Ruff on export helper passed; synthetic export/full-suite verification follows with normal temp access.
 
-All REPORT.md numbers checked against cited files/artifacts: metric numerators/
-denominators, seven exact/thirteen within-tolerance/two N/A checks, residuals
--1..+3,20/20 truncation consistency, both1.000000 accounting fractions,20 seeds/
-360 attempts, all four before/after mean-min rows,90 assignment cases, seed11
-at.2H,38/43 and14/43 ablation results,72/72 coverage and249/648,621/639,3007/3025
-digit detection ratios, and0.5/max(1,n)/n+1 method constants. No measured numeric
-mismatches found or changed. Added74/74 text-layer agreement from compared74,
-disagreements0. Model/version labels corrected from owner attribution, not
-inferred from metrics. REPORT.md now1208 words with only time/reflection markers.
-P13 next action unchanged. Original P2/review bodies match their prior versions.
-
-Remaining historical names: notes/p2_report.md:12 (preserved historical label;
-new note supersedes it); chat_logs/transcript_full.jsonl:226 (legacy model name).
-Unqualified audit-independence wording remains in README.md:392,405;
-notes/evaluation_design.md:24,268; notes/p10_audit.md:1. Report these locations,
-without changing unrequested docs/logs. Full suite/scope check now running.
-
-Requested doc corrections written. Historical P2/review bodies preserved byte-for-
-byte beneath dated notes. Report now attributes planning/second reading to Claude,
-implementation/audit to GPT 6.1 Sol (Codex), review to Claude Sonnet 4.6, fixes to
-Gemini Flash 3.8; all marked owner/user-supplied. P13 attribution corrected without
-changing measurements. GT cross-check74/74 added from compared74/disagreements0.
-Rounding remains unconfirmed; only time/reflection USER placeholders remain.
-Numeric and residual-conflict audit in progress; no protected files changed.
-
-Clean main at97cfb11; no pre-existing uncommitted changes. P13 DONE. Attribution
-comes from the owner, not a fresh forensic inference. Current chat continues;
-no new runtime-session row. Only the five requested documentation files may change.
+Clean tracked main at7185d4c; existing untracked chat_logs/claude_conversation.md will be inspected under this request. P13 remains DONE; no new numbered prompt or session row. Current request overrides earlier restrictions on redacting historical paths. Protected data/eval/examples/tests/parser logic remain read-only.
 
 ## P13 handoff record — attribution corrected, measurements retained
 
@@ -167,6 +126,8 @@ final export_chat.py, redaction of chat_logs, add the Claude conversation log, s
 | P13 | GPT 6.1 Sol (Codex), user-supplied; fresh committed clones; both README install paths pass 298 tests/Ruff, exports and reports byte-identical; hygiene redaction pending; temporary envs removed | b178e09 (evidence); 9911ca7 (README); final completion commit named P13: clean-clone reproducibility check |
 
 | housekeeping | User-supplied attribution corrected in five docs; report numbers verified,74/74 text agreement added; two placeholders remain;298 tests pass | f8b54d3 (plan); final commit named docs: correct attribution and finalize report draft |
+
+| housekeeping | Final report text and personal-information redaction IN PROGRESS; existing Claude conversation included in authorized scan | pending |
 
 ## Sessions
 
