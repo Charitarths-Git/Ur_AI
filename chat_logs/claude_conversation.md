@@ -1,647 +1,6 @@
-PART- A :
+This file contains two parts of my chat with Claude. Part A is the first (primary) conversation, in which the implementation plan and the first prompts were made. Part B is the second conversation, which reviews the prompts and results from the P0/P1 stage through submission, including a second AI reading of the ground-truth transcription. Both are included in full and redacted for personal information. They are grouped by conversation, not as one chronological transcript.
 
-
-1792688919407_image.png
-1792688936517_image.png
-1792689057335_image.png
-1792689299973_image.png
-1792689306407_image.png
-1792689345735_image.png
-1792689352460_image.png
-1792689358345_image.png
-
-Phase 0 (setup) is complete, but it was executed with an earlier version of my instructions that did not include a session handoff protocol. This prompt (P1) first installs that protocol, then does the Phase 1 work: inspecting the PDF. Do NOT write any parsing, normalization or evaluation logic in t
-
-pasted
-
-analyse everything
-
-this is the JD "(Company Info)
-Ur AI is an AI technology company developing practical products for document understanding and business process automation.
-Our team develops Document Intelligence systems that transform complex business documents, including PDFs, images, tables, charts, and presentation files, into structured and usable data.
-The working language for this internship will be English. Japanese language proficiency is not required.
-(Internship Project)
-
-About the project This internship focuses on the research and development of Document Intelligence and Vision-Language Models (VLMs). The main objective is to improve AI systems that understand complex documents and convert their contents into structured formats such as Markdown and JSON. This is an on-site internship in Japan. The internship will run for approximately two months and will be completed by the end of February 2027. Exact dates will be coordinated with the selected candidates.
-What the intern will be doing
-Depending on the intern's experience and assigned research theme, the intern will work on one or more of the following areas:
-
-Developing and improving pipelines for extracting text, tables, charts, images, and layout information from PDFs, images, and PowerPoint files
-Implementing OCR, layout analysis, table understanding, chart understanding, and structured data conversion
-Creating, cleaning, and evaluating datasets for Vision-Language Models
-Conducting continued pre-training, supervised fine-tuning, and instruction-tuning experiments
-Evaluating model outputs and analyzing failure patterns
-Designing benchmarks and evaluation datasets for Document AI and VLM models
-Comparing accuracy, inference speed, GPU memory usage, and inference cost
-Optimizing training and inference pipelines using PyTorch, vLLM, TensorRT-LLM, CUDA, quantization, parallelization, and model serving technologies
-
-Expected deliverables
-By the end of the internship, the intern is expected to deliver:
-
-A reproducible experiment or development environment
-Organized training or evaluation datasets, source code, and evaluation scripts
-Comparison results against existing baselines, including accuracy, speed, or GPU efficiency
-At least one working prototype, model, evaluation framework, or product implementation
-A final report describing the experiments, results, failure cases, and recommended next steps
-The goal is not limited to research or investigation. We expect the intern to produce working code, a trained model, an evaluation framework, or a functional prototype.
-(Skills)
-
-Must-have skills
-
-Programming experience in Python
-Basic development experience using Git and GitHub
-Basic knowledge of machine learning, deep learning, LLMs, or Vision-Language Models
-Ability to formulate hypotheses and independently conduct implementation, testing, and improvement
-Ability to read technical documents and research papers in English
-Ability to communicate with the team in English
-
-Nice-to-have skills
-
-Experience with PyTorch or Hugging Face Transformers
-Experience with pre-training, continued pre-training, fine-tuning, or instruction tuning of LLMs or VLMs
-Experience with OCR, Document AI, computer vision, layout analysis, table understanding, or chart understanding
-Experience with CUDA, vLLM, TensorRT-LLM, distributed training, quantization, or inference optimization
-Experience with FastAPI, Docker, AWS, or GPU environments
--Experience reproducing AI research papers or conducting research projects"
-and the take home assignment i have been given, help to complete the above work.
-i have created a implementation plan on how we will complete the above work and then one one by help me complete the implementation plan for the above work
-we will use different AI Agents to complete the work and do the coding part you just have to give the prompts that i can give it to the AI Agent.
-also i have created a implementation plan for the prompts (i.e. in which order to give which prompts ), since i have to submit the AI chat logs also be very careful with the prompts you give and the order in which you give me.
-prompt P0 and P1 have already been completed the prompts P0, P1 and their results has also been pasted
-P0 "You are helping me build a take-home project for an internship application at Ur AI (Document Intelligence & VLM R&D). I will give you a series of prompts, one phase at a time. This first prompt only sets up the project. Do NOT write any parsing logic yet.
-
-## The task I was given
-Here is one page from a real public Japanese company filing: a consolidated balance sheet (連結貸借対照表), page 4, marked 訂正後 ("after correction"), units 千円 (thousands of yen), with previous-year and current-year columns. The objective: imagine many PDFs like this, some in more complex formats. Design a parser that converts each page into a correct table. How "correct" is defined and measured is up to me. A complete solution is not expected. I may use any AI tool, and I must submit my full AI chat log together with the work, so please explain your decisions as you go, and keep your actions and reasoning visible rather than silent.
-
-## What I have promised to deliver
-1. A GitHub repository with code.
-2. A flat CSV with columns: label, parent, level, row_type, previous_year_value, current_year_value.
-3. A hierarchical JSON preserving the section > subsection > line-item structure.
-4. An evaluation framework covering: (a) cell-level accuracy against hand-labeled ground truth, (b) structural accuracy (hierarchy and row/column alignment), (c) label-free accounting checks (subtotals, net rows, total assets) with a rounding tolerance appropriate for 千円 units.
-5. A short written report.
-
-## Design assumptions
-- The input PDF is born-digital with a real text layer. Build for that first.
-- Structure the code so an OCR/VLM backend for scanned pages can be plugged in later behind a clean interface, but do not implement it now.
-- Known properties of this page that the design must eventually handle: negative numbers marked with △; nil values marked with －; full-width digits and parentheses; duplicate labels under different parents (e.g. リース資産, その他, 減価償却累計額), so each row needs a parent path; hierarchy that is not present in plain extracted text and must come from layout coordinates plus rules; printed subtotals that may differ slightly from the sum of components because of rounding.
-
-## What I want from you in this step
-1. Propose a repository layout (src package, tests, data/raw, data/gt, outputs, eval, notes, scripts) and briefly justify it. Then create it.
-2. Set up a Python environment (Python 3.11+ if available) with a pyproject.toml or requirements.txt. Dependencies: PyMuPDF, pdfplumber, pandas, pytest, and ruff if you think it is useful. Keep dependencies minimal and pinned to versions you have verified install correctly.
-3. Create PROJECT_BRIEF.md at the repo root containing the task description, assumptions, deliverables and the planned phases above, so that another AI agent or a human reviewer can understand the project without this chat.
-4. Create a README.md stub with setup and run instructions that you will fill in later, and a .gitignore appropriate for Python.
-5. Put the provided PDF in data/raw/ (it is currently in the workspace; move or copy it, do not modify it).
-6. Write one smoke test that opens the PDF and asserts it has at least one page and a non-empty text layer, and run it.
-7. Make an initial git commit with a clear message.
-
-## Constraints
-- No parsing, normalization or evaluation logic yet.
-- Do not invent data or expected values.
-- Keep everything reproducible from a fresh clone with documented commands.
-
-## Acceptance criteria
-- I can run one documented command to install dependencies and one to run pytest, and the smoke test passes.
-- The directory tree, the commands you ran, and the test output are shown in your final message.
-- At the end, list any assumptions you made and anything you were unsure about."
-P1 ""
-
-Counting data rows and headings in the balance sheet table.
-Analysis and next step: P2 (ground truth)
-1. What the task is really testing
-The email is deliberately open-ended (“how you define and measure correct is up to you”), and the JD tells us what they will look for:
-
-JD signal	What to show in the submission
-Evaluation frameworks, benchmarks, failure analysis	Your P7–P8 work, including honest failure cases
-“Comparison results against existing baselines”	Missing from your plan. Add a naive baseline in P8
-Reproducible environment, source code	P0, requirements.lock, P13 clean-clone check
-OCR/VLM, layout analysis	The P12 plug-in point
-Working code, not just investigation	Keep everything runnable
-Your plan is solid. I’d make three changes:
-
-P8 should include baselines. Compare your parser against (a) pdfplumber.extract_tables() and (b) plain get_text() lines with a regex split, using the same metrics. A parser that beats naive baselines on hierarchy and parent paths is the headline result.
-P4–P5 should be config-driven. Label rules (合計, （純額）, 減価償却累計額) belong in a small rules file, and indent levels should be discovered by clustering x0 rather than hard-coded. “Many PDFs, some more complex” means a hard-coded 75/88/101/114 would look like overfitting.
-P8 robustness test. Perturb the page (shift x-offsets, drop the shaded rects, rescale) and report which metrics survive.
-2. Deadline warning
-Today is Thu 22 Oct. The deadline is Fri 23 Oct, 11:59 pm IST, so you have about one day. If time gets tight, merge P3+P4 and P5+P6, and skip P12 (mention it in the write-up as future work). Do not skip P9, since the independent review is the strongest point in your process. Run it well before the deadline.
-
-3. Review of P0/P1 results
-The P0/P1 results look sound: the commits exist, 11 tests pass, and the lock file and handoff protocol are in place. I found three things to carry forward.
-
-a) The Q6 counts are slightly mislabeled. I counted the text layer myself. The table body has 43 rows: 6 header rows (資産の部, 流動資産, 固定資産, 有形固定資産, 無形固定資産, 投資その他の資産) and 37 data rows. P1 reported “39 with numbers / 11 without”, but I think two of the “numbers” rows are the date line ((2025 年３月 31 日)…) and the footer - 4 -, which contain digits but aren’t data. “Has digits” is not the same as “is a data row”, so the parser must not use it as the test. The P2 prompt has the agent verify this.
-
-b) Full-width digits are only in labels and headings. The table values are half-width (2,002,429), while ３月 and ３１日 are full-width. Normalization still needs to handle both.
-
-c) Hierarchy is harder than P1 suggests. 減価償却累計額 appears 4 times under the same section (有形固定資産). Its parent is not the section, it’s the gross row above it (e.g. 建物及び構築物). A correct path looks like:
-
-資産の部 > 固定資産 > 有形固定資産 > 建物及び構築物 > 減価償却累計額
-
-This is the core structural insight, and I’ve built it into the ground-truth convention below.
-
-Accounting checks I computed from your text layer (components vs printed, 千円):
-
-流動資産合計: FY25 sums to 5,863,681 vs 5,863,684 (diff 3). FY26 sums to 3,377,405 vs 3,377,407 (diff 2).
-有形固定資産合計: diff 1 (FY25) and 3 (FY26).
-固定資産合計 FY25: diff 2. 資産合計 FY26: diff 1.
-Net rows are off by at most 1 (e.g. 213,939 − 172,066 = 41,873 vs printed 41,872).
-Everything else matches exactly.
-The maximum observed difference is 3, so a tolerance of roughly 0.5 × (number of addends) works. Use these figures later to sanity-check the evaluator.
-
-4. Prompt P2
-Paste this into the same agent and session as P0/P1. The point of the design is that ground truth must be independent of the parser, so the agent transcribes from the image and uses the text layer only afterwards, to flag disagreements.
-
-P2: Ground truth (draft for human verification). Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into workstamp.md, write the plan, set P2 IN PROGRESS, mark steps [~]/[x] as you go, make small wip(P2) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over.
-
-Goal: create a hand-verifiable ground-truth table for page 4, created from the RENDERED PAGE IMAGE, independent of any parser. A human (me) will verify it against the page afterwards. Do not write any parsing, normalization or evaluation code for the package.
-
-## Rules for independence (important)
-- Transcribe ONLY from the image data/derived/page4_200dpi.png. If your tooling cannot view images, STOP and tell me; do not fall back to the text layer.
-- If digits are hard to read at 200 DPI, render zoomed crops of the PDF with PyMuPDF (e.g. 300 DPI, horizontal strips of about 12 rows with overlap) into data/derived/crops/ and read those. Rendering crops is allowed; reading text from the PDF is NOT allowed during transcription.
-- During transcription do NOT open or use: the PDF text layer, get_text, pdfplumber, notes/words_*.json, notes/inspection.md. Do not copy numbers from earlier chat output.
-- If any character or digit is unclear, do not guess: write the best reading and list it under "uncertain cells" in your report.
-
-## Step 0 (before transcription): verify one P1 claim
-notes/inspection.md Q6 reports 39 rows with numbers and 11 without. I suspect 2 of the "numeric" rows are the date heading and the "- 4 -" footer, which contain digits but are not data rows. Check this from the P1 notes only (not for GT purposes), and if Q6 is wrong or misleading, correct that paragraph of notes/inspection.md with evidence and commit it as a separate "fix(P1): ..." commit. This does not count as using the text layer for GT.
-
-## Step 1: define the ground-truth conventions
-Write data/gt/README.md documenting these conventions exactly:
-- File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
-- Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
-- label: exactly as printed (keep full-width parentheses （純額）, no normalization).
-- parent_path: ancestors' labels joined by " > ", root first; empty for the root. parent: the immediate parent label. level = number of ancestors (so the root 資産の部 has level 0).
-- Hierarchy convention (semantic, not just indentation):
-  * 流動資産 and 固定資産 are children of 資産の部. 有形固定資産, 無形固定資産 and 投資その他の資産 are children of 固定資産.
-  * Plain line items are children of their section header.
-  * Where a gross item is followed by a 減価償却累計額 row and a （純額） row, those two rows are CHILDREN OF THE GROSS ITEM (e.g. parent of 減価償却累計額 is 建物及び構築物). The gross item itself is a child of the section.
-  * A 合計 row is a child of the section it closes and has row_type subtotal; 資産合計 is a child of 資産の部 with row_type total.
-- row_type values (exactly these): header (no numbers), line_item, contra (減価償却累計額 and 貸倒引当金), net (（純額） rows), subtotal, total.
-- Values: integers in 千円 exactly as printed (do NOT multiply by 1000). △ means negative. A printed nil mark (－) is stored as an EMPTY value (null, not 0) and prev_raw/curr_raw keep the printed string. △0 is stored as 0 with raw "△0". prev_raw/curr_raw hold the string exactly as printed (including △, commas); empty for header rows. Use previous = 前連結会計年度 column, current = 当連結会計年度 column.
-- If you believe a convention above is ambiguous or wrong for this page, say so in the report rather than silently deviating.
-
-## Step 2: transcribe
-Create data/gt/page4.csv and data/gt/page4_meta.json (page_number, correction_marker "訂正後", title, unit "千円", period headings as printed, period end dates as printed, "verified_by_human": false). Number of rows: report what you count; do not pad.
-
-## Step 3: verification aids (not part of the package)
-a) Write notes/gt_verification.md: a checklist table with one line per GT row (row_id, label, previous raw, current raw, a "[ ] verified" box) so I can tick rows against the page.
-b) Write a throwaway script scripts/gt_selfcheck.py that (1) validates the CSV schema, enums, level == number of path elements, and that nil cells are empty; and (2) prints, for each subtotal/net/total row, the components' sum vs the printed value and the difference, as INFORMATION ONLY (no pass/fail, no tolerance logic; that is P7).
-c) ONLY AFTER the CSV is finished and committed: write scripts/gt_crosscheck.py that compares GT numbers against the numeric tokens in the text layer and prints disagreements. It must never modify the GT. Report disagreements; do not fix them by yourself, because I adjudicate against the page.
-
-## Constraints
-- Do not use the text layer for GT values; do not invent data; do not touch the original PDF; do not add anything under src/.
-- Add one pytest test that only checks schema (columns present, allowed row_type values, level consistent with parent_path). Assert NO financial values and no row counts.
-- Run the full test suite. Update README (data/gt description, how to run the two scripts).
-- Final commit "P2: draft ground truth (pending human verification)"; workstamp.md set to DONE with "Next action: human verification of GT, then P3". Mark in workstamp.md that the GT is a DRAFT until I confirm.
-
-## Final message must show
-Row count and row-type counts; the list of uncertain cells; the self-check output; the cross-check disagreements (if any); convention questions; files created; test output; commit hashes.
-5. What you do after P2 (this is your human-verification step)
-Open data/derived/page4_200dpi.png next to notes/gt_verification.md and tick every row. Don’t skim, since this file defines “correct” for the whole project.
-Quick completeness checks:
-It should have 43 rows (6 header + 37 numeric rows).
-Exactly 2 nil cells: 建設仮勘定 (prev) and 長期貸付金 (prev).
-貸倒引当金 current is △0, stored as 0.
-Self-check differences should be ≤ 3 everywhere. If any exceeds that, suspect a typo in the GT.
-Cross-check disagreements are a to-do list. For each one, look at the page and decide who’s right.
-Reply in the same session with something like “Verified. Corrections: row 17 prev should be …”, and ask it to apply them, set verified_by_human: true, update workstamp and commit. That reply doesn’t need a new prompt ID, but keep it in the log.
-Send me the agent’s P2 final message once you’ve done this, and I’ll review it before drafting P3. If you want, I can also tighten the P3–P5 prompts now to include the config-driven design and the baseline comparison.
-
-do i need to do anything before giving P2 and also i am switching the AI Agent i used before as reached my quota limit so the new AI agent might not know the context
-
-Drafting a resume prompt and pre-flight checklist for continuity.
-Before P2: a short checklist, then one prompt for the new agent
-Yes, there are a few things to do first. The new agent has no memory of the old chat, but your protocol was designed for this: all continuity lives in the repo (workstamp.md, PROJECT_BRIEF.md, git history). What matters is that the repo is intact and the new agent is told to read it.
-
-What you should do (about 5 minutes)
-Open the same project folder in the new agent. If the new agent runs on a different machine or workspace, copy the whole folder including the hidden .git directory, or push to GitHub and clone it. Recreate the venv afterwards (pip install -e ".[dev]").
-Check the repo state yourself in a terminal:
-   git status          # should be clean
-   git log --oneline -3   # top commit should be 0c66de8 (or later)
-   git ls-files data/derived/page4_200dpi.png   # must print the path
-If git status is not clean, tell the agent in the prompt below, not me.
-3. Check that the new agent can view images. P2 depends on it, and the prompt tells the agent to stop if it can’t. If it can’t, use a different agent for P2, because the ground truth must not come from the text layer.
-4. Windows only: set PYTHONIOENCODING=utf-8 (or $env:PYTHONIOENCODING="utf-8" in PowerShell) before running anything, as P1 found.
-5. Export the old session’s chat log now, while you still can. The log is part of your submission, and the old session covers P0 and P1. Keep one file per session, plus a short note on why you switched (usage limit).
-6. Start a fresh chat in the new agent and paste the prompt below as the first message. It has a short orientation section followed by P2, so the log reads cleanly as “continuation, then P2”.
-
-Changes I made to P2
-I removed “paste into the same session”. The new prompt starts with orientation instead.
-I told the agent to add its own Sessions row with its real model name and to write “Resumed in new session (previous agent hit usage limit)”.
-I added an instruction not to trust or reuse any earlier chat claims, only the repo.
-I kept the independence rules, since they are the most important part of P2.
-Prompt to paste (new agent, new session)
-This is a continuation of an existing project. My previous AI agent hit its usage limit, and you are a different agent in a new session with NO memory of earlier chats. Rely only on the repository. P0 (setup) and P1 (PDF inspection) are complete. I am now giving you P2.
-
-## Orientation (do this first, before anything else)
-1. Read PROJECT_BRIEF.md (especially "Agent working rules") and workstamp.md. Follow the handoff protocol and resume procedure written there for every step of this prompt.
-2. Run git status, git log -5, and the full test suite (activate .venv first, or use .venv\Scripts\python.exe on Windows; set PYTHONIOENCODING=utf-8 so Japanese text prints correctly). Report the real state. P1 should show DONE in workstamp.md with all tests passing; if reality disagrees, tell me and fix inconsistencies before starting P2.
-3. Add a row to the "Sessions" table in workstamp.md: next session number, YOUR actual model name, UTC start time (or "unknown"), note "Resumed in new session; previous agent hit usage limit". Never write emails, account names or credentials anywhere.
-4. Do not rely on anything you may infer about earlier chats. Treat the repo files as the only source of truth.
-
-## P2: Ground truth (draft for human verification)
-Copy this whole P2 section verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P2 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P2) commits.
-
-Goal: create a hand-verifiable ground-truth table for page 4, created from the RENDERED PAGE IMAGE, independent of any parser. A human (me) will verify it against the page afterwards. Do not write any parsing, normalization or evaluation code for the package.
-
-### Rules for independence (important)
-- Transcribe ONLY from the image data/derived/page4_200dpi.png. If your tooling cannot view images, STOP and tell me; do not fall back to the text layer.
-- If digits are hard to read at 200 DPI, render zoomed crops of the PDF with PyMuPDF (e.g. 300 DPI, horizontal strips of about 12 rows with overlap) into data/derived/crops/ and read those. Rendering crops is allowed; reading text from the PDF is NOT allowed during transcription.
-- During transcription do NOT open or use: the PDF text layer, get_text, pdfplumber, notes/words_*.json, notes/inspection.md. Do not copy numbers from earlier chat output or from any file other than the images.
-- If any character or digit is unclear, do not guess: write the best reading and list it under "uncertain cells" in your report.
-
-### Step 0 (before transcription): verify one P1 claim
-notes/inspection.md Q6 reports 39 rows with numbers and 11 without. I suspect 2 of the "numeric" rows are the date heading and the "- 4 -" footer, which contain digits but are not data rows. Check this from the P1 notes only (not for GT purposes), and if Q6 is wrong or misleading, correct that paragraph of notes/inspection.md with evidence and commit it as a separate "fix(P1): ..." commit. This does not count as using the text layer for GT.
-
-### Step 1: define the ground-truth conventions
-Write data/gt/README.md documenting these conventions exactly:
-- File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
-- Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
-- label: exactly as printed (keep full-width parentheses （純額）, no normalization).
-- parent_path: ancestors' labels joined by " > ", root first; empty for the root. parent: the immediate parent label. level = number of ancestors (so the root 資産の部 has level 0).
-- Hierarchy convention (semantic, not just indentation):
-  * 流動資産 and 固定資産 are children of 資産の部. 有形固定資産, 無形固定資産 and 投資その他の資産 are children of 固定資産.
-  * Plain line items are children of their section header.
-  * Where a gross item is followed by a 減価償却累計額 row and a （純額） row, those two rows are CHILDREN OF THE GROSS ITEM (e.g. parent of 減価償却累計額 is 建物及び構築物). The gross item itself is a child of the section.
-  * A 合計 row is a child of the section it closes and has row_type subtotal; 資産合計 is a child of 資産の部 with row_type total.
-- row_type values (exactly these): header (no numbers), line_item, contra (減価償却累計額 and 貸倒引当金), net (（純額） rows), subtotal, total.
-- Values: integers in 千円 exactly as printed (do NOT multiply by 1000). △ means negative. A printed nil mark (－) is stored as an EMPTY value (null, not 0) and prev_raw/curr_raw keep the printed string. △0 is stored as 0 with raw "△0". prev_raw/curr_raw hold the string exactly as printed (including △, commas); empty for header rows. Use previous = 前連結会計年度 column, current = 当連結会計年度 column.
-- If you believe a convention above is ambiguous or wrong for this page, say so in the report rather than silently deviating.
-
-### Step 2: transcribe
-Create data/gt/page4.csv and data/gt/page4_meta.json (page_number, correction_marker "訂正後", title, unit "千円", period headings as printed, period end dates as printed, "verified_by_human": false). Number of rows: report what you count; do not pad.
-
-### Step 3: verification aids (not part of the package)
-a) Write notes/gt_verification.md: a checklist table with one line per GT row (row_id, label, previous raw, current raw, a "[ ] verified" box) so I can tick rows against the page.
-b) Write a throwaway script scripts/gt_selfcheck.py that (1) validates the CSV schema, enums, level == number of path elements, and that nil cells are empty; and (2) prints, for each subtotal/net/total row, the components' sum vs the printed value and the difference, as INFORMATION ONLY (no pass/fail, no tolerance logic; that is P7).
-c) ONLY AFTER the CSV is finished and committed: write scripts/gt_crosscheck.py that compares GT numbers against the numeric tokens in the text layer and prints disagreements. It must never modify the GT. Report disagreements; do not fix them by yourself, because I adjudicate against the page.
-
-### Constraints
-- Do not use the text layer for GT values; do not invent data; do not touch the original PDF; do not add anything under src/.
-- Add one pytest test that only checks schema (columns present, allowed row_type values, level consistent with parent_path). Assert NO financial values and no row counts.
-- Run the full test suite. Update README (data/gt description, how to run the two scripts).
-- Final commit "P2: draft ground truth (pending human verification)"; workstamp.md set to DONE with "Next action: human verification of GT, then P3". Mark in workstamp.md that the GT is a DRAFT until I confirm.
-
-### Final message must show
-Orientation results (repo state, tests, session row added); row count and row-type counts; the list of uncertain cells; the self-check output; the cross-check disagreements (if any); convention questions; files created; test output; commit hashes.
-After the agent finishes
-Do the verification steps from my previous message: tick all rows against the page image, expect 43 rows with 6 headers and 37 numeric rows, exactly 2 nil cells, △0 stored as 0, and self-check differences of 3 or less. Then send me the agent’s final message and I’ll review it before drafting P3.
-
-If the new agent says it cannot view images, tell me which agent it is and I’ll suggest a workaround that keeps the ground truth independent of the text layer.
-
-
-1792691801500_image.png
-1792691816801_image.png
-now what to do
-
-Comparing chat exports between the old and new agent setups.
-Comparing chat exports between the old and new agent setups.
-You’re ready for P2. The screenshots show everything is in place:
-
-Old session exported. The old agent created chat_logs/chat_log.md, chat_logs/transcript_full.jsonl and scripts/export_chat.py, and committed them.
-New Codex session is open in the Ur_AI project, with the UTF-8 variable set in the terminal.
-What to do now
-Paste the full P2 prompt (the one starting “This is a continuation of an existing project...”) as the first message in this new chat, and send it. Don’t add anything before it.
-Expect the top commit to differ. The new agent will see the chat-export commit on top of 0c66de8. That’s fine, since only the chat-log files were added. If it reports any other change, ask it to explain.
-Approve its commands as they come. You’re in “Ask for approval” mode, so it will pause often. That’s good for your log, but read what it runs. In particular, it must not run get_text, pdfplumber or open notes/words_*.json during transcription.
-Optional: raise the reasoning effort to High (the “Medium” dropdown). P2 means reading about 80 numbers from an image, and extra effort helps accuracy. Your own verification pass catches errors anyway, so Medium is acceptable.
-Watch the first reply. It should confirm it can view the PNG. If it says it can’t, or starts reading text from the PDF instead, stop it and tell me.
-Before you submit (not now)
-The raw transcript_full.jsonl may contain account details, email addresses or local file paths. Open it and search for @ and your username (<user>) before submitting. Redact or remove anything private. The protocol already says never to write credentials into the repo, but a raw export can capture more than you expect.
-
-Send me the agent’s final P2 message when it finishes, after your row-by-row verification against the page.
-
-1792692711445_image.png
-1792692763412_image.png
-1792692782771_image.png
-what to do now
-
-P2 finished. Your job now: verify the ground truth
-The agent’s report looks very good. Before you tick anything, here is what it tells us.
-
-What checks out
-Counts match my independent computation: 43 rows = 6 headers + 22 line items + 5 contra + 4 net + 5 subtotals + 1 total. (My expected breakdown was 6 headers and 37 numeric rows, and 22+5+4+5+1 = 37.)
-Self-check differences all match mine (all within 3):
-流動資産合計: −3 (prev), −2 (curr)
-有形固定資産合計: −1, −3
-固定資産合計 prev: −2
-資産合計 curr: −1
-リース資産（純額）: +1 on both years
-The cross-check agrees: 74 cells, 0 disagreements. 74 is exactly 37 rows × 2 columns. The CSV was committed before the cross-check ran, so the two readings are independent. Two different reads of the same page (image vs text layer) agree on every number, which is strong evidence.
-Process was clean: separate fix commit for the Q6 correction, GT frozen before the cross-check, 12 tests passing, src/ and the PDF untouched.
-One thing to note: the self-check shows 固定資産合計 current as 1757841 / 1757841 / 0, while my earlier hand-check had a small diff only on the previous year. That is consistent with what I told you.
-
-What you do now (about 20 to 30 minutes)
-The cross-check makes errors unlikely, but you are the human in “human-verified”, so do the pass. Both readings could still share a mistake in a label (the cross-check only compared numbers) or in the hierarchy.
-
-Open data/derived/page4_200dpi.png beside notes/gt_verification.md.
-For each of the 43 rows, tick it if the label and both raw values match the page. Pay extra attention to:
-labels (the cross-check didn’t test them): 退職給付に係る資産, 投資その他の資産, 機械装置及び運搬具
-the 2 nil cells: 建設仮勘定 and 長期貸付金, both previous year, stored empty
-貸倒引当金 current = △0, stored as 0
-Open data/gt/page4.csv (in VS Code, or Excel with UTF-8) and check the hierarchy columns against the convention:
-減価償却累計額 and （純額） rows have the gross item as parent, e.g. … > 有形固定資産 > 建物及び構築物
-流動資産 and 固定資産 have parent 資産の部; 有形固定資産, 無形固定資産 and 投資その他の資産 have parent 固定資産
-資産合計 is a child of 資産の部 with level 1
-Think about one convention question. It said “none” for convention questions, but the 無形固定資産 section has a plain リース資産 and その他 with no 減価償却累計額 rows. Check they are children of 無形固定資産, not of a gross item.
-Then reply to the agent in the same session
-If everything is right, send this (it is not a new prompt ID, but keep it in the log):
-
-Verified. I checked all 43 rows against the page image (labels, raw values, nil cells, △0, and the hierarchy columns). No corrections. Please set "verified_by_human": true in data/gt/page4_meta.json, mark the GT as VERIFIED (no longer DRAFT) in workstamp.md and data/gt/README.md, record the verification in workstamp.md, and commit as "chore(P2): GT verified by human". Then show me git status and the final commit hash. Do not start P3.
-If you find mistakes, replace the “No corrections” sentence with something like Corrections: row 17 label should be …, row 30 current should be …, and ask it to apply them, re-run the self-check, the cross-check and the tests, and commit. Then it should expect disagreements to show up in the cross-check, which is the point of having it.
-
-One honest caveat for your write-up
-Because the agent read the image itself, the GT is “AI-transcribed, human-verified, cross-checked against the text layer”, not purely hand-typed. That is fine, and arguably stronger, but describe it that way in the report.
-
-When the agent confirms the commit, send me that message. I’ll then draft P3, and I’ll build in the config-driven design (rules in a small file, indent levels clustered from x0) that I suggested earlier.
-
-1792693447712_page4_200dpi.png
-1792693615538_image.png
-1792693640163_image.png
-# Page 4 draft ground truth — human verification
-
-Status: **DRAFT**, not verified by a human. Source: the rendered page and
-300 DPI overlapping crops in `data/derived/crops/`. Check each entry against
-the image, including the label, signs, commas and nil marks. Parent paths are
-in the CSV for separate hierarchy review. Header cells are intentionally blank.
-
-Image-only CSV frozen in commit `7ca2ef8` before any text-layer cross-check.
-Uncertain cells: none identified after enlarged visual review. This does not
-substitute for human verification. No convention deviations or open questions.
-
-| row_id | label | previous raw | current raw | human check |
-|---|---|---|---|---|
-| r001 | 資産の部 |  |  | [ ] verified |
-| r002 | 流動資産 |  |  | [ ] verified |
-| r003 | 現金及び預金 | 2,002,429 | 608,281 | [ ] verified |
-| r004 | 受取手形 | 20,659 | 26,333 | [ ] verified |
-| r005 | 売掛金 | 2,019,476 | 884,339 | [ ] verified |
-| r006 | 電子記録債権 | 564,667 | 370,468 | [ ] verified |
-| r007 | 商品及び製品 | 589,488 | 1,019,663 | [ ] verified |
-| r008 | 仕掛品 | 186,748 | 55,344 | [ ] verified |
-| r009 | 原材料及び貯蔵品 | 370,403 | 136,082 | [ ] verified |
-| r010 | 短期貸付金 | 7,530 | 30,000 | [ ] verified |
-| r011 | その他 | 105,260 | 246,895 | [ ] verified |
-| r012 | 貸倒引当金 | △2,979 | △0 | [ ] verified |
-| r013 | 流動資産合計 | 5,863,684 | 3,377,407 | [ ] verified |
-| r014 | 固定資産 |  |  | [ ] verified |
-| r015 | 有形固定資産 |  |  | [ ] verified |
-| r016 | 建物及び構築物 | 2,121,360 | 1,880,082 | [ ] verified |
-| r017 | 減価償却累計額 | △1,923,585 | △1,640,253 | [ ] verified |
-| r018 | 建物及び構築物（純額） | 197,775 | 239,828 | [ ] verified |
-| r019 | 機械装置及び運搬具 | 4,024,922 | 2,250,799 | [ ] verified |
-| r020 | 減価償却累計額 | △3,634,165 | △1,914,091 | [ ] verified |
-| r021 | 機械装置及び運搬具（純額） | 390,757 | 336,708 | [ ] verified |
-| r022 | 土地 | 768,976 | 705,403 | [ ] verified |
-| r023 | リース資産 | 210,746 | 213,939 | [ ] verified |
-| r024 | 減価償却累計額 | △147,599 | △172,066 | [ ] verified |
-| r025 | リース資産（純額） | 63,146 | 41,872 | [ ] verified |
-| r026 | 建設仮勘定 | － | 4,553 | [ ] verified |
-| r027 | その他 | 848,814 | 446,126 | [ ] verified |
-| r028 | 減価償却累計額 | △840,375 | △421,883 | [ ] verified |
-| r029 | その他（純額） | 8,439 | 24,243 | [ ] verified |
-| r030 | 有形固定資産合計 | 1,429,094 | 1,352,610 | [ ] verified |
-| r031 | 無形固定資産 |  |  | [ ] verified |
-| r032 | リース資産 | 34,190 | 21,402 | [ ] verified |
-| r033 | その他 | 10,070 | 14,466 | [ ] verified |
-| r034 | 無形固定資産合計 | 44,261 | 35,869 | [ ] verified |
-| r035 | 投資その他の資産 |  |  | [ ] verified |
-| r036 | 投資有価証券 | 44,180 | 218,836 | [ ] verified |
-| r037 | 関係会社株式 | 1,123 | 1,123 | [ ] verified |
-| r038 | 長期貸付金 | － | 62,000 | [ ] verified |
-| r039 | 退職給付に係る資産 | 18,404 | 16,435 | [ ] verified |
-| r040 | その他 | 133,361 | 70,967 | [ ] verified |
-| r041 | 投資その他の資産合計 | 197,069 | 369,362 | [ ] verified |
-| r042 | 固定資産合計 | 1,670,426 | 1,757,841 | [ ] verified |
-| r043 | 資産合計 | 7,534,110 | 5,135,249 | [ ] verified |
-
-## Additional verification
-
-- [ ] Check page metadata, headings, end dates and footer in `data/gt/page4_meta.json`.
-- [ ] Check the semantic parents in the CSV, including gross/contra/net families.
-- [ ] Adjudicate any arithmetic differences against the page; do not change values to force sums.
-- [ ] Confirm the draft explicitly before changing `verified_by_human` to true or starting P3.
-i have verified it, you also verify it as well so that there are no human error
-
-Cross-checking individual line values against the source figures.
-Independent check: no errors found
-I compared the page image (page4_200dpi.png), the checklist, and the two spreadsheet screenshots row by row.
-
-What I verified
-Rows and labels: 43 rows, r001 to r043, in the same order as the page. All labels match, including full-width parentheses in （純額） and the repeated labels (減価償却累計額 ×4, その他 ×3, リース資産 ×2).
-Raw values: all 74 numeric cells match the image, with commas and △ preserved. The special cases are right:
-貸倒引当金 current is △0, stored as 0.
-建設仮勘定 and 長期貸付金 are nil in the previous-year column only. They show as － in the raw column and empty in the value column.
-Numeric columns in the spreadsheet: all values match the image, and every contra row is negative.
-Row types: the 6 headers, 5 contra, 4 net, 5 subtotal and 1 total rows are all classified correctly.
-Hierarchy:
-流動資産 and 固定資産 are at level 1 under 資産の部.
-有形固定資産, 無形固定資産 and 投資その他の資産 are at level 2 under 固定資産.
-Plain items are at level 3, and each contra and net row is at level 4, under its gross item.
-建設仮勘定 is correctly level 3 under 有形固定資産.
-The 無形固定資産 リース資産 and その他 are level 3 under 無形固定資産, with no contra rows.
-流動資産合計 and 固定資産合計 are level 2 children of the section they close. 有形, 無形 and 投資 subtotals are level 3. 資産合計 is level 1.
-Two cautions
-Do not save the CSV from Excel. Excel is converting raw strings like 608,281 into numbers and re-displaying them in Indian grouping (6,08,281), and showing ####### where columns are narrow. The file on disk is probably fine, but saving it from Excel could overwrite the raw strings and strip the BOM. Close it without saving, and use VS Code to view it from now on.
-What I could not see. The parent_path and label columns are truncated in your screenshots, and I haven’t seen page4_meta.json. I checked the labels from the checklist and the parents from the visible columns. Please open the CSV in VS Code and confirm one deep row reads 資産の部 > 固定資産 > 有形固定資産 > 建物及び構築物. Also check that the meta file has the two period headings, the end dates, 訂正後, 千円 and the title.
-Limits of this verification
-I read the same page image as the agent, so this is not independent of the image. It is a second reader plus the text-layer cross-check (74 of 74 cells agree). Say that honestly in the write-up: transcribed by an AI, checked by you and a second AI, and cross-checked against the PDF text layer.
-
-Reply to the agent
-Verified. I checked all 43 rows against the page image (labels, raw values, nil cells, △0, and the hierarchy columns), and an independent second review found no discrepancies. No corrections. Please set "verified_by_human": true in data/gt/page4_meta.json, mark the GT as VERIFIED (no longer DRAFT) in workstamp.md, data/gt/README.md and notes/gt_verification.md, record the verification in workstamp.md, run the test suite, and commit as "chore(P2): GT verified by human". Then show me git status and the final commit hash. Do not start P3.
-Send me the agent’s confirmation and I’ll draft P3.
-
-1792694685598_image.png
-Scoping normalization rules for numbers and label variants.
-P2 is closed: GT is verified (commit 9805d79)
-Codex confirmed what I asked for: verified_by_human is true, VERIFIED is marked in all four files, 12 tests pass, the CSV is byte-for-byte unchanged with its BOM preserved, and the tree is clean. P2 is done.
-
-Design decisions in P3
-P3 stays pure normalization. The config-driven rules file (the 合計 / （純額） / 減価償却累計額 patterns) belongs in P5, and clustering indent levels from x0 belongs in P4. Putting them in P3 would blur the phases in your log.
-Numbers become int or None, never a guess. The parser returns a structured result (value, raw, nil flag, status), and invalid input is reported as invalid rather than turned into 0. This matters because 0 (△0) and nil (－) are different things on this page.
-Labels are never rewritten in the output. NFKC turns （純額） into (純額), but the GT keeps the printed form. So P3 provides a matching key for comparisons, and the label itself stays as printed.
-The GT is used read-only as a test oracle. Parsing every prev_raw and curr_raw in the GT must reproduce the GT values. This is a legitimate use because the GT was made independently of any code.
-Variants beyond this page. Real filings also use ▲ for negatives, (123) for negatives, and several dash characters for nil. Handling these supports the “many PDFs” goal, and the tests cover them.
-Prompt P3 (paste into the same Codex session)
-P3: Normalization utilities with unit tests. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P3 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P3) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. Set PYTHONIOENCODING=utf-8 for all commands. Add a Sessions row only if this is a new session.
-
-Goal: small, pure, well-tested normalization functions in src/parser/normalize.py. No PDF access, no row reconstruction, no hierarchy or row-type inference, no evaluation logic, no label-rule config (that is P5), no indent clustering (that is P4). Explain each design decision as you go.
-
-## 1. Number parsing: parse_amount(raw) -> AmountResult
-Return a small frozen dataclass with: raw (the input exactly as given), value (int or None), status (one of "ok", "nil", "invalid", "empty"), negative (bool), note (short string, empty if nothing notable). Never return a float, never raise for bad input, and never turn invalid input into 0. Units stay as printed (千円): do NOT multiply by 1000 and do not add a scale parameter.
-Required behaviour:
-- Strip surrounding whitespace (including full-width space U+3000 and NBSP). Empty or whitespace-only input -> status "empty", value None.
-- Apply NFKC for digits, commas and parentheses, so full-width digits "２，００２，４２９" and half-width digits both work. Accept thousands separators "," and full-width "，". Do not validate comma grouping strictly, but note it in "note" if a group is not 3 digits (informational only).
-- Negative markers: leading △ (U+25B3), ▲ (U+25B2), ASCII hyphen-minus, U+2212 minus, and U+FF0D (the full-width hyphen-minus). Also parentheses "(123)" or "（123）" meaning negative. "△0" and "▲0" must give value 0 with negative True and note "negative zero printed" (value is the integer 0, status "ok").
-- Nil markers: a standalone dash and nothing else: U+FF0D "－", U+2015 "―", U+2014 "—", U+2013 "–", U+2212 "−", U+2010 "‐", U+30FC "ー", ASCII "-", or a run of them, possibly with whitespace -> status "nil", value None. A dash FOLLOWED by digits is a negative number, not nil. Also treat "…" / "･･･" is NOT supported: mark those "invalid".
-- Anything else (letters, two numbers, "1.5", "12-3", stray symbols, a double sign "△-5") -> status "invalid", value None, with a short note naming the reason. Decide explicitly how to treat a decimal point and document it (my default: invalid, because this page is in whole 千円).
-- Never silently accept a trailing unit such as "千円" or "円"; mark invalid.
-
-## 2. Label helpers (matching only, never for output)
-- label_key(label) -> str: NFKC, then remove ALL whitespace (including U+3000), keeping the characters otherwise unchanged. So "建物及び構築物 （純額）" and "建物及び構築物（純額）" give the same key. Document clearly that label_key is for COMPARISON ONLY and that output labels stay exactly as printed, because ground truth keeps the printed form, e.g. full-width （純額）.
-- labels_equal(a, b) -> bool: compares label_key values.
-- label_key must be idempotent; test that.
-- Do NOT add any rule about 合計, （純額）, 減価償却累計額 or any other accounting word. That is P5.
-
-## 3. Period heading helper
-- parse_period_end(text) -> tuple[int, int, int] | None: extracts (year, month, day) from strings such as "(2025 年３月 31 日)" or "（２０２６年３月３１日）", handling full-width digits and arbitrary spaces. Return None if it cannot find all three parts. No Japanese-era (和暦) support; mention that as a documented limitation.
-
-## 4. Tests (tests/test_normalize.py)
-- Table-driven cases for parse_amount covering at least: plain, comma, full-width digits, full-width comma, △ and ▲, hyphen and U+2212 and U+FF0D negatives, parenthesised negatives (half and full width), △0, ▲0, each nil marker above, runs of dashes, dash with spaces, empty, whitespace-only, "1.5", "12-3", "△-5", "12千円", "abc", and a very long number string. Assert status, value and negative for each.
-- label_key and labels_equal cases (space variants, half/full-width parentheses, idempotence) and 3 or 4 parse_period_end cases including a failing one.
-- GT round trip (read-only): for every row in data/gt/page4.csv, parse_amount(prev_raw) and parse_amount(curr_raw) must reproduce previous_year_value and current_year_value exactly, with nil raws giving value None and empty header cells giving "empty". Read the CSV with encoding utf-8-sig. NEVER write to data/gt/. This test must not use the PDF.
-- Run the complete suite, then ruff (if configured) on the new files.
-
-## 5. Docs
-- Update README with a short "normalization" section (what the functions do, the nil vs zero rule, "label_key is for matching only").
-- Add a short "Decisions" list to the docstring or to notes/normalization.md (decimal handling, dash handling, negative zero, parentheses).
-
-## Constraints
-- Do not touch data/gt/, data/raw/, or the original PDF. Do not add dependencies (stdlib only, unicodedata and re are fine). Do not write extraction, hierarchy or evaluation code.
-- Do not weaken a test to make it pass; if a GT row fails, report it instead of editing the GT.
-- Final commit "P3: normalization utilities and tests"; workstamp.md set to DONE with "Next action: P4 row reconstruction"; append P3 to the Prompt history with the commit hash.
-
-## Final message must show
-Orientation (repo state, test count before P3); the public function signatures; the list of decisions made (especially anything ambiguous); test output with counts; the GT round-trip result; ruff result; files created or modified; commit hashes; open questions.
-After Codex finishes
-Send me its final message, and I’ll check three things:
-
-the GT round trip passes for all 74 cells
-△0 gives 0 while － gives None
-no test was weakened to get green
-I’ll then draft P4 (row reconstruction), which will cluster the indent levels from x0 rather than hard-coding them.
-
-Also run scripts\export_chat.py again after P3, so the chat log in the repo stays current.
-
-1792695416164_image.png
-1792695441641_image.png
-what now
-
-Cross-checking model and reviewer attributions across sessions.
-Thanks, this corrects an error I introduced
-Your chain is different from what I put in the P10b and P11 prompts. I told the agents that “the fixes were applied by the same agent that wrote the review”. By your account that is wrong: P9 was Claude Sonnet 4.6 and the P10a fixes were Gemini Flash 3.8. REPORT.md section 7 may therefore repeat my mistake, so check it.
-
-The accurate chain
-Step	Tool and model
-Implementation plan, prompt drafting	Claude (website, different account), then this conversation (Claude)
-P0, P1	Claude Opus 4.6
-P2 to P8, P10b to P13	GPT 6.1 Sol (Codex)
-P9 independent review	Claude Sonnet 4.6
-P10a fixes (commits 5565491, d51c47f)	Gemini Flash 3.8
-P10b audit	GPT 6.1 Sol, which also built the original code
-GT second reading and prompt reviews	this conversation (Claude)
-This is a stronger story than the one in the draft. The reviewer, the fixer and the builder are three different models, and the builder then audited the fixes.
-
-What to fix
-REPORT.md section 7 (you edit this by hand). Replace any sentence saying the reviewer also applied the fixes. Use the table above. Say the review model (Claude Sonnet 4.6) differs from the builder (GPT 6.1 Sol), and the fixer (Gemini Flash 3.8) differs from both.
-Model names in workstamp.md. The P11 agent found “GPT-6” in one place and “GPT-6.1 Sol” in another. Your statement settles it, but record it as “user-supplied”, since the repo can’t verify it.
-The “Claude” row. I’m Claude Sonnet 5.5 in this session, but this conversation may have used other models earlier, so write “Claude (model as shown in your interface; confirm)”. I’d rather you not guess.
-Send this to Codex before P13
-Run it first so P13 checks the corrected state. It deliberately leaves REPORT.md to you.
-
-Housekeeping, docs only. Do NOT modify, stage or commit REPORT.md (I am editing it by hand). Do not touch code, tests, data, eval or examples. Stage only the files you change.
-
-The human owner supplied this authoritative attribution (user-supplied, not verifiable from the repo):
-- Implementation plan and prompt drafting: Claude (web, separate account), later a Claude conversation that also gave a second AI reading of the GT transcription.
-- P0, P1: Claude Opus 4.6
-- P2 to P8 and P10b to P13: GPT 6.1 Sol (Codex)
-- P9 independent review: Claude Sonnet 4.6
-- P10a fixes (commits 5565491 and d51c47f): Gemini Flash 3.8
-
-Tasks:
-1. In workstamp.md correct the Sessions table and any handoff text so they match this attribution, marking it "user-supplied". Specifically remove or correct any statement that the reviewer applied the fixes, and any "GPT-6" naming that conflicts with "GPT 6.1 Sol". Keep the history of what was written before only in git, not in the file.
-2. Add a dated note at the top of notes/p2_report.md saying the GT was later verified (see data/gt/README.md and workstamp.md). Do not rewrite the rest.
-3. Add a short dated note at the top of notes/review_P9.md stating the reviewer was Claude Sonnet 4.6 per the owner. Do not edit its findings.
-4. Report any other file that states a different attribution, with file:line, without changing it.
-Commit as "docs: correct tool and model attribution". Show git status and the hash.
-Then give P13 as drafted.
-
-For your rewrite
-Include this plainly in section 7: the independent review was written by a different model from the builder, and the fixes by a third. Also say that the fixes were audited by the builder model, which is a weaker form of independence than a human audit.
-
-but i have already given the P13 to GPT 6.1 sol
-
-No problem. P13 is a read-only check on the committed state, so it will still be useful. You just need to run the attribution fix afterwards and make sure P13’s records don’t contradict it.
-
-What to do
-Let P13 finish. Don’t interrupt it. Its clean-clone check (tests, byte-identical exports, hygiene scan) doesn’t depend on the model names.
-Then send the housekeeping message from my last reply, unchanged. It only edits workstamp.md, notes/p2_report.md and notes/review_P9.md, and it leaves REPORT.md alone.
-One addition to that message. P13 will have written notes/p13_clean_clone_check.md and updated workstamp.md with the old attribution. Add this line so everything ends up consistent:
-   Also check notes/p13_clean_clone_check.md and the P13 entries in workstamp.md for any model-attribution statement that conflicts with the list above, and correct them in the same commit.
-Why order matters. Running the housekeeping after P13 means it fixes everything in one pass, including P13’s own records. If you ran it first and P13 then rewrote workstamp.md, the correction could be overwritten.
-One small risk
-P13 might have left the “Next action” line in workstamp.md as “final export_chat.py, redaction of chat_logs...”. Housekeeping shouldn’t change that. Leave it.
-
-After both finish
-Read P13’s hygiene findings first. They list what to redact in chat_logs/ and workstamp.md.
-Fix REPORT.md section 7 by hand using the attribution table in my last reply, then commit it.
-Run pytest and git status in the main folder to confirm a clean tree.
-Run export_chat.py once more, redact, add this conversation, push to GitHub, and test the clone URL.
-Email Arun with the repo link, REPORT.md and the chat logs before 11:59 pm IST tonight.
-Send me P13’s final message when it finishes and I’ll go through it with you.
-
-give me final prompt to send after P13
-
-Final prompt (send after P13 finishes)
-This is the housekeeping prompt with the P13 addition built in. It leaves REPORT.md to you.
-
-Housekeeping, docs only. Do NOT modify, stage, stash, revert or commit REPORT.md (I am editing it by hand). Do not touch code, tests, data, eval, examples or any threshold. Stage only the files you change (never "git add -A"). If git status shows uncommitted changes you did not make, leave them alone and mention them. Set PYTHONIOENCODING=utf-8. Follow the handoff protocol (update workstamp.md, small commits), but do not add a new prompt ID to the history other than "housekeeping".
-
-The human owner supplied this authoritative attribution (user-supplied, not verifiable from the repo):
-- Implementation plan and prompt drafting: Claude (web, separate account), later a Claude conversation that also gave a second AI reading of the GT transcription.
-- P0, P1: Claude Opus 4.6
-- P2 to P8 and P10b to P13: GPT 6.1 Sol (Codex)
-- P9 independent review: Claude Sonnet 4.6
-- P10a fixes (commits 5565491 and d51c47f): Gemini Flash 3.8
-
-Tasks:
-1. In workstamp.md correct the Sessions table and any handoff text so they match this attribution, marking it "user-supplied". Remove or correct any statement that the reviewer applied the fixes, and any "GPT-6" naming that conflicts with "GPT 6.1 Sol". Leave the "Next action" line from P13 unchanged.
-2. Add a dated note at the top of notes/p2_report.md saying the GT was later verified (see data/gt/README.md and workstamp.md). Do not rewrite the rest.
-3. Add a short dated note at the top of notes/review_P9.md stating the reviewer was Claude Sonnet 4.6 per the owner. Do not edit its findings.
-4. Check notes/p13_clean_clone_check.md and the P13 entries in workstamp.md for any model-attribution statement that conflicts with the list above, and correct them in the same commit.
-5. Report any other file that states a different attribution, with file:line, without changing it.
-6. Run the full test suite and git status to confirm nothing else changed.
-
-Commit as "docs: correct tool and model attribution".
-
-Final message: the files changed, the commit hash, test count, git status, and any conflicting attributions found elsewhere (file:line).
-After it finishes
-Fix REPORT.md section 7 by hand (use the attribution table from my earlier reply), then commit it.
-Run pytest and git status in the main folder to confirm a clean tree.
-Run export_chat.py, redact the chat logs using P13’s hygiene findings, and add this conversation.
-Push to GitHub and test the clone URL.
-Email Arun before 11:59 pm IST tonight.
-
-1792757007795_image.png
-1792757021733_image.png
-these are the results of P13 don't discuss them just tell me what to do
-
-Do this now
-Paste the final prompt (the one that fixes attribution and finalizes REPORT.md) into the same Codex chat. Send it as is.
-When it finishes, run these in your terminal:
-   $env:PYTHONIOENCODING = "utf-8"
-   .venv\Scripts\python.exe -m pytest -q
-   git status
-Expect 298 passed and a clean tree.
-3. Redact the hygiene findings (the hygiene check failed, and the findings are in notes/p13_clean_clone_check.md):
-
-In VS Code, use Ctrl+Shift+F to search the repo for <user>, <path> and @.
-Replace your username and local paths with <user> or <path> in chat_logs/chat_log.md, chat_logs/transcript_full.jsonl, notes/p2_report.md line 78 and scripts/export_chat.py line 17.
-Replace the email in transcript_full.jsonl line 205 with <email>.
-If transcript_full.jsonl is too messy to redact, delete it and keep only chat_log.md, then redact that one.
-Add this conversation to chat_logs/ as a text file (copy and paste the whole chat from the top, or use the export option in the Claude website), and redact it the same way.
-Commit:
-   git add -A
-   git commit -m "chore: redact logs and add Claude conversation"
-Push to GitHub. Create a repo (public, or private with the reviewers invited), then run:
-   git remote remove origin
-   git remote add origin <your repo URL>
-   git push -u origin main
-Email Arun (cc Sandeep) before 11:59 pm IST with the repo link, a note pointing to REPORT.md, and the chat logs attached. If anything is still pending, send the repo link first and the logs right after.
-Minimum if you are out of time: steps 1, 3, 5, 6 and 7. Fill the two [USER: ...] placeholders (time spent, reflection) in REPORT.md with one or two honest sentences each before the push.
-
-
-
-
-
-PART - B :
+PART A: primary conversation (implementation plan and the first prompts)
 
 
 Ur_AI_email.pdf
@@ -1594,3 +953,646 @@ Also add a short "Results at a glance" pointer to REPORT.md near the top of READ
 
 Final message: the word count, a list of every placeholder, every claim you could not source, and the "Things to check" list.
 After P10b: check examples/ is still byte-identical, push, then run P11. I’ll write P13 (the clean-clone check, submission checklist and the email to Arun) when you tell me both are done. Plan to finish your own rewrite of REPORT.md by about 7 pm. Nobody can write the placeholders for you, and a reviewer will read that part closely.
+PART B: secondary conversation (reviews of prompts and results, from the P0/P1 results through submission)
+
+
+1792688919407_image.png
+1792688936517_image.png
+1792689057335_image.png
+1792689299973_image.png
+1792689306407_image.png
+1792689345735_image.png
+1792689352460_image.png
+1792689358345_image.png
+
+Phase 0 (setup) is complete, but it was executed with an earlier version of my instructions that did not include a session handoff protocol. This prompt (P1) first installs that protocol, then does the Phase 1 work: inspecting the PDF. Do NOT write any parsing, normalization or evaluation logic in t
+
+pasted
+
+analyse everything
+
+this is the JD "(Company Info)
+Ur AI is an AI technology company developing practical products for document understanding and business process automation.
+Our team develops Document Intelligence systems that transform complex business documents, including PDFs, images, tables, charts, and presentation files, into structured and usable data.
+The working language for this internship will be English. Japanese language proficiency is not required.
+(Internship Project)
+
+About the project This internship focuses on the research and development of Document Intelligence and Vision-Language Models (VLMs). The main objective is to improve AI systems that understand complex documents and convert their contents into structured formats such as Markdown and JSON. This is an on-site internship in Japan. The internship will run for approximately two months and will be completed by the end of February 2027. Exact dates will be coordinated with the selected candidates.
+What the intern will be doing
+Depending on the intern's experience and assigned research theme, the intern will work on one or more of the following areas:
+
+Developing and improving pipelines for extracting text, tables, charts, images, and layout information from PDFs, images, and PowerPoint files
+Implementing OCR, layout analysis, table understanding, chart understanding, and structured data conversion
+Creating, cleaning, and evaluating datasets for Vision-Language Models
+Conducting continued pre-training, supervised fine-tuning, and instruction-tuning experiments
+Evaluating model outputs and analyzing failure patterns
+Designing benchmarks and evaluation datasets for Document AI and VLM models
+Comparing accuracy, inference speed, GPU memory usage, and inference cost
+Optimizing training and inference pipelines using PyTorch, vLLM, TensorRT-LLM, CUDA, quantization, parallelization, and model serving technologies
+
+Expected deliverables
+By the end of the internship, the intern is expected to deliver:
+
+A reproducible experiment or development environment
+Organized training or evaluation datasets, source code, and evaluation scripts
+Comparison results against existing baselines, including accuracy, speed, or GPU efficiency
+At least one working prototype, model, evaluation framework, or product implementation
+A final report describing the experiments, results, failure cases, and recommended next steps
+The goal is not limited to research or investigation. We expect the intern to produce working code, a trained model, an evaluation framework, or a functional prototype.
+(Skills)
+
+Must-have skills
+
+Programming experience in Python
+Basic development experience using Git and GitHub
+Basic knowledge of machine learning, deep learning, LLMs, or Vision-Language Models
+Ability to formulate hypotheses and independently conduct implementation, testing, and improvement
+Ability to read technical documents and research papers in English
+Ability to communicate with the team in English
+
+Nice-to-have skills
+
+Experience with PyTorch or Hugging Face Transformers
+Experience with pre-training, continued pre-training, fine-tuning, or instruction tuning of LLMs or VLMs
+Experience with OCR, Document AI, computer vision, layout analysis, table understanding, or chart understanding
+Experience with CUDA, vLLM, TensorRT-LLM, distributed training, quantization, or inference optimization
+Experience with FastAPI, Docker, AWS, or GPU environments
+-Experience reproducing AI research papers or conducting research projects"
+and the take home assignment i have been given, help to complete the above work.
+i have created a implementation plan on how we will complete the above work and then one one by help me complete the implementation plan for the above work
+we will use different AI Agents to complete the work and do the coding part you just have to give the prompts that i can give it to the AI Agent.
+also i have created a implementation plan for the prompts (i.e. in which order to give which prompts ), since i have to submit the AI chat logs also be very careful with the prompts you give and the order in which you give me.
+prompt P0 and P1 have already been completed the prompts P0, P1 and their results has also been pasted
+P0 "You are helping me build a take-home project for an internship application at Ur AI (Document Intelligence & VLM R&D). I will give you a series of prompts, one phase at a time. This first prompt only sets up the project. Do NOT write any parsing logic yet.
+
+## The task I was given
+Here is one page from a real public Japanese company filing: a consolidated balance sheet (連結貸借対照表), page 4, marked 訂正後 ("after correction"), units 千円 (thousands of yen), with previous-year and current-year columns. The objective: imagine many PDFs like this, some in more complex formats. Design a parser that converts each page into a correct table. How "correct" is defined and measured is up to me. A complete solution is not expected. I may use any AI tool, and I must submit my full AI chat log together with the work, so please explain your decisions as you go, and keep your actions and reasoning visible rather than silent.
+
+## What I have promised to deliver
+1. A GitHub repository with code.
+2. A flat CSV with columns: label, parent, level, row_type, previous_year_value, current_year_value.
+3. A hierarchical JSON preserving the section > subsection > line-item structure.
+4. An evaluation framework covering: (a) cell-level accuracy against hand-labeled ground truth, (b) structural accuracy (hierarchy and row/column alignment), (c) label-free accounting checks (subtotals, net rows, total assets) with a rounding tolerance appropriate for 千円 units.
+5. A short written report.
+
+## Design assumptions
+- The input PDF is born-digital with a real text layer. Build for that first.
+- Structure the code so an OCR/VLM backend for scanned pages can be plugged in later behind a clean interface, but do not implement it now.
+- Known properties of this page that the design must eventually handle: negative numbers marked with △; nil values marked with －; full-width digits and parentheses; duplicate labels under different parents (e.g. リース資産, その他, 減価償却累計額), so each row needs a parent path; hierarchy that is not present in plain extracted text and must come from layout coordinates plus rules; printed subtotals that may differ slightly from the sum of components because of rounding.
+
+## What I want from you in this step
+1. Propose a repository layout (src package, tests, data/raw, data/gt, outputs, eval, notes, scripts) and briefly justify it. Then create it.
+2. Set up a Python environment (Python 3.11+ if available) with a pyproject.toml or requirements.txt. Dependencies: PyMuPDF, pdfplumber, pandas, pytest, and ruff if you think it is useful. Keep dependencies minimal and pinned to versions you have verified install correctly.
+3. Create PROJECT_BRIEF.md at the repo root containing the task description, assumptions, deliverables and the planned phases above, so that another AI agent or a human reviewer can understand the project without this chat.
+4. Create a README.md stub with setup and run instructions that you will fill in later, and a .gitignore appropriate for Python.
+5. Put the provided PDF in data/raw/ (it is currently in the workspace; move or copy it, do not modify it).
+6. Write one smoke test that opens the PDF and asserts it has at least one page and a non-empty text layer, and run it.
+7. Make an initial git commit with a clear message.
+
+## Constraints
+- No parsing, normalization or evaluation logic yet.
+- Do not invent data or expected values.
+- Keep everything reproducible from a fresh clone with documented commands.
+
+## Acceptance criteria
+- I can run one documented command to install dependencies and one to run pytest, and the smoke test passes.
+- The directory tree, the commands you ran, and the test output are shown in your final message.
+- At the end, list any assumptions you made and anything you were unsure about."
+P1 ""
+
+Counting data rows and headings in the balance sheet table.
+Analysis and next step: P2 (ground truth)
+1. What the task is really testing
+The email is deliberately open-ended (“how you define and measure correct is up to you”), and the JD tells us what they will look for:
+
+JD signal	What to show in the submission
+Evaluation frameworks, benchmarks, failure analysis	Your P7–P8 work, including honest failure cases
+“Comparison results against existing baselines”	Missing from your plan. Add a naive baseline in P8
+Reproducible environment, source code	P0, requirements.lock, P13 clean-clone check
+OCR/VLM, layout analysis	The P12 plug-in point
+Working code, not just investigation	Keep everything runnable
+Your plan is solid. I’d make three changes:
+
+P8 should include baselines. Compare your parser against (a) pdfplumber.extract_tables() and (b) plain get_text() lines with a regex split, using the same metrics. A parser that beats naive baselines on hierarchy and parent paths is the headline result.
+P4–P5 should be config-driven. Label rules (合計, （純額）, 減価償却累計額) belong in a small rules file, and indent levels should be discovered by clustering x0 rather than hard-coded. “Many PDFs, some more complex” means a hard-coded 75/88/101/114 would look like overfitting.
+P8 robustness test. Perturb the page (shift x-offsets, drop the shaded rects, rescale) and report which metrics survive.
+2. Deadline warning
+Today is Thu 22 Oct. The deadline is Fri 23 Oct, 11:59 pm IST, so you have about one day. If time gets tight, merge P3+P4 and P5+P6, and skip P12 (mention it in the write-up as future work). Do not skip P9, since the independent review is the strongest point in your process. Run it well before the deadline.
+
+3. Review of P0/P1 results
+The P0/P1 results look sound: the commits exist, 11 tests pass, and the lock file and handoff protocol are in place. I found three things to carry forward.
+
+a) The Q6 counts are slightly mislabeled. I counted the text layer myself. The table body has 43 rows: 6 header rows (資産の部, 流動資産, 固定資産, 有形固定資産, 無形固定資産, 投資その他の資産) and 37 data rows. P1 reported “39 with numbers / 11 without”, but I think two of the “numbers” rows are the date line ((2025 年３月 31 日)…) and the footer - 4 -, which contain digits but aren’t data. “Has digits” is not the same as “is a data row”, so the parser must not use it as the test. The P2 prompt has the agent verify this.
+
+b) Full-width digits are only in labels and headings. The table values are half-width (2,002,429), while ３月 and ３１日 are full-width. Normalization still needs to handle both.
+
+c) Hierarchy is harder than P1 suggests. 減価償却累計額 appears 4 times under the same section (有形固定資産). Its parent is not the section, it’s the gross row above it (e.g. 建物及び構築物). A correct path looks like:
+
+資産の部 > 固定資産 > 有形固定資産 > 建物及び構築物 > 減価償却累計額
+
+This is the core structural insight, and I’ve built it into the ground-truth convention below.
+
+Accounting checks I computed from your text layer (components vs printed, 千円):
+
+流動資産合計: FY25 sums to 5,863,681 vs 5,863,684 (diff 3). FY26 sums to 3,377,405 vs 3,377,407 (diff 2).
+有形固定資産合計: diff 1 (FY25) and 3 (FY26).
+固定資産合計 FY25: diff 2. 資産合計 FY26: diff 1.
+Net rows are off by at most 1 (e.g. 213,939 − 172,066 = 41,873 vs printed 41,872).
+Everything else matches exactly.
+The maximum observed difference is 3, so a tolerance of roughly 0.5 × (number of addends) works. Use these figures later to sanity-check the evaluator.
+
+4. Prompt P2
+Paste this into the same agent and session as P0/P1. The point of the design is that ground truth must be independent of the parser, so the agent transcribes from the image and uses the text layer only afterwards, to flag disagreements.
+
+P2: Ground truth (draft for human verification). Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into workstamp.md, write the plan, set P2 IN PROGRESS, mark steps [~]/[x] as you go, make small wip(P2) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over.
+
+Goal: create a hand-verifiable ground-truth table for page 4, created from the RENDERED PAGE IMAGE, independent of any parser. A human (me) will verify it against the page afterwards. Do not write any parsing, normalization or evaluation code for the package.
+
+## Rules for independence (important)
+- Transcribe ONLY from the image data/derived/page4_200dpi.png. If your tooling cannot view images, STOP and tell me; do not fall back to the text layer.
+- If digits are hard to read at 200 DPI, render zoomed crops of the PDF with PyMuPDF (e.g. 300 DPI, horizontal strips of about 12 rows with overlap) into data/derived/crops/ and read those. Rendering crops is allowed; reading text from the PDF is NOT allowed during transcription.
+- During transcription do NOT open or use: the PDF text layer, get_text, pdfplumber, notes/words_*.json, notes/inspection.md. Do not copy numbers from earlier chat output.
+- If any character or digit is unclear, do not guess: write the best reading and list it under "uncertain cells" in your report.
+
+## Step 0 (before transcription): verify one P1 claim
+notes/inspection.md Q6 reports 39 rows with numbers and 11 without. I suspect 2 of the "numeric" rows are the date heading and the "- 4 -" footer, which contain digits but are not data rows. Check this from the P1 notes only (not for GT purposes), and if Q6 is wrong or misleading, correct that paragraph of notes/inspection.md with evidence and commit it as a separate "fix(P1): ..." commit. This does not count as using the text layer for GT.
+
+## Step 1: define the ground-truth conventions
+Write data/gt/README.md documenting these conventions exactly:
+- File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
+- Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
+- label: exactly as printed (keep full-width parentheses （純額）, no normalization).
+- parent_path: ancestors' labels joined by " > ", root first; empty for the root. parent: the immediate parent label. level = number of ancestors (so the root 資産の部 has level 0).
+- Hierarchy convention (semantic, not just indentation):
+  * 流動資産 and 固定資産 are children of 資産の部. 有形固定資産, 無形固定資産 and 投資その他の資産 are children of 固定資産.
+  * Plain line items are children of their section header.
+  * Where a gross item is followed by a 減価償却累計額 row and a （純額） row, those two rows are CHILDREN OF THE GROSS ITEM (e.g. parent of 減価償却累計額 is 建物及び構築物). The gross item itself is a child of the section.
+  * A 合計 row is a child of the section it closes and has row_type subtotal; 資産合計 is a child of 資産の部 with row_type total.
+- row_type values (exactly these): header (no numbers), line_item, contra (減価償却累計額 and 貸倒引当金), net (（純額） rows), subtotal, total.
+- Values: integers in 千円 exactly as printed (do NOT multiply by 1000). △ means negative. A printed nil mark (－) is stored as an EMPTY value (null, not 0) and prev_raw/curr_raw keep the printed string. △0 is stored as 0 with raw "△0". prev_raw/curr_raw hold the string exactly as printed (including △, commas); empty for header rows. Use previous = 前連結会計年度 column, current = 当連結会計年度 column.
+- If you believe a convention above is ambiguous or wrong for this page, say so in the report rather than silently deviating.
+
+## Step 2: transcribe
+Create data/gt/page4.csv and data/gt/page4_meta.json (page_number, correction_marker "訂正後", title, unit "千円", period headings as printed, period end dates as printed, "verified_by_human": false). Number of rows: report what you count; do not pad.
+
+## Step 3: verification aids (not part of the package)
+a) Write notes/gt_verification.md: a checklist table with one line per GT row (row_id, label, previous raw, current raw, a "[ ] verified" box) so I can tick rows against the page.
+b) Write a throwaway script scripts/gt_selfcheck.py that (1) validates the CSV schema, enums, level == number of path elements, and that nil cells are empty; and (2) prints, for each subtotal/net/total row, the components' sum vs the printed value and the difference, as INFORMATION ONLY (no pass/fail, no tolerance logic; that is P7).
+c) ONLY AFTER the CSV is finished and committed: write scripts/gt_crosscheck.py that compares GT numbers against the numeric tokens in the text layer and prints disagreements. It must never modify the GT. Report disagreements; do not fix them by yourself, because I adjudicate against the page.
+
+## Constraints
+- Do not use the text layer for GT values; do not invent data; do not touch the original PDF; do not add anything under src/.
+- Add one pytest test that only checks schema (columns present, allowed row_type values, level consistent with parent_path). Assert NO financial values and no row counts.
+- Run the full test suite. Update README (data/gt description, how to run the two scripts).
+- Final commit "P2: draft ground truth (pending human verification)"; workstamp.md set to DONE with "Next action: human verification of GT, then P3". Mark in workstamp.md that the GT is a DRAFT until I confirm.
+
+## Final message must show
+Row count and row-type counts; the list of uncertain cells; the self-check output; the cross-check disagreements (if any); convention questions; files created; test output; commit hashes.
+5. What you do after P2 (this is your human-verification step)
+Open data/derived/page4_200dpi.png next to notes/gt_verification.md and tick every row. Don’t skim, since this file defines “correct” for the whole project.
+Quick completeness checks:
+It should have 43 rows (6 header + 37 numeric rows).
+Exactly 2 nil cells: 建設仮勘定 (prev) and 長期貸付金 (prev).
+貸倒引当金 current is △0, stored as 0.
+Self-check differences should be ≤ 3 everywhere. If any exceeds that, suspect a typo in the GT.
+Cross-check disagreements are a to-do list. For each one, look at the page and decide who’s right.
+Reply in the same session with something like “Verified. Corrections: row 17 prev should be …”, and ask it to apply them, set verified_by_human: true, update workstamp and commit. That reply doesn’t need a new prompt ID, but keep it in the log.
+Send me the agent’s P2 final message once you’ve done this, and I’ll review it before drafting P3. If you want, I can also tighten the P3–P5 prompts now to include the config-driven design and the baseline comparison.
+
+do i need to do anything before giving P2 and also i am switching the AI Agent i used before as reached my quota limit so the new AI agent might not know the context
+
+Drafting a resume prompt and pre-flight checklist for continuity.
+Before P2: a short checklist, then one prompt for the new agent
+Yes, there are a few things to do first. The new agent has no memory of the old chat, but your protocol was designed for this: all continuity lives in the repo (workstamp.md, PROJECT_BRIEF.md, git history). What matters is that the repo is intact and the new agent is told to read it.
+
+What you should do (about 5 minutes)
+Open the same project folder in the new agent. If the new agent runs on a different machine or workspace, copy the whole folder including the hidden .git directory, or push to GitHub and clone it. Recreate the venv afterwards (pip install -e ".[dev]").
+Check the repo state yourself in a terminal:
+   git status          # should be clean
+   git log --oneline -3   # top commit should be 0c66de8 (or later)
+   git ls-files data/derived/page4_200dpi.png   # must print the path
+If git status is not clean, tell the agent in the prompt below, not me.
+3. Check that the new agent can view images. P2 depends on it, and the prompt tells the agent to stop if it can’t. If it can’t, use a different agent for P2, because the ground truth must not come from the text layer.
+4. Windows only: set PYTHONIOENCODING=utf-8 (or $env:PYTHONIOENCODING="utf-8" in PowerShell) before running anything, as P1 found.
+5. Export the old session’s chat log now, while you still can. The log is part of your submission, and the old session covers P0 and P1. Keep one file per session, plus a short note on why you switched (usage limit).
+6. Start a fresh chat in the new agent and paste the prompt below as the first message. It has a short orientation section followed by P2, so the log reads cleanly as “continuation, then P2”.
+
+Changes I made to P2
+I removed “paste into the same session”. The new prompt starts with orientation instead.
+I told the agent to add its own Sessions row with its real model name and to write “Resumed in new session (previous agent hit usage limit)”.
+I added an instruction not to trust or reuse any earlier chat claims, only the repo.
+I kept the independence rules, since they are the most important part of P2.
+Prompt to paste (new agent, new session)
+This is a continuation of an existing project. My previous AI agent hit its usage limit, and you are a different agent in a new session with NO memory of earlier chats. Rely only on the repository. P0 (setup) and P1 (PDF inspection) are complete. I am now giving you P2.
+
+## Orientation (do this first, before anything else)
+1. Read PROJECT_BRIEF.md (especially "Agent working rules") and workstamp.md. Follow the handoff protocol and resume procedure written there for every step of this prompt.
+2. Run git status, git log -5, and the full test suite (activate .venv first, or use .venv\Scripts\python.exe on Windows; set PYTHONIOENCODING=utf-8 so Japanese text prints correctly). Report the real state. P1 should show DONE in workstamp.md with all tests passing; if reality disagrees, tell me and fix inconsistencies before starting P2.
+3. Add a row to the "Sessions" table in workstamp.md: next session number, YOUR actual model name, UTC start time (or "unknown"), note "Resumed in new session; previous agent hit usage limit". Never write emails, account names or credentials anywhere.
+4. Do not rely on anything you may infer about earlier chats. Treat the repo files as the only source of truth.
+
+## P2: Ground truth (draft for human verification)
+Copy this whole P2 section verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P2 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P2) commits.
+
+Goal: create a hand-verifiable ground-truth table for page 4, created from the RENDERED PAGE IMAGE, independent of any parser. A human (me) will verify it against the page afterwards. Do not write any parsing, normalization or evaluation code for the package.
+
+### Rules for independence (important)
+- Transcribe ONLY from the image data/derived/page4_200dpi.png. If your tooling cannot view images, STOP and tell me; do not fall back to the text layer.
+- If digits are hard to read at 200 DPI, render zoomed crops of the PDF with PyMuPDF (e.g. 300 DPI, horizontal strips of about 12 rows with overlap) into data/derived/crops/ and read those. Rendering crops is allowed; reading text from the PDF is NOT allowed during transcription.
+- During transcription do NOT open or use: the PDF text layer, get_text, pdfplumber, notes/words_*.json, notes/inspection.md. Do not copy numbers from earlier chat output or from any file other than the images.
+- If any character or digit is unclear, do not guess: write the best reading and list it under "uncertain cells" in your report.
+
+### Step 0 (before transcription): verify one P1 claim
+notes/inspection.md Q6 reports 39 rows with numbers and 11 without. I suspect 2 of the "numeric" rows are the date heading and the "- 4 -" footer, which contain digits but are not data rows. Check this from the P1 notes only (not for GT purposes), and if Q6 is wrong or misleading, correct that paragraph of notes/inspection.md with evidence and commit it as a separate "fix(P1): ..." commit. This does not count as using the text layer for GT.
+
+### Step 1: define the ground-truth conventions
+Write data/gt/README.md documenting these conventions exactly:
+- File: data/gt/page4.csv, UTF-8 with BOM (utf-8-sig), one row per printed table-body row, in reading order, from 資産の部 down to 資産合計. Page header items (訂正後, title, unit, period headings, footer) are NOT rows; they go in page4_meta.json.
+- Columns: row_id, label, parent, parent_path, level, row_type, previous_year_value, current_year_value, prev_raw, curr_raw.
+- label: exactly as printed (keep full-width parentheses （純額）, no normalization).
+- parent_path: ancestors' labels joined by " > ", root first; empty for the root. parent: the immediate parent label. level = number of ancestors (so the root 資産の部 has level 0).
+- Hierarchy convention (semantic, not just indentation):
+  * 流動資産 and 固定資産 are children of 資産の部. 有形固定資産, 無形固定資産 and 投資その他の資産 are children of 固定資産.
+  * Plain line items are children of their section header.
+  * Where a gross item is followed by a 減価償却累計額 row and a （純額） row, those two rows are CHILDREN OF THE GROSS ITEM (e.g. parent of 減価償却累計額 is 建物及び構築物). The gross item itself is a child of the section.
+  * A 合計 row is a child of the section it closes and has row_type subtotal; 資産合計 is a child of 資産の部 with row_type total.
+- row_type values (exactly these): header (no numbers), line_item, contra (減価償却累計額 and 貸倒引当金), net (（純額） rows), subtotal, total.
+- Values: integers in 千円 exactly as printed (do NOT multiply by 1000). △ means negative. A printed nil mark (－) is stored as an EMPTY value (null, not 0) and prev_raw/curr_raw keep the printed string. △0 is stored as 0 with raw "△0". prev_raw/curr_raw hold the string exactly as printed (including △, commas); empty for header rows. Use previous = 前連結会計年度 column, current = 当連結会計年度 column.
+- If you believe a convention above is ambiguous or wrong for this page, say so in the report rather than silently deviating.
+
+### Step 2: transcribe
+Create data/gt/page4.csv and data/gt/page4_meta.json (page_number, correction_marker "訂正後", title, unit "千円", period headings as printed, period end dates as printed, "verified_by_human": false). Number of rows: report what you count; do not pad.
+
+### Step 3: verification aids (not part of the package)
+a) Write notes/gt_verification.md: a checklist table with one line per GT row (row_id, label, previous raw, current raw, a "[ ] verified" box) so I can tick rows against the page.
+b) Write a throwaway script scripts/gt_selfcheck.py that (1) validates the CSV schema, enums, level == number of path elements, and that nil cells are empty; and (2) prints, for each subtotal/net/total row, the components' sum vs the printed value and the difference, as INFORMATION ONLY (no pass/fail, no tolerance logic; that is P7).
+c) ONLY AFTER the CSV is finished and committed: write scripts/gt_crosscheck.py that compares GT numbers against the numeric tokens in the text layer and prints disagreements. It must never modify the GT. Report disagreements; do not fix them by yourself, because I adjudicate against the page.
+
+### Constraints
+- Do not use the text layer for GT values; do not invent data; do not touch the original PDF; do not add anything under src/.
+- Add one pytest test that only checks schema (columns present, allowed row_type values, level consistent with parent_path). Assert NO financial values and no row counts.
+- Run the full test suite. Update README (data/gt description, how to run the two scripts).
+- Final commit "P2: draft ground truth (pending human verification)"; workstamp.md set to DONE with "Next action: human verification of GT, then P3". Mark in workstamp.md that the GT is a DRAFT until I confirm.
+
+### Final message must show
+Orientation results (repo state, tests, session row added); row count and row-type counts; the list of uncertain cells; the self-check output; the cross-check disagreements (if any); convention questions; files created; test output; commit hashes.
+After the agent finishes
+Do the verification steps from my previous message: tick all rows against the page image, expect 43 rows with 6 headers and 37 numeric rows, exactly 2 nil cells, △0 stored as 0, and self-check differences of 3 or less. Then send me the agent’s final message and I’ll review it before drafting P3.
+
+If the new agent says it cannot view images, tell me which agent it is and I’ll suggest a workaround that keeps the ground truth independent of the text layer.
+
+
+1792691801500_image.png
+1792691816801_image.png
+now what to do
+
+Comparing chat exports between the old and new agent setups.
+Comparing chat exports between the old and new agent setups.
+You’re ready for P2. The screenshots show everything is in place:
+
+Old session exported. The old agent created chat_logs/chat_log.md, chat_logs/transcript_full.jsonl and scripts/export_chat.py, and committed them.
+New Codex session is open in the Ur_AI project, with the UTF-8 variable set in the terminal.
+What to do now
+Paste the full P2 prompt (the one starting “This is a continuation of an existing project...”) as the first message in this new chat, and send it. Don’t add anything before it.
+Expect the top commit to differ. The new agent will see the chat-export commit on top of 0c66de8. That’s fine, since only the chat-log files were added. If it reports any other change, ask it to explain.
+Approve its commands as they come. You’re in “Ask for approval” mode, so it will pause often. That’s good for your log, but read what it runs. In particular, it must not run get_text, pdfplumber or open notes/words_*.json during transcription.
+Optional: raise the reasoning effort to High (the “Medium” dropdown). P2 means reading about 80 numbers from an image, and extra effort helps accuracy. Your own verification pass catches errors anyway, so Medium is acceptable.
+Watch the first reply. It should confirm it can view the PNG. If it says it can’t, or starts reading text from the PDF instead, stop it and tell me.
+Before you submit (not now)
+The raw transcript_full.jsonl may contain account details, email addresses or local file paths. Open it and search for @ and your username (<user>) before submitting. Redact or remove anything private. The protocol already says never to write credentials into the repo, but a raw export can capture more than you expect.
+
+Send me the agent’s final P2 message when it finishes, after your row-by-row verification against the page.
+
+1792692711445_image.png
+1792692763412_image.png
+1792692782771_image.png
+what to do now
+
+P2 finished. Your job now: verify the ground truth
+The agent’s report looks very good. Before you tick anything, here is what it tells us.
+
+What checks out
+Counts match my independent computation: 43 rows = 6 headers + 22 line items + 5 contra + 4 net + 5 subtotals + 1 total. (My expected breakdown was 6 headers and 37 numeric rows, and 22+5+4+5+1 = 37.)
+Self-check differences all match mine (all within 3):
+流動資産合計: −3 (prev), −2 (curr)
+有形固定資産合計: −1, −3
+固定資産合計 prev: −2
+資産合計 curr: −1
+リース資産（純額）: +1 on both years
+The cross-check agrees: 74 cells, 0 disagreements. 74 is exactly 37 rows × 2 columns. The CSV was committed before the cross-check ran, so the two readings are independent. Two different reads of the same page (image vs text layer) agree on every number, which is strong evidence.
+Process was clean: separate fix commit for the Q6 correction, GT frozen before the cross-check, 12 tests passing, src/ and the PDF untouched.
+One thing to note: the self-check shows 固定資産合計 current as 1757841 / 1757841 / 0, while my earlier hand-check had a small diff only on the previous year. That is consistent with what I told you.
+
+What you do now (about 20 to 30 minutes)
+The cross-check makes errors unlikely, but you are the human in “human-verified”, so do the pass. Both readings could still share a mistake in a label (the cross-check only compared numbers) or in the hierarchy.
+
+Open data/derived/page4_200dpi.png beside notes/gt_verification.md.
+For each of the 43 rows, tick it if the label and both raw values match the page. Pay extra attention to:
+labels (the cross-check didn’t test them): 退職給付に係る資産, 投資その他の資産, 機械装置及び運搬具
+the 2 nil cells: 建設仮勘定 and 長期貸付金, both previous year, stored empty
+貸倒引当金 current = △0, stored as 0
+Open data/gt/page4.csv (in VS Code, or Excel with UTF-8) and check the hierarchy columns against the convention:
+減価償却累計額 and （純額） rows have the gross item as parent, e.g. … > 有形固定資産 > 建物及び構築物
+流動資産 and 固定資産 have parent 資産の部; 有形固定資産, 無形固定資産 and 投資その他の資産 have parent 固定資産
+資産合計 is a child of 資産の部 with level 1
+Think about one convention question. It said “none” for convention questions, but the 無形固定資産 section has a plain リース資産 and その他 with no 減価償却累計額 rows. Check they are children of 無形固定資産, not of a gross item.
+Then reply to the agent in the same session
+If everything is right, send this (it is not a new prompt ID, but keep it in the log):
+
+Verified. I checked all 43 rows against the page image (labels, raw values, nil cells, △0, and the hierarchy columns). No corrections. Please set "verified_by_human": true in data/gt/page4_meta.json, mark the GT as VERIFIED (no longer DRAFT) in workstamp.md and data/gt/README.md, record the verification in workstamp.md, and commit as "chore(P2): GT verified by human". Then show me git status and the final commit hash. Do not start P3.
+If you find mistakes, replace the “No corrections” sentence with something like Corrections: row 17 label should be …, row 30 current should be …, and ask it to apply them, re-run the self-check, the cross-check and the tests, and commit. Then it should expect disagreements to show up in the cross-check, which is the point of having it.
+
+One honest caveat for your write-up
+Because the agent read the image itself, the GT is “AI-transcribed, human-verified, cross-checked against the text layer”, not purely hand-typed. That is fine, and arguably stronger, but describe it that way in the report.
+
+When the agent confirms the commit, send me that message. I’ll then draft P3, and I’ll build in the config-driven design (rules in a small file, indent levels clustered from x0) that I suggested earlier.
+
+1792693447712_page4_200dpi.png
+1792693615538_image.png
+1792693640163_image.png
+# Page 4 draft ground truth — human verification
+
+Status: **DRAFT**, not verified by a human. Source: the rendered page and
+300 DPI overlapping crops in `data/derived/crops/`. Check each entry against
+the image, including the label, signs, commas and nil marks. Parent paths are
+in the CSV for separate hierarchy review. Header cells are intentionally blank.
+
+Image-only CSV frozen in commit `7ca2ef8` before any text-layer cross-check.
+Uncertain cells: none identified after enlarged visual review. This does not
+substitute for human verification. No convention deviations or open questions.
+
+| row_id | label | previous raw | current raw | human check |
+|---|---|---|---|---|
+| r001 | 資産の部 |  |  | [ ] verified |
+| r002 | 流動資産 |  |  | [ ] verified |
+| r003 | 現金及び預金 | 2,002,429 | 608,281 | [ ] verified |
+| r004 | 受取手形 | 20,659 | 26,333 | [ ] verified |
+| r005 | 売掛金 | 2,019,476 | 884,339 | [ ] verified |
+| r006 | 電子記録債権 | 564,667 | 370,468 | [ ] verified |
+| r007 | 商品及び製品 | 589,488 | 1,019,663 | [ ] verified |
+| r008 | 仕掛品 | 186,748 | 55,344 | [ ] verified |
+| r009 | 原材料及び貯蔵品 | 370,403 | 136,082 | [ ] verified |
+| r010 | 短期貸付金 | 7,530 | 30,000 | [ ] verified |
+| r011 | その他 | 105,260 | 246,895 | [ ] verified |
+| r012 | 貸倒引当金 | △2,979 | △0 | [ ] verified |
+| r013 | 流動資産合計 | 5,863,684 | 3,377,407 | [ ] verified |
+| r014 | 固定資産 |  |  | [ ] verified |
+| r015 | 有形固定資産 |  |  | [ ] verified |
+| r016 | 建物及び構築物 | 2,121,360 | 1,880,082 | [ ] verified |
+| r017 | 減価償却累計額 | △1,923,585 | △1,640,253 | [ ] verified |
+| r018 | 建物及び構築物（純額） | 197,775 | 239,828 | [ ] verified |
+| r019 | 機械装置及び運搬具 | 4,024,922 | 2,250,799 | [ ] verified |
+| r020 | 減価償却累計額 | △3,634,165 | △1,914,091 | [ ] verified |
+| r021 | 機械装置及び運搬具（純額） | 390,757 | 336,708 | [ ] verified |
+| r022 | 土地 | 768,976 | 705,403 | [ ] verified |
+| r023 | リース資産 | 210,746 | 213,939 | [ ] verified |
+| r024 | 減価償却累計額 | △147,599 | △172,066 | [ ] verified |
+| r025 | リース資産（純額） | 63,146 | 41,872 | [ ] verified |
+| r026 | 建設仮勘定 | － | 4,553 | [ ] verified |
+| r027 | その他 | 848,814 | 446,126 | [ ] verified |
+| r028 | 減価償却累計額 | △840,375 | △421,883 | [ ] verified |
+| r029 | その他（純額） | 8,439 | 24,243 | [ ] verified |
+| r030 | 有形固定資産合計 | 1,429,094 | 1,352,610 | [ ] verified |
+| r031 | 無形固定資産 |  |  | [ ] verified |
+| r032 | リース資産 | 34,190 | 21,402 | [ ] verified |
+| r033 | その他 | 10,070 | 14,466 | [ ] verified |
+| r034 | 無形固定資産合計 | 44,261 | 35,869 | [ ] verified |
+| r035 | 投資その他の資産 |  |  | [ ] verified |
+| r036 | 投資有価証券 | 44,180 | 218,836 | [ ] verified |
+| r037 | 関係会社株式 | 1,123 | 1,123 | [ ] verified |
+| r038 | 長期貸付金 | － | 62,000 | [ ] verified |
+| r039 | 退職給付に係る資産 | 18,404 | 16,435 | [ ] verified |
+| r040 | その他 | 133,361 | 70,967 | [ ] verified |
+| r041 | 投資その他の資産合計 | 197,069 | 369,362 | [ ] verified |
+| r042 | 固定資産合計 | 1,670,426 | 1,757,841 | [ ] verified |
+| r043 | 資産合計 | 7,534,110 | 5,135,249 | [ ] verified |
+
+## Additional verification
+
+- [ ] Check page metadata, headings, end dates and footer in `data/gt/page4_meta.json`.
+- [ ] Check the semantic parents in the CSV, including gross/contra/net families.
+- [ ] Adjudicate any arithmetic differences against the page; do not change values to force sums.
+- [ ] Confirm the draft explicitly before changing `verified_by_human` to true or starting P3.
+i have verified it, you also verify it as well so that there are no human error
+
+Cross-checking individual line values against the source figures.
+Independent check: no errors found
+I compared the page image (page4_200dpi.png), the checklist, and the two spreadsheet screenshots row by row.
+
+What I verified
+Rows and labels: 43 rows, r001 to r043, in the same order as the page. All labels match, including full-width parentheses in （純額） and the repeated labels (減価償却累計額 ×4, その他 ×3, リース資産 ×2).
+Raw values: all 74 numeric cells match the image, with commas and △ preserved. The special cases are right:
+貸倒引当金 current is △0, stored as 0.
+建設仮勘定 and 長期貸付金 are nil in the previous-year column only. They show as － in the raw column and empty in the value column.
+Numeric columns in the spreadsheet: all values match the image, and every contra row is negative.
+Row types: the 6 headers, 5 contra, 4 net, 5 subtotal and 1 total rows are all classified correctly.
+Hierarchy:
+流動資産 and 固定資産 are at level 1 under 資産の部.
+有形固定資産, 無形固定資産 and 投資その他の資産 are at level 2 under 固定資産.
+Plain items are at level 3, and each contra and net row is at level 4, under its gross item.
+建設仮勘定 is correctly level 3 under 有形固定資産.
+The 無形固定資産 リース資産 and その他 are level 3 under 無形固定資産, with no contra rows.
+流動資産合計 and 固定資産合計 are level 2 children of the section they close. 有形, 無形 and 投資 subtotals are level 3. 資産合計 is level 1.
+Two cautions
+Do not save the CSV from Excel. Excel is converting raw strings like 608,281 into numbers and re-displaying them in Indian grouping (6,08,281), and showing ####### where columns are narrow. The file on disk is probably fine, but saving it from Excel could overwrite the raw strings and strip the BOM. Close it without saving, and use VS Code to view it from now on.
+What I could not see. The parent_path and label columns are truncated in your screenshots, and I haven’t seen page4_meta.json. I checked the labels from the checklist and the parents from the visible columns. Please open the CSV in VS Code and confirm one deep row reads 資産の部 > 固定資産 > 有形固定資産 > 建物及び構築物. Also check that the meta file has the two period headings, the end dates, 訂正後, 千円 and the title.
+Limits of this verification
+I read the same page image as the agent, so this is not independent of the image. It is a second reader plus the text-layer cross-check (74 of 74 cells agree). Say that honestly in the write-up: transcribed by an AI, checked by you and a second AI, and cross-checked against the PDF text layer.
+
+Reply to the agent
+Verified. I checked all 43 rows against the page image (labels, raw values, nil cells, △0, and the hierarchy columns), and an independent second review found no discrepancies. No corrections. Please set "verified_by_human": true in data/gt/page4_meta.json, mark the GT as VERIFIED (no longer DRAFT) in workstamp.md, data/gt/README.md and notes/gt_verification.md, record the verification in workstamp.md, run the test suite, and commit as "chore(P2): GT verified by human". Then show me git status and the final commit hash. Do not start P3.
+Send me the agent’s confirmation and I’ll draft P3.
+
+1792694685598_image.png
+Scoping normalization rules for numbers and label variants.
+P2 is closed: GT is verified (commit 9805d79)
+Codex confirmed what I asked for: verified_by_human is true, VERIFIED is marked in all four files, 12 tests pass, the CSV is byte-for-byte unchanged with its BOM preserved, and the tree is clean. P2 is done.
+
+Design decisions in P3
+P3 stays pure normalization. The config-driven rules file (the 合計 / （純額） / 減価償却累計額 patterns) belongs in P5, and clustering indent levels from x0 belongs in P4. Putting them in P3 would blur the phases in your log.
+Numbers become int or None, never a guess. The parser returns a structured result (value, raw, nil flag, status), and invalid input is reported as invalid rather than turned into 0. This matters because 0 (△0) and nil (－) are different things on this page.
+Labels are never rewritten in the output. NFKC turns （純額） into (純額), but the GT keeps the printed form. So P3 provides a matching key for comparisons, and the label itself stays as printed.
+The GT is used read-only as a test oracle. Parsing every prev_raw and curr_raw in the GT must reproduce the GT values. This is a legitimate use because the GT was made independently of any code.
+Variants beyond this page. Real filings also use ▲ for negatives, (123) for negatives, and several dash characters for nil. Handling these supports the “many PDFs” goal, and the tests cover them.
+Prompt P3 (paste into the same Codex session)
+P3: Normalization utilities with unit tests. Follow the handoff protocol in PROJECT_BRIEF.md "Agent working rules": read PROJECT_BRIEF.md and workstamp.md first, copy this prompt verbatim into "Current prompt (verbatim)" in workstamp.md, write the numbered plan, set P3 IN PROGRESS, mark steps [~]/[x] as you go, and make small wip(P3) commits. If workstamp.md shows an interrupted IN PROGRESS prompt, follow the resume procedure instead of starting over. Set PYTHONIOENCODING=utf-8 for all commands. Add a Sessions row only if this is a new session.
+
+Goal: small, pure, well-tested normalization functions in src/parser/normalize.py. No PDF access, no row reconstruction, no hierarchy or row-type inference, no evaluation logic, no label-rule config (that is P5), no indent clustering (that is P4). Explain each design decision as you go.
+
+## 1. Number parsing: parse_amount(raw) -> AmountResult
+Return a small frozen dataclass with: raw (the input exactly as given), value (int or None), status (one of "ok", "nil", "invalid", "empty"), negative (bool), note (short string, empty if nothing notable). Never return a float, never raise for bad input, and never turn invalid input into 0. Units stay as printed (千円): do NOT multiply by 1000 and do not add a scale parameter.
+Required behaviour:
+- Strip surrounding whitespace (including full-width space U+3000 and NBSP). Empty or whitespace-only input -> status "empty", value None.
+- Apply NFKC for digits, commas and parentheses, so full-width digits "２，００２，４２９" and half-width digits both work. Accept thousands separators "," and full-width "，". Do not validate comma grouping strictly, but note it in "note" if a group is not 3 digits (informational only).
+- Negative markers: leading △ (U+25B3), ▲ (U+25B2), ASCII hyphen-minus, U+2212 minus, and U+FF0D (the full-width hyphen-minus). Also parentheses "(123)" or "（123）" meaning negative. "△0" and "▲0" must give value 0 with negative True and note "negative zero printed" (value is the integer 0, status "ok").
+- Nil markers: a standalone dash and nothing else: U+FF0D "－", U+2015 "―", U+2014 "—", U+2013 "–", U+2212 "−", U+2010 "‐", U+30FC "ー", ASCII "-", or a run of them, possibly with whitespace -> status "nil", value None. A dash FOLLOWED by digits is a negative number, not nil. Also treat "…" / "･･･" is NOT supported: mark those "invalid".
+- Anything else (letters, two numbers, "1.5", "12-3", stray symbols, a double sign "△-5") -> status "invalid", value None, with a short note naming the reason. Decide explicitly how to treat a decimal point and document it (my default: invalid, because this page is in whole 千円).
+- Never silently accept a trailing unit such as "千円" or "円"; mark invalid.
+
+## 2. Label helpers (matching only, never for output)
+- label_key(label) -> str: NFKC, then remove ALL whitespace (including U+3000), keeping the characters otherwise unchanged. So "建物及び構築物 （純額）" and "建物及び構築物（純額）" give the same key. Document clearly that label_key is for COMPARISON ONLY and that output labels stay exactly as printed, because ground truth keeps the printed form, e.g. full-width （純額）.
+- labels_equal(a, b) -> bool: compares label_key values.
+- label_key must be idempotent; test that.
+- Do NOT add any rule about 合計, （純額）, 減価償却累計額 or any other accounting word. That is P5.
+
+## 3. Period heading helper
+- parse_period_end(text) -> tuple[int, int, int] | None: extracts (year, month, day) from strings such as "(2025 年３月 31 日)" or "（２０２６年３月３１日）", handling full-width digits and arbitrary spaces. Return None if it cannot find all three parts. No Japanese-era (和暦) support; mention that as a documented limitation.
+
+## 4. Tests (tests/test_normalize.py)
+- Table-driven cases for parse_amount covering at least: plain, comma, full-width digits, full-width comma, △ and ▲, hyphen and U+2212 and U+FF0D negatives, parenthesised negatives (half and full width), △0, ▲0, each nil marker above, runs of dashes, dash with spaces, empty, whitespace-only, "1.5", "12-3", "△-5", "12千円", "abc", and a very long number string. Assert status, value and negative for each.
+- label_key and labels_equal cases (space variants, half/full-width parentheses, idempotence) and 3 or 4 parse_period_end cases including a failing one.
+- GT round trip (read-only): for every row in data/gt/page4.csv, parse_amount(prev_raw) and parse_amount(curr_raw) must reproduce previous_year_value and current_year_value exactly, with nil raws giving value None and empty header cells giving "empty". Read the CSV with encoding utf-8-sig. NEVER write to data/gt/. This test must not use the PDF.
+- Run the complete suite, then ruff (if configured) on the new files.
+
+## 5. Docs
+- Update README with a short "normalization" section (what the functions do, the nil vs zero rule, "label_key is for matching only").
+- Add a short "Decisions" list to the docstring or to notes/normalization.md (decimal handling, dash handling, negative zero, parentheses).
+
+## Constraints
+- Do not touch data/gt/, data/raw/, or the original PDF. Do not add dependencies (stdlib only, unicodedata and re are fine). Do not write extraction, hierarchy or evaluation code.
+- Do not weaken a test to make it pass; if a GT row fails, report it instead of editing the GT.
+- Final commit "P3: normalization utilities and tests"; workstamp.md set to DONE with "Next action: P4 row reconstruction"; append P3 to the Prompt history with the commit hash.
+
+## Final message must show
+Orientation (repo state, test count before P3); the public function signatures; the list of decisions made (especially anything ambiguous); test output with counts; the GT round-trip result; ruff result; files created or modified; commit hashes; open questions.
+After Codex finishes
+Send me its final message, and I’ll check three things:
+
+the GT round trip passes for all 74 cells
+△0 gives 0 while － gives None
+no test was weakened to get green
+I’ll then draft P4 (row reconstruction), which will cluster the indent levels from x0 rather than hard-coding them.
+
+Also run scripts\export_chat.py again after P3, so the chat log in the repo stays current.
+
+1792695416164_image.png
+1792695441641_image.png
+what now
+
+Cross-checking model and reviewer attributions across sessions.
+Thanks, this corrects an error I introduced
+Your chain is different from what I put in the P10b and P11 prompts. I told the agents that “the fixes were applied by the same agent that wrote the review”. By your account that is wrong: P9 was Claude Sonnet 4.6 and the P10a fixes were Gemini Flash 3.8. REPORT.md section 7 may therefore repeat my mistake, so check it.
+
+The accurate chain
+Step	Tool and model
+Implementation plan, prompt drafting	Claude (website, different account), then this conversation (Claude)
+P0, P1	Claude Opus 4.6
+P2 to P8, P10b to P13	GPT 6.1 Sol (Codex)
+P9 independent review	Claude Sonnet 4.6
+P10a fixes (commits 5565491, d51c47f)	Gemini Flash 3.8
+P10b audit	GPT 6.1 Sol, which also built the original code
+GT second reading and prompt reviews	this conversation (Claude)
+This is a stronger story than the one in the draft. The reviewer, the fixer and the builder are three different models, and the builder then audited the fixes.
+
+What to fix
+REPORT.md section 7 (you edit this by hand). Replace any sentence saying the reviewer also applied the fixes. Use the table above. Say the review model (Claude Sonnet 4.6) differs from the builder (GPT 6.1 Sol), and the fixer (Gemini Flash 3.8) differs from both.
+Model names in workstamp.md. The P11 agent found “GPT-6” in one place and “GPT-6.1 Sol” in another. Your statement settles it, but record it as “user-supplied”, since the repo can’t verify it.
+The “Claude” row. I’m Claude Sonnet 5.5 in this session, but this conversation may have used other models earlier, so write “Claude (model as shown in your interface; confirm)”. I’d rather you not guess.
+Send this to Codex before P13
+Run it first so P13 checks the corrected state. It deliberately leaves REPORT.md to you.
+
+Housekeeping, docs only. Do NOT modify, stage or commit REPORT.md (I am editing it by hand). Do not touch code, tests, data, eval or examples. Stage only the files you change.
+
+The human owner supplied this authoritative attribution (user-supplied, not verifiable from the repo):
+- Implementation plan and prompt drafting: Claude (web, separate account), later a Claude conversation that also gave a second AI reading of the GT transcription.
+- P0, P1: Claude Opus 4.6
+- P2 to P8 and P10b to P13: GPT 6.1 Sol (Codex)
+- P9 independent review: Claude Sonnet 4.6
+- P10a fixes (commits 5565491 and d51c47f): Gemini Flash 3.8
+
+Tasks:
+1. In workstamp.md correct the Sessions table and any handoff text so they match this attribution, marking it "user-supplied". Specifically remove or correct any statement that the reviewer applied the fixes, and any "GPT-6" naming that conflicts with "GPT 6.1 Sol". Keep the history of what was written before only in git, not in the file.
+2. Add a dated note at the top of notes/p2_report.md saying the GT was later verified (see data/gt/README.md and workstamp.md). Do not rewrite the rest.
+3. Add a short dated note at the top of notes/review_P9.md stating the reviewer was Claude Sonnet 4.6 per the owner. Do not edit its findings.
+4. Report any other file that states a different attribution, with file:line, without changing it.
+Commit as "docs: correct tool and model attribution". Show git status and the hash.
+Then give P13 as drafted.
+
+For your rewrite
+Include this plainly in section 7: the independent review was written by a different model from the builder, and the fixes by a third. Also say that the fixes were audited by the builder model, which is a weaker form of independence than a human audit.
+
+but i have already given the P13 to GPT 6.1 sol
+
+No problem. P13 is a read-only check on the committed state, so it will still be useful. You just need to run the attribution fix afterwards and make sure P13’s records don’t contradict it.
+
+What to do
+Let P13 finish. Don’t interrupt it. Its clean-clone check (tests, byte-identical exports, hygiene scan) doesn’t depend on the model names.
+Then send the housekeeping message from my last reply, unchanged. It only edits workstamp.md, notes/p2_report.md and notes/review_P9.md, and it leaves REPORT.md alone.
+One addition to that message. P13 will have written notes/p13_clean_clone_check.md and updated workstamp.md with the old attribution. Add this line so everything ends up consistent:
+   Also check notes/p13_clean_clone_check.md and the P13 entries in workstamp.md for any model-attribution statement that conflicts with the list above, and correct them in the same commit.
+Why order matters. Running the housekeeping after P13 means it fixes everything in one pass, including P13’s own records. If you ran it first and P13 then rewrote workstamp.md, the correction could be overwritten.
+One small risk
+P13 might have left the “Next action” line in workstamp.md as “final export_chat.py, redaction of chat_logs...”. Housekeeping shouldn’t change that. Leave it.
+
+After both finish
+Read P13’s hygiene findings first. They list what to redact in chat_logs/ and workstamp.md.
+Fix REPORT.md section 7 by hand using the attribution table in my last reply, then commit it.
+Run pytest and git status in the main folder to confirm a clean tree.
+Run export_chat.py once more, redact, add this conversation, push to GitHub, and test the clone URL.
+Email Arun with the repo link, REPORT.md and the chat logs before 11:59 pm IST tonight.
+Send me P13’s final message when it finishes and I’ll go through it with you.
+
+give me final prompt to send after P13
+
+Final prompt (send after P13 finishes)
+This is the housekeeping prompt with the P13 addition built in. It leaves REPORT.md to you.
+
+Housekeeping, docs only. Do NOT modify, stage, stash, revert or commit REPORT.md (I am editing it by hand). Do not touch code, tests, data, eval, examples or any threshold. Stage only the files you change (never "git add -A"). If git status shows uncommitted changes you did not make, leave them alone and mention them. Set PYTHONIOENCODING=utf-8. Follow the handoff protocol (update workstamp.md, small commits), but do not add a new prompt ID to the history other than "housekeeping".
+
+The human owner supplied this authoritative attribution (user-supplied, not verifiable from the repo):
+- Implementation plan and prompt drafting: Claude (web, separate account), later a Claude conversation that also gave a second AI reading of the GT transcription.
+- P0, P1: Claude Opus 4.6
+- P2 to P8 and P10b to P13: GPT 6.1 Sol (Codex)
+- P9 independent review: Claude Sonnet 4.6
+- P10a fixes (commits 5565491 and d51c47f): Gemini Flash 3.8
+
+Tasks:
+1. In workstamp.md correct the Sessions table and any handoff text so they match this attribution, marking it "user-supplied". Remove or correct any statement that the reviewer applied the fixes, and any "GPT-6" naming that conflicts with "GPT 6.1 Sol". Leave the "Next action" line from P13 unchanged.
+2. Add a dated note at the top of notes/p2_report.md saying the GT was later verified (see data/gt/README.md and workstamp.md). Do not rewrite the rest.
+3. Add a short dated note at the top of notes/review_P9.md stating the reviewer was Claude Sonnet 4.6 per the owner. Do not edit its findings.
+4. Check notes/p13_clean_clone_check.md and the P13 entries in workstamp.md for any model-attribution statement that conflicts with the list above, and correct them in the same commit.
+5. Report any other file that states a different attribution, with file:line, without changing it.
+6. Run the full test suite and git status to confirm nothing else changed.
+
+Commit as "docs: correct tool and model attribution".
+
+Final message: the files changed, the commit hash, test count, git status, and any conflicting attributions found elsewhere (file:line).
+After it finishes
+Fix REPORT.md section 7 by hand (use the attribution table from my earlier reply), then commit it.
+Run pytest and git status in the main folder to confirm a clean tree.
+Run export_chat.py, redact the chat logs using P13’s hygiene findings, and add this conversation.
+Push to GitHub and test the clone URL.
+Email Arun before 11:59 pm IST tonight.
+
+1792757007795_image.png
+1792757021733_image.png
+these are the results of P13 don't discuss them just tell me what to do
+
+Do this now
+Paste the final prompt (the one that fixes attribution and finalizes REPORT.md) into the same Codex chat. Send it as is.
+When it finishes, run these in your terminal:
+   $env:PYTHONIOENCODING = "utf-8"
+   .venv\Scripts\python.exe -m pytest -q
+   git status
+Expect 298 passed and a clean tree.
+3. Redact the hygiene findings (the hygiene check failed, and the findings are in notes/p13_clean_clone_check.md):
+
+In VS Code, use Ctrl+Shift+F to search the repo for <user>, <path> and @.
+Replace your username and local paths with <user> or <path> in chat_logs/chat_log.md, chat_logs/transcript_full.jsonl, notes/p2_report.md line 78 and scripts/export_chat.py line 17.
+Replace the email in transcript_full.jsonl line 205 with <email>.
+If transcript_full.jsonl is too messy to redact, delete it and keep only chat_log.md, then redact that one.
+Add this conversation to chat_logs/ as a text file (copy and paste the whole chat from the top, or use the export option in the Claude website), and redact it the same way.
+Commit:
+   git add -A
+   git commit -m "chore: redact logs and add Claude conversation"
+Push to GitHub. Create a repo (public, or private with the reviewers invited), then run:
+   git remote remove origin
+   git remote add origin <your repo URL>
+   git push -u origin main
+Email Arun (cc Sandeep) before 11:59 pm IST with the repo link, a note pointing to REPORT.md, and the chat logs attached. If anything is still pending, send the repo link first and the logs right after.
+Minimum if you are out of time: steps 1, 3, 5, 6 and 7. Fill the two [USER: ...] placeholders (time spent, reflection) in REPORT.md with one or two honest sentences each before the push.
+
+
+
+
+
