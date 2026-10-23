@@ -59,7 +59,7 @@ Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clo
 3. [x] Run clone tests/lint and documented parser/evaluation/robustness commands; compare committed artifacts/hashes.
 4. [x] Scan every tracked file for hygiene locations without printing values; verify ignore rules, protected assets and phase/state consistency.
 5. [x] Record PASS/FAIL evidence; fix documentation gaps only, if any; preserve REPORT.md and other user edits.
-6. [~] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
+6. [x] Safely delete verified temporary clone/venvs; final scoped commit and DONE handoff.
 
 ## Files created or modified
 
@@ -68,6 +68,13 @@ Final message: the cloned commit hash, a PASS/FAIL table, test counts in the clo
 - workstamp.md — verbatim P13 request, plan, baseline and boundaries.
 
 ## Last action and result
+
+Cleanup complete: exact owned temp base and both clone roots resolved and verified
+under system temp, outside main; only the two expected clone directories were
+present. Both clones/venvs and owned temp base removed; absence confirmed.
+Reproduction evidence and README clarification complete; no uncommitted changes
+outside this task observed. REPORT.md was never modified or staged; commits use
+explicit pathspecs. git diff --check clean. Final DONE handoff commit remains.
 
 Evidence note written with complete command list, per-route timings, six common
 artifact hashes, protected asset hashes and all masked hygiene line locations.
