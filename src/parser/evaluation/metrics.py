@@ -274,9 +274,12 @@ def aggregate_reports(reports: list[dict]) -> dict:
         }
     for name, numerator, denominator in [
         ("accounting_pass_rate", "passed", "evaluable"),
+        ("evaluable_fraction", "evaluable", "applicable"),
         ("truncation_fraction", "truncation_inside", "truncation_evaluable"),
     ]:
-        accounts = [r["accounting"] for r in reports if "accounting" in r]
+        accounts = [
+            r["accounting"] for r in reports if "accounting" in r and denominator in r["accounting"]
+        ]
         if accounts:
             micro[name] = ratio(
                 sum(a[numerator] for a in accounts),

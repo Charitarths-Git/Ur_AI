@@ -41,9 +41,16 @@ def build_hierarchy(typed_rows: tuple[TypedRow, ...]) -> Hierarchy:
     With fewer than two distinct steps the first body row is the root. Later
     headers attach to it (nesting unknown), ordinary/subtotal rows to the latest
     header, contra/net rows to the nearest earlier line item, and totals to root.
-    This deliberately partial fallback is always warned, including empty input.
+    This deliberately partial fallback is warned; empty input has its own warning.
     """
     rows = tuple(typed_rows)
+    if not rows:
+        return Hierarchy(
+            (),
+            (),
+            "rules_fallback",
+            (ParseWarning("empty_input", "no body rows to build a hierarchy"),),
+        )
     warnings = [w for row in rows for w in row.warnings]
     steps = {r.row.indent_step for r in rows if r.row.indent_step is not None}
     informative = len(steps) >= 2

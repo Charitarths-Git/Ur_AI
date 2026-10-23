@@ -53,8 +53,8 @@ Orientation; the audit table (status per requirement); the gaps closed (with com
 ## Plan for this prompt
 
 1. [x] Audit real P10 history, source, tests, reports and protected bytes before changes; baseline suite and initial audit table.
-2. [~] Close report/coverage gaps and add independent accounting, warnings, geometry and fault-oracle tests without weakening existing tests.
-3. [ ] Diagnose y=0.2/0.3H and x=0.3H over all seeds; time-box any pitch experiment, keep only with all acceptance conditions met.
+2. [x] Close report/coverage gaps and add independent accounting, warnings, geometry and fault-oracle tests without weakening existing tests.
+3. [~] Diagnose y=0.2/0.3H and x=0.3H over all seeds; time-box any pitch experiment, keep only with all acceptance conditions met.
 4. [ ] Regenerate parse/evaluation/robustness, document complete P8/P10/current comparisons and update design/README/audit.
 5. [ ] Full suite, ruff, determinism/protected checks, final commit and DONE handoff.
 
@@ -64,6 +64,14 @@ Orientation; the audit table (status per requirement); the gaps closed (with com
 - workstamp.md — verbatim P10b request, overrides and plan.
 
 ## Last action and result
+
+Gap closure: 15 additional acceptance tests, full suite 298 passed in 13.80s;
+full-tree ruff clean. Geometry JSON/Markdown now show mean/min evaluable_fraction
+beside pass rate; ablations include the companion fraction. Single-page headline
+shows pass-rate N/A explicitly. Added no-body/one-column/empty-input warnings.
+Independent oracle generates faults and computes residuals inside the test.
+Existing test assertions unchanged. Section C diagnosis started; all20 x=.3 seeds
+have two correct roles, so remaining numeric errors are the cell-assignment gate.
 
 Clean tree at e40462b. Baseline: 283 passed in 13.23s. History proves baseline
 86a290f precedes P10 5565491; seed test added in 7f5afbd. Parser example bytes match;

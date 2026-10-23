@@ -14,7 +14,8 @@ from parser.pdf_backend import read_pdf_page
 from parser.rows import reconstruct_page
 
 AMPLITUDES = (0, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.75, 1.0)
-PRIMARY = ("cell_accuracy_all", "row_f1", "parent", "accounting_pass_rate")
+GT_METRICS = ("cell_accuracy_all", "row_f1", "parent")
+PRIMARY = (*GT_METRICS, "accounting_pass_rate", "evaluable_fraction")
 
 
 def run_robustness(
@@ -73,8 +74,10 @@ def run_robustness(
                 for seed in range(seeds):
                     try:
                         parsed, report = score(transform(raw, f"jitter_{axis}", seed, amplitude))
-                        metrics = {key: report["metrics"][key]["score"] for key in PRIMARY[:-1]}
+                        metrics = {key: report["metrics"][key]["score"] for key in GT_METRICS}
                         metrics["accounting_pass_rate"] = report["accounting"]["pass_rate"]
+                        metrics["evaluable_fraction"] = report["accounting"]["evaluable_fraction"]
+                        metrics["evaluable_fraction"] = report["accounting"]["evaluable_fraction"]
                         runs.append(
                             {
                                 "seed": seed,
@@ -95,8 +98,7 @@ def run_robustness(
                                 "seed": seed,
                                 "crash": f"{type(error).__name__}: {error}",
                                 "metrics": {
-                                    key: 0.0 if key != "accounting_pass_rate" else None
-                                    for key in PRIMARY
+                                    key: 0.0 if key in GT_METRICS else None for key in PRIMARY
                                 },
                             }
                         )
@@ -151,9 +153,7 @@ def run_robustness(
                     r["amplitude_H"]
                     for r in result["geometry"]
                     if r["axis"] == axis
-                    and (
-                        r["crashes"] or any(r["summary"][key]["worst"] != 1 for key in PRIMARY[:-1])
-                    )
+                    and (r["crashes"] or any(r["summary"][key]["worst"] != 1 for key in GT_METRICS))
                 ),
                 None,
             )
@@ -181,11 +181,12 @@ def robustness_markdown(report):
         "",
         "## Geometry sweep",
         "",
-        "Each entry is mean / worst. See JSON for all seed records and defined-run counts.",
+        "Each entry is mean / minimum over defined seeds. "
+        "See JSON for all seed records and defined-run counts.",
         "",
         "| Axis | H amplitude | Cell accuracy | Row F1 | Parent accuracy | Accounting "
-        "pass rate | Crashes |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "pass rate | evaluable_fraction | Crashes |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in report["geometry"]:
         scores = [
@@ -205,8 +206,9 @@ def robustness_markdown(report):
         "",
         "The JSON includes the full metric set and accounting checks for each.",
         "",
-        "| Mode | Cell accuracy | Row F1 | Parent | Full rows | Accounting | Parser warnings |",
-        "|---|---:|---:|---:|---:|---:|---:|",
+        "| Mode | Cell accuracy | Row F1 | Parent | Full rows | Accounting pass rate | "
+        "evaluable_fraction | Parser warnings |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for mode, ablation in report["ablations"].items():
         if ablation["crash"]:
@@ -218,9 +220,9 @@ def robustness_markdown(report):
             for key in ["cell_accuracy_all", "row_f1", "parent", "fully_correct_rows"]
         ]
         lines.append(
-            f"| {mode} | "
-            + " | ".join(metrics)
-            + f" | {pct(r['accounting']['pass_rate'])} | {len(ablation['parser_warnings'])} |"
+            f"| {mode} | " + " | ".join(metrics) + f" | {pct(r['accounting']['pass_rate'])} "
+            f"| {pct(r['accounting']['evaluable_fraction'])} "
+            f"| {len(ablation['parser_warnings'])} |"
         )
     f = report["fault_injection"]
     lines += [

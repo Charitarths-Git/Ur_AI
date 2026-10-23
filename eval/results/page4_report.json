@@ -360,6 +360,7 @@
     "passed": 20,
     "evaluable": 20,
     "not_evaluable": 0,
+    "applicable": 20,
     "pass_rate": 1.0,
     "evaluable_fraction": 1.0,
     "truncation_inside": 20,
@@ -1222,6 +1223,12 @@
         "score": 1.0,
         "meaning": "pooled accounting counts across pages"
       },
+      "evaluable_fraction": {
+        "numerator": 20,
+        "denominator": 20,
+        "score": 1.0,
+        "meaning": "pooled accounting counts across pages"
+      },
       "truncation_fraction": {
         "numerator": 20,
         "denominator": 20,
@@ -1311,6 +1318,11 @@
         "total_pages": 1
       },
       "accounting_pass_rate": {
+        "score": 1.0,
+        "defined_pages": 1,
+        "total_pages": 1
+      },
+      "evaluable_fraction": {
         "score": 1.0,
         "defined_pages": 1,
         "total_pages": 1

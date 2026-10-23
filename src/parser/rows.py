@@ -247,5 +247,13 @@ def reconstruct_page(raw_page: RawPage, config: LayoutConfig = LayoutConfig()) -
     rows = [replace(r, indent_step=assignments.get(r.index)) for r in rows]
     warnings = []
     if not centres:
-        warnings.append(ParseWarning("no_columns_detected", "no numeric columns detected"))
+        warnings.append(
+            ParseWarning("no_columns_detected", "no supported numeric columns detected")
+        )
+    elif len(centres) == 1:
+        warnings.append(
+            ParseWarning("one_column_detected", "only one supported value column detected")
+        )
+    if not any(r.zone == "body" for r in rows):
+        warnings.append(ParseWarning("no_body_rows", "no body rows reconstructed"))
     return PageLayout(tuple(rows), columns, indent_centres, thresholds, tuple(warnings))

@@ -1,5 +1,9 @@
 # Development evaluation: supplied page 4
 
+Accounting pass rate=1.000000; evaluable_fraction=1.000000.
+
+Accounting pass rate=1.000000; evaluable_fraction=1.000000.
+
 ## Metrics and denominators
 
 | Metric | Correct / denominator | Score | Meaning |

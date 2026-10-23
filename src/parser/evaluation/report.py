@@ -68,8 +68,21 @@ def _display(value):
 
 
 def markdown_report(report: dict) -> str:
+    summary = report["accounting"]
+
+    def rate(value):
+        return f"{value:.6f}" if value is not None else "N/A"
+
+    headline = (
+        f"Accounting pass rate={rate(summary['pass_rate'])}; "
+        f"evaluable_fraction={rate(summary['evaluable_fraction'])}."
+    )
     lines = [
         "# Development evaluation: supplied page 4",
+        "",
+        headline,
+        "",
+        headline,
         "",
         "## Metrics and denominators",
         "",

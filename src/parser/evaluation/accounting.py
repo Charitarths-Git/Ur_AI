@@ -60,8 +60,8 @@ def accounting_checks(
 ) -> tuple[AccountingCheck, ...]:
     """Rebuild sibling groups in file order; never inspect labels or compare to GT.
 
-    A net child replaces gross contribution. Otherwise use own amount, or a lone
-    subtotal child's amount for a header. Ambiguous/missing components are NE.
+    A net child replaces gross contribution. Otherwise use own amount plus contra
+    children, or a lone subtotal child's amount for a header. Ambiguous/missing components are NE.
     """
     rows = tuple(rows)
     by_id = {r.row_id: r for r in rows}
@@ -188,6 +188,7 @@ def accounting_summary(checks: tuple[AccountingCheck, ...]) -> dict:
         "passed": passed,
         "evaluable": evaluable,
         "not_evaluable": not_evaluable,
+        "applicable": denom,
         "pass_rate": passed / evaluable if evaluable else None,
         "evaluable_fraction": evaluable / denom if denom else None,
         "truncation_inside": inside,
